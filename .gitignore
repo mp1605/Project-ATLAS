@@ -1,0 +1,45 @@
+# Flutter / Dart
+.dart_tool/
+.packages
+.pub-cache/
+build/
+
+# iOS
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Generated.xcconfig
+ios/Flutter/flutter_export_environment.sh
+*.xcuserstate
+DerivedData/
+
+# Android
+android/.gradle/
+android/local.properties
+*.keystore
+*.jks
+
+# Node / Dashboard
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# Secrets / Env
+.env
+.env.*
+*.pem
+*.p12
+*.key
+*.crt
+
+# Databases / Health data
+*.db
+*.sqlite
+*.sqlite3
+*.sqlcipher
+
+# Archives
+*.zip
+
+# macOS
+.DS_Store
+
