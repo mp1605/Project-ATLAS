@@ -142,7 +142,7 @@ class DailyReadinessService {
       frequency: Duration(hours: 24),
       initialDelay: _calculateInitialDelay(),
       constraints: Constraints(
-        networkType: NetworkType.not_required,
+        networkType: NetworkType.notRequired,
         requiresBatteryNotLow: false,
         requiresCharging: false,
       ),
