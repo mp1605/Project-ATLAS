@@ -1,8 +1,11 @@
+import 'dart:math' as math;
+import 'package:sqflite_sqlcipher/sqflite.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:go_router/go_router.dart';
+import '../services/last_sleep_service.dart';
 import '../database/secure_database_manager.dart';
 import '../services/all_scores_calculator.dart';
-import '../services/last_sleep_service.dart';
 import '../models/user_profile.dart';
 import '../routes.dart';
 
@@ -27,6 +30,8 @@ class _DataMonitorScreenState extends State<DataMonitorScreen> with SingleTicker
   
   // Calculated scores
   Map<String, double> _scores = {};
+  Map<String, String> _confidenceLevels = {};
+  Map<String, Map<String, dynamic>> _componentBreakdowns = {};
   bool _loadingScores = true;
   String _overallCategory = 'UNKNOWN';
 
@@ -59,22 +64,23 @@ class _DataMonitorScreenState extends State<DataMonitorScreen> with SingleTicker
       
       if (email == null) return;
       
-      // Get latest metrics from last 24 hours
+      // Get latest metrics from last 7 days (to match deep sync history)
       final now = DateTime.now();
-      final yesterday = now.subtract(const Duration(hours: 24));
+      final sevenDaysAgo = now.subtract(const Duration(days: 7));
       
       final results = await db.query(
         'health_metrics',
         where: 'user_email = ? AND timestamp >= ?',
-        whereArgs: [email, yesterday.millisecondsSinceEpoch],
+        whereArgs: [email, sevenDaysAgo.millisecondsSinceEpoch],
         orderBy: 'timestamp DESC',
-        limit: 1000, // Increased limit to get more data
+        limit: 2000, 
       );
       
-      print('📊 DataMonitor: Found ${results.length} metrics in last 24h');
+      print('📊 DataMonitor: Found ${results.length} metrics in last 7 days');
       
       // Define all metric types we're tracking (from AppleHealthAdapter)
       final allMetricTypes = [
+        // Cardiovascular
         'HEART_RATE',
         'RESTING_HEART_RATE',
         'WALKING_HEART_RATE',
@@ -83,13 +89,19 @@ class _DataMonitorScreenState extends State<DataMonitorScreen> with SingleTicker
         'BLOOD_OXYGEN',
         'RESPIRATORY_RATE',
         'PERIPHERAL_PERFUSION_INDEX',
+        // Activity
         'STEPS',
         'DISTANCE_WALKING_RUNNING',
         'DISTANCE_CYCLING',
         'DISTANCE_SWIMMING',
         'FLIGHTS_CLIMBED',
         'ACTIVE_ENERGY_BURNED',
+        'BASAL_ENERGY_BURNED',
         'EXERCISE_TIME',
+        'WORKOUT',
+        'APPLE_STAND_TIME',
+        'APPLE_MOVE_TIME',
+        // Sleep
         'SLEEP_ASLEEP',
         'SLEEP_DEEP',
         'SLEEP_REM',
@@ -98,13 +110,36 @@ class _DataMonitorScreenState extends State<DataMonitorScreen> with SingleTicker
         'SLEEP_AWAKE_IN_BED',
         'SLEEP_IN_BED',
         'SLEEP_SESSION',
+        // Stress & Recovery
         'ELECTRODERMAL_ACTIVITY',
         'MINDFULNESS',
+        // Heart Events
         'HIGH_HEART_RATE_EVENT',
         'LOW_HEART_RATE_EVENT',
         'IRREGULAR_HEART_RATE_EVENT',
+        'BLOOD_PRESSURE_SYSTOLIC',
+        'BLOOD_PRESSURE_DIASTOLIC',
+        // Body Measurements
         'BODY_TEMPERATURE',
-        'WORKOUT',
+        'WEIGHT',
+        'HEIGHT',
+        'BODY_MASS_INDEX',
+        'BODY_FAT_PERCENTAGE',
+        'LEAN_BODY_MASS',
+        'WAIST_CIRCUMFERENCE',
+        // Blood Glucose
+        'BLOOD_GLUCOSE',
+        // Reproductive Health
+        'MENSTRUATION_FLOW',
+        // Nutrition (optional - may not have data)
+        'DIETARY_ENERGY_CONSUMED',
+        'DIETARY_CARBS_CONSUMED',
+        'DIETARY_PROTEIN_CONSUMED',
+        'DIETARY_FATS_CONSUMED',
+        'DIETARY_FIBER',
+        'DIETARY_SUGAR',
+        'DIETARY_CAFFEINE',
+        'DIETARY_SODIUM',
       ];
       
       final Map<String, dynamic> metrics = {};
@@ -114,37 +149,101 @@ class _DataMonitorScreenState extends State<DataMonitorScreen> with SingleTicker
         metrics[type] = {'value': null, 'timestamp': null};
       }
       
-      // Populate with actual data where available
-      for (var row in results) {
-        final type = row['metric_type'] as String;
+      // Get last sleep session for sleep metrics
+      final lastSleep = await LastSleepService.getLastSleep(email);
+      
+      // Populate sleep metrics from LastSleepService
+      if (lastSleep != null) {
+        metrics['SLEEP_ASLEEP'] = {
+          'value': lastSleep.totalMinutes.toDouble(),
+          'timestamp': lastSleep.wakeTime,
+        };
+        metrics['SLEEP_DEEP'] = {
+          'value': lastSleep.deepMinutes.toDouble(),
+          'timestamp': lastSleep.wakeTime,
+        };
+        metrics['SLEEP_REM'] = {
+          'value': lastSleep.remMinutes.toDouble(),
+          'timestamp': lastSleep.wakeTime,
+        };
+        metrics['SLEEP_LIGHT'] = {
+          'value': lastSleep.lightMinutes.toDouble(),
+          'timestamp': lastSleep.wakeTime,
+        };
+        metrics['SLEEP_AWAKE'] = {
+          'value': lastSleep.awakeMinutes.toDouble(),
+          'timestamp': lastSleep.wakeTime,
+        };
+        metrics['SLEEP_IN_BED'] = {
+          'value': lastSleep.inBedMinutes.toDouble(),
+          'timestamp': lastSleep.wakeTime,
+        };
+      }
+      
+      // For non-sleep interval metrics (mindfulness, workouts, energy), sum for today
+      final startOfToday = DateTime(now.year, now.month, now.day);
+      final nonSleepIntervalTypes = allMetricTypes.where((type) => 
+        _isIntervalType(type) && !type.startsWith('SLEEP_')
+      ).toList();
+      
+      for (var type in nonSleepIntervalTypes) {
+        final sumResult = await db.rawQuery('''
+          SELECT SUM(value) as total, MAX(timestamp) as latest 
+          FROM health_metrics 
+          WHERE metric_type = ? AND user_email = ? AND timestamp >= ?
+        ''', [type, email, startOfToday.millisecondsSinceEpoch]);
         
-        // Handle value conversion
-        final rawValue = row['value'];
-        double? value;
-        if (rawValue is double) {
-          value = rawValue;
-        } else if (rawValue is int) {
-          value = rawValue.toDouble();
-        } else if (rawValue is num) {
-          value = rawValue.toDouble();
+        if (sumResult.isNotEmpty && sumResult.first['total'] != null) {
+          metrics[type] = {
+            'value': (sumResult.first['total'] as num).toDouble(),
+            'timestamp': DateTime.fromMillisecondsSinceEpoch(sumResult.first['latest'] as int),
+          };
         }
+      }
+      
+      // For point metrics, get the latest value
+      final pointTypes = allMetricTypes.where((type) => !_isIntervalType(type)).toList();
+      
+      for (var type in pointTypes) {
+        final latestResult = await db.query(
+          'health_metrics',
+          where: 'metric_type = ? AND user_email = ?',
+          whereArgs: [type, email],
+          orderBy: 'timestamp DESC',
+          limit: 1,
+        );
         
-        final timestamp = DateTime.fromMillisecondsSinceEpoch(row['timestamp'] as int);
-        
-        // Keep only the most recent value for each metric type
-        if (metrics.containsKey(type) && metrics[type]['value'] == null) {
-          metrics[type] = {'value': value, 'timestamp': timestamp};
-          print('  📌 $type: ${value ?? "No data"} at ${timestamp.toLocal()}');
+        if (latestResult.isNotEmpty) {
+          metrics[type] = {
+            'value': (latestResult.first['value'] as num).toDouble(),
+            'timestamp': DateTime.fromMillisecondsSinceEpoch(latestResult.first['timestamp'] as int),
+          };
+        }
+      }
+      
+      
+      // BACKFILL LOGIC: If SLEEP_ASLEEP is missing but we have stage data, sum them up
+      if (metrics['SLEEP_ASLEEP']['value'] == null && lastSleep != null) {
+        final totalAsleep = lastSleep.totalMinutes;
+        if (totalAsleep > 0) {
+          metrics['SLEEP_ASLEEP'] = {
+            'value': totalAsleep.toDouble(), 
+            'timestamp': lastSleep.wakeTime
+          };
+        }
+      }
+
+      if (metrics['SLEEP_IN_BED']['value'] == null && lastSleep != null) {
+        final totalInBed = lastSleep.inBedMinutes;
+        if (totalInBed > 0) {
+          metrics['SLEEP_IN_BED'] = {
+            'value': totalInBed.toDouble(), 
+            'timestamp': lastSleep.wakeTime
+          };
         }
       }
       
       print('📊 Total metric types tracked: ${metrics.length}');
-      
-      // Load LastSleep summary
-      LastSleep? lastSleep;
-      if (email.isNotEmpty) {
-        lastSleep = await LastSleepService.getLastSleep(email);
-      }
       
       setState(() {
         _latestMetrics = metrics;
@@ -203,11 +302,11 @@ class _DataMonitorScreenState extends State<DataMonitorScreen> with SingleTicker
       setState(() {
         _scores = {
           'Overall Readiness': result.overallReadiness,
-          'Recovery Score': result.recoveryScore,
+          'Recovery': result.recoveryScore,
           'Fatigue Index': result.fatigueIndex,
-          'Endurance Capacity': result.enduranceCapacity,
+          'Endurance': result.enduranceCapacity,
           'Sleep Index': result.sleepIndex,
-          'Cardiovascular Fitness': result.cardiovascularFitness,
+          'Cardio Fitness': result.cardiovascularFitness,
           'Stress Load': result.stressLoad,
           'Injury Risk': result.injuryRisk,
           'Cardio-Resp Stability': result.cardioRespStability,
@@ -222,6 +321,8 @@ class _DataMonitorScreenState extends State<DataMonitorScreen> with SingleTicker
           'Thermoregulatory': result.thermoregulatoryAdaptation,
         };
         _overallCategory = result.category;
+        _confidenceLevels = result.confidenceLevels;
+        _componentBreakdowns = result.componentBreakdown;
         _loadingScores = false;
       });
     } catch (e) {
@@ -230,6 +331,17 @@ class _DataMonitorScreenState extends State<DataMonitorScreen> with SingleTicker
     }
   }
 
+  bool _isIntervalType(String type) {
+    return type.startsWith('SLEEP_') || 
+           type == 'MINDFULNESS' || 
+           type == 'WORKOUT' || 
+           type == 'EXERCISE_TIME' ||
+           type == 'ELECTRODERMAL_ACTIVITY' ||
+           type == 'APPLE_STAND_TIME' ||
+           type == 'APPLE_MOVE_TIME' ||
+           type == 'BASAL_ENERGY_BURNED' ||
+           type == 'ACTIVE_ENERGY_BURNED';
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -324,85 +436,6 @@ class _DataMonitorScreenState extends State<DataMonitorScreen> with SingleTicker
           ),
           const SizedBox(height: 16),
 
-          // Latest Sleep Summary Card
-          if (_lastSleepSummary != null)
-            Card(
-              color: Colors.indigo.shade50,
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Latest Sleep Session',
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.indigo),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: Colors.indigo.shade200,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            _lastSleepSummary!.confidence.toUpperCase(),
-                            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.indigo),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text('Total Sleep', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                            Text(
-                              _lastSleepSummary!.formattedDuration,
-                              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                            ),
-                          ],
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            const Text('Efficiency', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                            Text(
-                              '${(_lastSleepSummary!.sleepEfficiency * 100).toStringAsFixed(1)}%',
-                              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    const Text('Stage Breakdown', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
-                    const SizedBox(height: 4),
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: [
-                          _buildStageLabel('Deep', _lastSleepSummary!.deepMinutes, Colors.blue),
-                          const SizedBox(width: 8),
-                          _buildStageLabel('REM', _lastSleepSummary!.remMinutes, Colors.purple),
-                          const SizedBox(width: 8),
-                          _buildStageLabel('Light', _lastSleepSummary!.lightMinutes, Colors.cyan),
-                          const SizedBox(width: 8),
-                          _buildStageLabel('Awake', _lastSleepSummary!.awakeMinutes, Colors.orange),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          
-          if (_lastSleepSummary != null) const SizedBox(height: 16),
-          
           // Metrics grid
           ..._latestMetrics.entries.map((entry) {
             final data = entry.value as Map<String, dynamic>;
@@ -503,6 +536,14 @@ class _DataMonitorScreenState extends State<DataMonitorScreen> with SingleTicker
             return Card(
               margin: const EdgeInsets.only(bottom: 12),
               child: ListTile(
+                onTap: () {
+                  context.push('/score-detail', extra: {
+                    'scoreName': entry.key,
+                    'scoreValue': score,
+                    'components': _componentBreakdowns[entry.key] ?? {},
+                    'confidence': _confidenceLevels[entry.key] ?? 'medium',
+                  });
+                },
                 leading: CircleAvatar(
                   backgroundColor: _getScoreColor(score),
                   child: Text(
@@ -581,16 +622,59 @@ class _DataMonitorScreenState extends State<DataMonitorScreen> with SingleTicker
     if (type.contains('HRV')) return '${value.toStringAsFixed(0)} ms';
     if (type.contains('OXYGEN')) return '${value.toStringAsFixed(1)}%';
     if (type.contains('RESPIRATORY')) return '${value.toStringAsFixed(0)} /min';
+    if (type.contains('BLOOD_PRESSURE')) return '${value.toStringAsFixed(0)} mmHg';
     if (type.contains('STEPS')) return value.toStringAsFixed(0);
+    if (type.contains('FLIGHTS')) return value.toStringAsFixed(0);
+    if (type.contains('DISTANCE')) return '${(value / 1000).toStringAsFixed(2)} km';
     if (type.contains('ENERGY')) return '${value.toStringAsFixed(0)} kcal';
+    
+    // Sleep metrics
     if (type.contains('SLEEP')) {
-      // Individual segments are in minutes. 
-      // If it's the total session, show hours, otherwise keep as minutes for clarity in raw logs
-      if (type == 'SLEEP_SESSION') {
-        return '${(value / 60).toStringAsFixed(1)} hrs';
+      // Show total sleep and in-bed in hours for clarity
+      if (type == 'SLEEP_ASLEEP' || type == 'SLEEP_IN_BED' || type == 'SLEEP_SESSION') {
+        final hours = value / 60.0;
+        return '${hours.toStringAsFixed(1)} hrs';
       }
+      // Show sleep stages (deep, rem, light, awake) in minutes
       return '${value.toStringAsFixed(0)} min';
     }
+    
+    // Activity intervals
+    if (type.contains('MINDFULNESS') || type.contains('WORKOUT') || type.contains('EXERCISE')) {
+      return '${value.toStringAsFixed(0)} min';
+    }
+    if (type.contains('STAND_TIME') || type.contains('MOVE_TIME')) {
+      return '${value.toStringAsFixed(0)} min';
+    }
+    
+    // Body measurements
+    if (type == 'WEIGHT' || type.contains('MASS')) return '${value.toStringAsFixed(1)} kg';
+    if (type == 'HEIGHT') return '${value.toStringAsFixed(1)} cm';
+    if (type == 'BODY_MASS_INDEX') return value.toStringAsFixed(1);
+    if (type == 'BODY_FAT_PERCENTAGE') return '${value.toStringAsFixed(1)}%';
+    if (type.contains('CIRCUMFERENCE')) return '${value.toStringAsFixed(1)} cm';
+    if (type == 'BODY_TEMPERATURE') return '${value.toStringAsFixed(1)}°C';
+    
+    // Blood glucose
+    if (type == 'BLOOD_GLUCOSE') return '${value.toStringAsFixed(0)} mg/dL';
+    
+    // Menstrual flow (categorical value)
+    if (type == 'MENSTRUATION_FLOW') {
+      final level = value.toInt();
+      if (level == 0) return 'None';
+      if (level == 1) return 'Light';
+      if (level == 2) return 'Medium';
+      if (level == 3) return 'Heavy';
+      return 'Level $level';
+    }
+    
+    // Nutrition
+    if (type.contains('DIETARY')) {
+      if (type.contains('ENERGY')) return '${value.toStringAsFixed(0)} kcal';
+      if (type.contains('CAFFEINE') || type.contains('SODIUM')) return '${value.toStringAsFixed(0)} mg';
+      return '${value.toStringAsFixed(1)} g';
+    }
+    
     return value.toStringAsFixed(1);
   }
 

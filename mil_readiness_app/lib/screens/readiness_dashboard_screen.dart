@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../services/all_scores_calculator.dart';
 import '../models/comprehensive_readiness_result.dart';
 import '../models/user_profile.dart';
@@ -396,10 +397,12 @@ class _ReadinessDashboardScreenState extends State<ReadinessDashboardScreen> {
               confidence: confidence,
               icon: _getIconForScore(scoreName),
               onTap: () {
-                // TODO: Navigate to score detail screen
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('$scoreName: ${scoreValue.toStringAsFixed(0)}')),
-                );
+                context.push('/score-detail', extra: {
+                  'scoreName': scoreName,
+                  'scoreValue': scoreValue,
+                  'components': _result!.componentBreakdown[scoreName] ?? {},
+                  'confidence': confidence,
+                });
               },
               compact: true,
             );

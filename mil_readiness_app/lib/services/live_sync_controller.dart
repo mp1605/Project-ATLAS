@@ -98,18 +98,42 @@ class LiveSyncController {
     print('🔄 LiveSync TICK at ${tickStartTime.toLocal()}');
     print('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
+    lastStatus.value = 'syncing';
+
     try {
       final now = DateTime.now();
+
+      // SMART WINDOW: Calculate actual window needed to bridge the gap
+      final prevSyncAt = await _store.getHealthLastSyncAtFor(_email);
+      final metricsCount = await HealthDataRepository.countUserMetrics(_email);
+      
+      Duration windowToUse = window; // Default (e.g. 10 mins)
+      
+      if (prevSyncAt == null || metricsCount == 0) {
+        // Step 0: Initial sync or empty database - fetch last 7 days of history
+        windowToUse = const Duration(days: 7);
+        print('🌟 DEEP SYNC: Fetching last 7 days of history for $_email (Metrics count: $metricsCount)');
+      } else {
+        // Step 0: Incremental sync - bridge the gap since last success
+        final gap = now.difference(prevSyncAt);
+        if (gap > window) {
+          // Cap at 30 days to avoid performance issues
+          final cappedGap = gap.inDays > 30 ? const Duration(days: 30) : gap;
+          windowToUse = cappedGap + const Duration(minutes: 5); // Add buffer
+          print('📏 GAP SYNC: Expanding window to ${windowToUse.inMinutes} mins to bridge since $prevSyncAt');
+        } else {
+          print('⏱️ NORMAL SYNC: Using default ${window.inMinutes} min window');
+        }
+      }
 
       // iOS Privacy Note: hasPermissions() is unreliable on iOS - it returns false
       // even when permissions are granted (Apple privacy feature).
       // So we skip it and attempt to read data directly instead.
       
       print('📋 Step 1/2: Attempting to read health data...');
-      print('   (Skipping unreliable hasPermissions() check on iOS)');
       
       // Try to read data - this is the ONLY reliable way to verify iOS Health access
-      final dataPoints = await _healthAdapter.getMetrics(window: window);
+      final dataPoints = await _healthAdapter.getMetrics(window: windowToUse);
       
       // Always update check timestamp
       await _store.setHealthAuthCheckedAtFor(_email, now);

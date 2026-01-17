@@ -1,12 +1,13 @@
 import 'dart:math' as math;
 import 'package:sqflite_sqlcipher/sqflite.dart';
+import '../../services/last_sleep_service.dart';
 import '../../models/user_profile.dart';
 import '../foundation/baseline_calculator_v2.dart';
 
 /// Sleep Index Result
 class SleepIndexResult {
   final double score; // 0-100
-  final Map<String, double> components;
+  final Map<String, dynamic> components;
   final String confidence;
   
   const SleepIndexResult({
@@ -33,12 +34,15 @@ class SleepIndexCalculator {
     required DateTime date,
     required UserProfile profile,
   }) async {
-    // Get sleep metrics
-    final sleepAsleep = await _getLatestValue(userEmail, 'SLEEP_ASLEEP', date);
-    final sleepInBed = await _getLatestValue(userEmail, 'SLEEP_IN_BED', date);
-    final sleepDeep = await _getLatestValue(userEmail, 'SLEEP_DEEP', date);
-    final sleepREM = await _getLatestValue(userEmail, 'SLEEP_REM', date);
-    final sleepAwake = await _getLatestValue(userEmail, 'SLEEP_AWAKE', date);
+    // Use LastSleepService to get the LATEST complete sleep session
+    // This is more robust than querying individual metric types
+    final lastSleep = await LastSleepService.getLastSleep(userEmail);
+    
+    final sleepAsleep = lastSleep?.totalMinutes.toDouble() ?? 0.0;
+    final sleepInBed = lastSleep?.inBedMinutes.toDouble() ?? 0.0;
+    final sleepDeep = lastSleep?.deepMinutes.toDouble() ?? 0.0;
+    final sleepREM = lastSleep?.remMinutes.toDouble() ?? 0.0;
+    final sleepAwake = lastSleep?.awakeMinutes.toDouble() ?? 0.0;
     
     // Get physiological metrics
     final rhrValue = await _getLatestValue(userEmail, 'RESTING_HEART_RATE', date);
@@ -99,11 +103,16 @@ class SleepIndexCalculator {
     return SleepIndexResult(
       score: sleepIndex.toDouble(),
       components: {
-        'duration': durationScore.toDouble(),
-        'efficiency': efficiencyScore.toDouble(),
-        'stages': stageScore.toDouble(),
-        'fragmentation': fragScore.toDouble(),
+        'duration_score': durationScore.toDouble(),
+        'efficiency_score': efficiencyScore.toDouble(),
+        'stage_score': stageScore.toDouble(),
+        'frag_score': fragScore.toDouble(),
         'physio_penalty': physioPenalty,
+        'asleep_min': sleepAsleep,
+        'deep_min': sleepDeep,
+        'rem_min': sleepREM,
+        'awake_min': sleepAwake,
+        'in_bed_min': sleepInBed,
       },
       confidence: confidence,
     );

@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:sqflite_sqlcipher/sqflite.dart';
+import '../../services/last_sleep_service.dart';
 import '../../models/user_profile.dart';
 import '../foundation/baseline_calculator_v2.dart';
 import '../foundation/data_sufficiency_checker.dart';
@@ -8,7 +9,7 @@ import '../foundation/data_sufficiency_checker.dart';
 class RecoveryScoreResult {
   final double score; // 0-100
   final String confidence; // 'high', 'medium', 'low'
-  final Map<String, double> components;
+  final Map<String, dynamic> components;
   final List<String> topContributors;
   
   const RecoveryScoreResult({
@@ -47,15 +48,18 @@ class RecoveryScoreCalculator {
     
     final confidence = dataCheck.getOverallConfidence(quality);
     
-    // Get latest values for each metric
+    // Use LastSleepService for aggregated sleep stages
+    final lastSleep = await LastSleepService.getLastSleep(userEmail);
+    final sleepDeep = lastSleep?.deepMinutes.toDouble() ?? 0.0;
+    final sleepAsleep = lastSleep?.totalMinutes.toDouble() ?? 0.0;
+    
+    // Get latest values for physiological markers
     final hrvValue = await _getLatestValue(userEmail, 'HRV_RMSSD', date);
     final sdnnValue = await _getLatestValue(userEmail, 'HRV_SDNN', date);
     final rhrValue = await _getLatestValue(userEmail, 'RESTING_HEART_RATE', date);
     final tempValue = await _getLatestValue(userEmail, 'BODY_TEMPERATURE', date);
     final edaValue = await _getLatestValue(userEmail, 'ELECTRODERMAL_ACTIVITY', date);
-    final sleepDeep = await _getLatestValue(userEmail, 'SLEEP_DEEP', date);
-    final sleepAsleep = await _getLatestValue(userEmail, 'SLEEP_ASLEEP', date);
-    
+
     // Get baselines
     final hrvBaseline = await baseline.calculate(
       userEmail: userEmail,

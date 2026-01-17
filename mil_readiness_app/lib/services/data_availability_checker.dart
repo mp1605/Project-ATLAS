@@ -19,11 +19,17 @@ class DataAvailabilityChecker {
     final recent28Days = await _countMetrics(db, userEmail, twentyEightDaysAgo, now);
 
     // Check specific critical metrics
-    final hasHRV = await _hasMetric(db, userEmail, 'HEART_RATE_VARIABILITY_SDNN', sevenDaysAgo, now);
+    final hasSDNN = await _hasMetric(db, userEmail, 'HEART_RATE_VARIABILITY_SDNN', sevenDaysAgo, now);
+    final hasRMSSD = await _hasMetric(db, userEmail, 'HEART_RATE_VARIABILITY_RMSSD', sevenDaysAgo, now);
+    final hasHRV = hasSDNN || hasRMSSD;
+    
     final hasRHR = await _hasMetric(db, userEmail, 'RESTING_HEART_RATE', sevenDaysAgo, now);
     final hasSleep = await _hasMetric(db, userEmail, 'SLEEP_ASLEEP', sevenDaysAgo, now);
+    final hasHeartRate = await _hasMetric(db, userEmail, 'HEART_RATE', sevenDaysAgo, now);
 
-    final canCalculate = recent7Days >= 7 && hasHRV && hasRHR && hasSleep;
+    // RELAXED REQUIREMENTS: Allow calculation if we have Heart Rate AND (HRV OR RHR)
+    // We don't REQUIRE Sleep anymore, though it's highly recommended
+    final canCalculate = recent7Days >= 5 && hasHeartRate && (hasHRV || hasRHR);
     final optimal = recent28Days >= 28;
 
     return DataAvailabilityResult(

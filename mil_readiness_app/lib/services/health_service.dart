@@ -15,11 +15,14 @@ class HealthService {
     // ===== VITAL SIGNS (7 metrics) =====
     HealthDataType.HEART_RATE,                    // Continuous heart rate
     HealthDataType.RESTING_HEART_RATE,            // Resting HR (calculated daily)
+    HealthDataType.WALKING_HEART_RATE,            // Aerobic efficiency
     HealthDataType.HEART_RATE_VARIABILITY_SDNN,   // HRV (stress/recovery)
+    HealthDataType.HEART_RATE_VARIABILITY_RMSSD,  // Short-term readiness
     HealthDataType.BLOOD_OXYGEN,                  // SpO2
     HealthDataType.RESPIRATORY_RATE,              // Breathing rate
     HealthDataType.BODY_TEMPERATURE,              // Wrist temperature
-    HealthDataType.BLOOD_PRESSURE_SYSTOLIC,       // Blood pressure (if available)
+    HealthDataType.BLOOD_PRESSURE_SYSTOLIC,       // Blood pressure
+    HealthDataType.BLOOD_PRESSURE_DIASTOLIC,      // Blood pressure
     
     // ===== ACTIVITY & MOVEMENT (6 metrics) =====
     HealthDataType.STEPS,                         // Step count
@@ -35,11 +38,15 @@ class HealthService {
     HealthDataType.SLEEP_AWAKE,                   // Awake time
     HealthDataType.SLEEP_DEEP,                    // Deep sleep
     HealthDataType.SLEEP_REM,                     // REM sleep
+    HealthDataType.SLEEP_AWAKE_IN_BED,            // Awake in bed
+    HealthDataType.SLEEP_SESSION,                 // Sleep session
     
-    // ===== FITNESS & ALERTS (5 metrics) =====
+    // ===== FITNESS & ALERTS (7 metrics) =====
     HealthDataType.HIGH_HEART_RATE_EVENT,         // High HR alerts
     HealthDataType.LOW_HEART_RATE_EVENT,          // Low HR alerts
     HealthDataType.IRREGULAR_HEART_RATE_EVENT,    // Irregular rhythm
+    HealthDataType.ELECTRODERMAL_ACTIVITY,        // Stress
+    HealthDataType.MINDFULNESS,                   // Recovery
     HealthDataType.WORKOUT,                       // Workout sessions
     HealthDataType.WATER,                         // Water intake
   ];

@@ -179,7 +179,7 @@ class AllScoresCalculator {
       userEmail: userEmail,
       date: date,
     );
-    confidenceLevels['Thermoregulation'] = thermoreg.confidence;
+    confidenceLevels['Thermoregulatory'] = thermoreg.confidence;
     
     // ===== OVERALL READINESS (Score #1) =====
     print('  🎖️ Calculating overall readiness...');
@@ -200,6 +200,27 @@ class AllScoresCalculator {
     
     // Determine overall confidence
     final overallConfidence = _determineOverallConfidence(confidenceLevels.values.toList());
+    
+    // Collect component breakdowns for drill-down
+    final Map<String, Map<String, dynamic>> componentBreakdown = {
+      'Recovery': recovery.components,
+      'Sleep Index': sleep.components,
+      'Fatigue Index': fatigue.components,
+      'Endurance': endurance.components,
+      'Cardio Fitness': cardioFitness.components,
+      'Stress Load': stressLoad.components,
+      'Injury Risk': injuryRisk.components,
+      'Cardio-Resp Stability': cardioResp.components,
+      'Illness Risk': illnessRisk.components,
+      'Daily Activity': dailyActivity.components,
+      'Work Capacity': workCapacity.components,
+      'Altitude Score': altitude.components,
+      'Cardiac Safety': cardiacSafety.components,
+      'Sleep Debt': sleepDebt.components,
+      'Training Readiness': trainingReadiness.components,
+      'Cognitive Alertness': cognitiveAlertness.components,
+      'Thermoregulatory': thermoreg.components,
+    };
     
     print('  ✅ All 18 scores calculated successfully');
     print('     Overall: ${overall.score.toStringAsFixed(1)} (${overall.category})');
@@ -228,6 +249,7 @@ class AllScoresCalculator {
       calculatedAt: DateTime.now(),
       confidenceLevels: confidenceLevels,
       overallConfidence: overallConfidence,
+      componentBreakdown: componentBreakdown,
     );
   }
   

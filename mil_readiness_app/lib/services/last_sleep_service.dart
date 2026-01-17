@@ -100,25 +100,30 @@ class LastSleepService {
       SELECT metric_type, SUM(value) as total_minutes
       FROM health_metrics
       WHERE user_email = ?
-        AND metric_type IN ('SLEEP_DEEP', 'SLEEP_REM', 'SLEEP_LIGHT', 'SLEEP_AWAKE')
+        AND metric_type IN ('SLEEP_ASLEEP', 'SLEEP_DEEP', 'SLEEP_REM', 'SLEEP_LIGHT', 'SLEEP_AWAKE')
         AND is_interval = 1
         AND date_from >= ?
         AND date_to <= ?
       GROUP BY metric_type
     ''', [userEmail, windowStart.toIso8601String(), windowEnd.toIso8601String()]);
     
-    int deep = 0, rem = 0, light = 0, awake = 0;
+    int asleep = 0, deep = 0, rem = 0, light = 0, awake = 0;
     for (var row in stages) {
       final type = row['metric_type'] as String;
       final mins = (row['total_minutes'] as num).toInt();
       
-      if (type == 'SLEEP_DEEP') deep = mins;
+      if (type == 'SLEEP_ASLEEP') asleep = mins;
+      else if (type == 'SLEEP_DEEP') deep = mins;
       else if (type == 'SLEEP_REM') rem = mins;
       else if (type == 'SLEEP_LIGHT') light = mins;
       else if (type == 'SLEEP_AWAKE') awake = mins;
     }
     
-    final asleep = deep + rem + light;
+    // If Apple Health provided SLEEP_ASLEEP, use it directly
+    // Otherwise fall back to calculating from stages (for older data)
+    if (asleep == 0) {
+      asleep = deep + rem + light;
+    }
     
     // If no in-bed data, estimate from stages
     if (inBedMinutes == 0) {

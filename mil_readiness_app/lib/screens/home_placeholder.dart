@@ -177,12 +177,12 @@ class _HomePlaceholderState extends State<HomePlaceholder> {
       final now = DateTime.now();
       final yesterday = now.subtract(const Duration(hours: 24));
 
-      // Get latest heart rate
+      // Get latest heart rate (Try continuous first, then resting)
       final hrResults = await db.rawQuery('''
-        SELECT value, timestamp FROM health_metrics 
-        WHERE metric_type = 'HEART_RATE' 
+        SELECT value, timestamp, metric_type FROM health_metrics 
+        WHERE (metric_type = 'HEART_RATE' OR metric_type = 'RESTING_HEART_RATE')
         AND timestamp >= ?
-        ORDER BY timestamp DESC 
+        ORDER BY (CASE WHEN metric_type = 'HEART_RATE' THEN 1 ELSE 2 END), timestamp DESC 
         LIMIT 1
       ''', [yesterday.millisecondsSinceEpoch]);
 
@@ -306,7 +306,12 @@ class _HomePlaceholderState extends State<HomePlaceholder> {
                         onTap: () => context.push('/readiness'),
                       ),
                       
-                      const SizedBox(height: 40),
+                      const SizedBox(height: 30),
+                      
+                      // Sync Status Card
+                      _buildSyncStatusCard(),
+
+                      const SizedBox(height: 20),
                       
                       // Status indicator
                       _buildStatusIndicator(),
@@ -466,6 +471,124 @@ class _HomePlaceholderState extends State<HomePlaceholder> {
         ),
       ),
     );
+  }
+
+  Widget _buildSyncStatusCard() {
+    if (_liveSync == null) return const SizedBox.shrink();
+
+    return ValueListenableBuilder<String>(
+      valueListenable: _liveSync!.lastStatus,
+      builder: (context, status, _) {
+        final isError = status == 'error' || status == 'permission_error';
+        final isSyncing = status == 'syncing';
+        
+        return Container(
+          padding: const EdgeInsets.all(16),
+          decoration: AppTheme.glassCard().copyWith(
+            border: Border.all(
+              color: isError ? AppTheme.accentRed.withOpacity(0.5) : AppTheme.primaryCyan.withOpacity(0.3),
+            ),
+          ),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    isError ? Icons.error_outline : Icons.sync,
+                    color: isError ? AppTheme.accentRed : AppTheme.primaryCyan,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          isError ? 'SYNC ISSUE' : 'HEALTH DATA SYNC',
+                          style: AppTheme.titleStyle.copyWith(fontSize: 14),
+                        ),
+                        ValueListenableBuilder<DateTime?>(
+                          valueListenable: _liveSync!.lastSyncAt,
+                          builder: (context, lastSync, _) {
+                            if (lastSync == null) return Text('Waiting for initial sync...', style: AppTheme.captionStyle);
+                            return Text(
+                              'Last synced: ${_formatTimeSince(lastSync)}',
+                              style: AppTheme.captionStyle,
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (isSyncing)
+                    const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation(AppTheme.primaryCyan)),
+                    )
+                  else
+                    IconButton(
+                      icon: const Icon(Icons.refresh, color: AppTheme.primaryCyan, size: 20),
+                      onPressed: _handleManualSync,
+                      tooltip: 'Sync Now',
+                    ),
+                ],
+              ),
+              if (isError) ...[
+                const SizedBox(height: 12),
+                ValueListenableBuilder<String>(
+                  valueListenable: _liveSync!.lastError,
+                  builder: (context, error, _) {
+                    return Text(
+                      error,
+                      style: AppTheme.captionStyle.copyWith(color: AppTheme.accentRed, fontSize: 12),
+                    );
+                  },
+                ),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _handleReconnectHealth,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.accentRed.withOpacity(0.2),
+                      foregroundColor: AppTheme.accentRed,
+                      side: const BorderSide(color: AppTheme.accentRed),
+                    ),
+                    child: const Text('RECONNECT HEALTH'),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _handleManualSync() async {
+    if (_liveSync == null) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Starting manual sync...'), duration: Duration(seconds: 1)),
+    );
+    await _liveSync!.syncNow();
+    _loadRealTimeStats();
+  }
+
+  Future<void> _handleReconnectHealth() async {
+    final email = widget.session.email;
+    if (email == null) return;
+
+    // Reset authorized flag to force a new prompt
+    await LocalSecureStore.instance.setHealthAuthorizedFor(email, false);
+    
+    // Trigger the prompt
+    await _requestHealthPermissionsIfNeeded();
+    
+    // Restart sync
+    if (_liveSync != null) {
+      await _liveSync!.syncNow();
+    }
   }
 
   Widget _buildStatusIndicator() {

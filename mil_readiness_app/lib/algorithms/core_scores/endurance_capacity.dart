@@ -7,11 +7,13 @@ class EnduranceCapacityResult {
   final double score; // 0-100
   final double weeklyVolume;
   final String confidence;
+  final Map<String, dynamic> components;
   
   const EnduranceCapacityResult({
     required this.score,
     required this.weeklyVolume,
     required this.confidence,
+    required this.components,
   });
 }
 
@@ -67,6 +69,13 @@ class EnduranceCapacityCalculator {
       score: enduranceScore.toDouble(),
       weeklyVolume: weeklyVolume,
       confidence: confidence,
+      components: {
+        'weekly_volume_km': (weeklyVolume / 1000.0).toDouble(),
+        'exercise_time_min': exerciseTime7d.toDouble(),
+        'intensity_score': intensityScore.toDouble(),
+        'time_score': timeScore.toDouble(),
+        'volume_score': volumeScore.toDouble(),
+      },
     );
   }
   

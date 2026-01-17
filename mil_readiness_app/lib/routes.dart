@@ -11,6 +11,7 @@ import 'screens/readiness_dashboard_screen.dart';
 import 'screens/data_monitor_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/health_debug_screen.dart';
+import 'screens/score_detail_screen.dart';
 import 'services/local_secure_store.dart';
 
 class SessionController extends ChangeNotifier {
@@ -106,6 +107,18 @@ GoRouter buildRouter(SessionController session) {
         builder: (context, state) => AuthorizeScreen(session: session),
       ),
 
+      GoRoute(
+        path: '/score-detail',
+        builder: (context, state) {
+          final args = state.extra as Map<String, dynamic>;
+          return ScoreDetailScreen(
+            scoreName: args['scoreName'] as String,
+            scoreValue: args['scoreValue'] as double,
+            components: args['components'] as Map<String, double>,
+            confidence: args['confidence'] as String,
+          );
+        },
+      ),
       GoRoute(
         path: '/home',
         builder: (context, state) => HomePlaceholder(session: session),

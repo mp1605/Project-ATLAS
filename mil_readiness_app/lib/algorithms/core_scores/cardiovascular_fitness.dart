@@ -7,11 +7,13 @@ class CardiovascularFitnessResult {
   final double score; // 0-100
   final String method; // 'vo2max' or 'economy'
   final String confidence;
+  final Map<String, dynamic> components;
   
   const CardiovascularFitnessResult({
     required this.score,
     required this.method,
     required this.confidence,
+    required this.components,
   });
 }
 
@@ -63,7 +65,13 @@ class CardiovascularFitnessCalculator {
     return CardiovascularFitnessResult(
       score: cardioFit.toDouble(),
       method: 'economy',
-      confidence: confidence,
+      confidence: whrValue > 0 ? 'high' : 'medium',
+      components: {
+        'resting_hr_bpm': rhrValue,
+        'walking_hr_bpm': whrValue,
+        'z_rhr': zRHR,
+        'z_whr': zWHR,
+      },
     );
   }
   

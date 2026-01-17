@@ -31,6 +31,7 @@ class ComprehensiveReadinessResult {
   final DateTime calculatedAt;
   final Map<String, String> confidenceLevels; // score name -> 'high'/'medium'/'low'
   final String overallConfidence;
+  final Map<String, Map<String, dynamic>> componentBreakdown; // score name -> {component -> value}
   
   const ComprehensiveReadinessResult({
     required this.overallReadiness,
@@ -55,6 +56,7 @@ class ComprehensiveReadinessResult {
     required this.calculatedAt,
     required this.confidenceLevels,
     required this.overallConfidence,
+    this.componentBreakdown = const {},
   });
   
   /// Get all scores as a map for easy iteration
@@ -77,7 +79,7 @@ class ComprehensiveReadinessResult {
       'Sleep Debt': sleepDebt,
       'Training Readiness': trainingReadiness,
       'Cognitive Alertness': cognitiveAlertness,
-      'Thermoregulation': thermoregulatoryAdaptation,
+      'Thermoregulatory': thermoregulatoryAdaptation,
     };
   }
   
@@ -105,7 +107,7 @@ class ComprehensiveReadinessResult {
         'Sleep Debt': sleepDebt,
         'Training Readiness': trainingReadiness,
         'Cognitive Alertness': cognitiveAlertness,
-        'Thermoregulation': thermoregulatoryAdaptation,
+        'Thermoregulatory': thermoregulatoryAdaptation,
       },
     };
   }

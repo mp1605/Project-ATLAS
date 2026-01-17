@@ -150,7 +150,17 @@ class IllnessRiskCalculator {
     final sleepPenalty = math.max(0, (targetSleep - sleepAsleep) / targetSleep);
     final risk = (30 + 35 * illnessRaw + 20 * sleepPenalty).clamp(0, 100);
     
-    return {'score': risk, 'confidence': 'high'};
+    return {
+      'score': risk.toDouble(), 
+      'confidence': 'high',
+      'components': {
+        'body_temp_c': tempValue.toDouble(),
+        'resting_hr': rhrValue.toDouble(),
+        'resp_rate': rrValue.toDouble(),
+        'hrv_rmssd': hrvValue.toDouble(),
+        'temp_z': tempDev.toDouble(),
+      }
+    };
   }
   
   Future<double> _getValue(String userEmail, String type, DateTime date) async {
@@ -178,7 +188,17 @@ class DailyActivityCalculator {
     final energyScore = (100 * math.min(1.0, energy / 600)).clamp(0, 100);
     
     final score = (0.35 * stepsScore + 0.25 * distScore + 0.15 * floorsScore + 0.25 * energyScore);
-    return {'score': score, 'confidence': 'high'};
+    return {
+      'score': score, 
+      'confidence': 'high',
+      'components': {
+        'steps': steps,
+        'distance_m': distance,
+        'floors': floors,
+        'energy_kcal': energy,
+        'step_score': stepsScore,
+      }
+    };
   }
   
   Future<double> _getValue(String userEmail, String type, DateTime date) async {
@@ -199,7 +219,7 @@ class AllSafetyScoresCalculator {
   Future<ScoreResult> calculateStressLoad({required String userEmail, required DateTime date}) async {
     final calc = StressLoadCalculator(db: db, baseline: baseline);
     final res = await calc.calculate(userEmail: userEmail, date: date);
-    return ScoreResult(score: res['score'], confidence: res['confidence']);
+    return ScoreResult(score: res['score'], confidence: res['confidence'], components: res['components'] ?? {});
   }
   
   Future<ScoreResult> calculateInjuryRisk({
@@ -218,13 +238,13 @@ class AllSafetyScoresCalculator {
       sleepAsleep: 420.0,
       targetSleep: profile.targetSleep ~/ 60,
     );
-    return ScoreResult(score: res['score'], confidence: res['confidence']);
+    return ScoreResult(score: res['score'], confidence: res['confidence'], components: res['components'] ?? {});
   }
   
   Future<ScoreResult> calculateCardioRespStability({required String userEmail, required DateTime date}) async {
     final calc = CardioRespStabilityCalculator(db: db, baseline: baseline);
     final res = await calc.calculate(userEmail: userEmail, date: date);
-    return ScoreResult(score: res['score'], confidence: res['confidence']);
+    return ScoreResult(score: res['score'], confidence: res['confidence'], components: res['components'] ?? {});
   }
   
   Future<ScoreResult> calculateIllnessRisk({
@@ -239,13 +259,13 @@ class AllSafetyScoresCalculator {
       sleepAsleep: 420.0,
       targetSleep: profile.targetSleep ~/ 60,
     );
-    return ScoreResult(score: res['score'], confidence: res['confidence']);
+    return ScoreResult(score: res['score'], confidence: res['confidence'], components: res['components'] ?? {});
   }
   
   Future<ScoreResult> calculateDailyActivity({required String userEmail, required DateTime date}) async {
     final calc = DailyActivityCalculator(db);
     final res = await calc.calculate(userEmail: userEmail, date: date);
-    return ScoreResult(score: res['score'], confidence: res['confidence']);
+    return ScoreResult(score: res['score'], confidence: res['confidence'], components: res['components'] ?? {});
   }
   
   Future<ScoreResult> calculateWorkCapacity({
@@ -256,14 +276,15 @@ class AllSafetyScoresCalculator {
   }) async {
     final calc = WorkCapacityCalculator(db);
     final res = await calc.calculate(recoveryScore: recoveryScore, sleepScore: sleepScore);
-    return ScoreResult(score: res['score'], confidence: res['confidence']);
+    return ScoreResult(score: res['score'], confidence: res['confidence'], components: res['components'] ?? {});
   }
 }
 
 class ScoreResult {
   final double score;
   final String confidence;
-  ScoreResult({required this.score, required this.confidence});
+  final Map<String, dynamic> components;
+  ScoreResult({required this.score, required this.confidence, this.components = const {}});
 }
 
 /// Score #12: Work Capacity (0-100)
@@ -278,6 +299,13 @@ class WorkCapacityCalculator {
   }) async {
     final capacityBase = 0.5 * recoveryScore + 0.5 * sleepScore;
     final score = capacityBase.clamp(0, 100);
-    return {'score': score, 'confidence': 'high'};
+    return {
+      'score': score.toDouble(), 
+      'confidence': 'high',
+      'components': {
+        'recovery_factor': recoveryScore,
+        'sleep_factor': sleepScore,
+      }
+    };
   }
 }

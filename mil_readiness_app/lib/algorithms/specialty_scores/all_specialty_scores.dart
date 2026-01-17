@@ -3,6 +3,7 @@ import 'package:sqflite_sqlcipher/sqflite.dart';
 import '../foundation/baseline_calculator_v2.dart';
 import '../../models/user_profile.dart';
 import '../safety_scores/all_safety_scores.dart';
+import '../../services/last_sleep_service.dart';
 
 /// Score #13: Altitude/Oxygenation (0-100)
 class AltitudeScoreCalculator {
@@ -27,7 +28,16 @@ class AltitudeScoreCalculator {
     final altitudeRisk = 0.5 * o2Drop + 0.3 * perfDrop + 0.2 * rrRise;
     final score = (85 - 30 * altitudeRisk).clamp(0, 100);
     
-    return {'score': score, 'confidence': 'medium'};
+    return {
+      'score': score.toDouble(), 
+      'confidence': 'medium',
+      'components': {
+        'spo2': spo2Value,
+        'ppi': ppiValue,
+        'resp_rate': rrValue,
+        'o2_drop_z': o2Drop,
+      }
+    };
   }
   
   Future<double> _getValue(String userEmail, String type, DateTime date) async {
@@ -59,11 +69,16 @@ class CardiacSafetyCalculator {
     
     var penalty = (20 * math.min(5, eventCount) + 10 * math.max(0, zRHR)).toDouble().clamp(0, 100);
     
-    if (irregEvents > 0) {
-      penalty = math.max(penalty, 40);
-    }
-    
-    return {'score': penalty, 'confidence': 'high'};
+    return {
+      'score': penalty.toDouble(), 
+      'confidence': 'high',
+      'components': {
+        'high_hr_events': highEvents,
+        'low_hr_events': lowEvents,
+        'irregular_events': irregEvents,
+        'resting_hr_z': zRHR,
+      }
+    };
   }
   
   Future<int> _countEvents(String userEmail, String type, DateTime start, DateTime end) async {
@@ -93,17 +108,39 @@ class SleepDebtCalculator {
     final debt7 = await _calculateDebt(userEmail, date, 7, targetSleep);
     final score = (100 - 100 * math.min(1.0, debt7 / (7 * 90))).clamp(0, 100);
     
-    return {'score': score, 'debt7': debt7, 'confidence': 'high'};
+    return {
+      'score': score.toDouble(), 
+      'confidence': 'high',
+      'components': {
+        'total_debt_7d_min': debt7,
+        'target_sleep_min': targetSleep.toDouble(),
+      }
+    };
   }
   
   Future<double> _calculateDebt(String userEmail, DateTime date, int days, int target) async {
     var totalDebt = 0.0;
     for (var i = 0; i < days; i++) {
       final checkDate = date.subtract(Duration(days: i));
-      final asleep = await _getValue(userEmail, 'SLEEP_ASLEEP', checkDate);
+      final startOfDay = DateTime(checkDate.year, checkDate.month, checkDate.day);
+      final endOfDay = startOfDay.add(const Duration(hours: 23, minutes: 59, seconds: 59));
+      
+      // Sum all sleep asleep chunks for this specific day
+      final asleep = await _getSum(userEmail, 'SLEEP_ASLEEP', startOfDay, endOfDay);
       totalDebt += math.max(0, target - asleep);
     }
     return totalDebt;
+  }
+  
+  Future<double> _getSum(String userEmail, String type, DateTime start, DateTime end) async {
+    final r = await db.rawQuery('''
+      SELECT SUM(value) as total 
+      FROM health_metrics 
+      WHERE user_email = ? AND metric_type = ? 
+      AND timestamp >= ? AND timestamp <= ?
+    ''', [userEmail, type, start.millisecondsSinceEpoch, end.millisecondsSinceEpoch]);
+    
+    return (r.first['total'] as num?)?.toDouble() ?? 0.0;
   }
   
   Future<double> _getValue(String userEmail, String type, DateTime date) async {
@@ -147,12 +184,20 @@ class CognitiveAlertnessCalculator {
   CognitiveAlertnessCalculator({required this.db, required this.baseline});
   
   Future<Map<String, dynamic>> calculate({required String userEmail, required DateTime date}) async {
-    final remValue = await _getValue(userEmail, 'SLEEP_REM', date);
-    final asleepValue = await _getValue(userEmail, 'SLEEP_ASLEEP', date);
-    final awakeValue = await _getValue(userEmail, 'SLEEP_AWAKE', date);
+    // Get aggregated last night's sleep session
+    final lastSleep = await LastSleepService.getLastSleep(userEmail);
+    
+    final remValue = lastSleep?.remMinutes.toDouble() ?? 0.0;
+    final asleepValue = lastSleep?.totalMinutes.toDouble() ?? 0.0;
+    final awakeValue = lastSleep?.awakeMinutes.toDouble() ?? 0.0;
+    
+    // Core physiological snapshots (latest is correct here for 'state')
     final hrvValue = await _getValue(userEmail, 'HRV_RMSSD', date);
     final edaValue = await _getValue(userEmail, 'ELECTRODERMAL_ACTIVITY', date);
-    final mindfulness = await _getValue(userEmail, 'MINDFULNESS', date);
+    
+    // Mindfulness is a 24-hour total
+    final startSum = date.subtract(const Duration(hours: 24));
+    final mindfulness = await _getSum(userEmail, 'MINDFULNESS', startSum, date);
     
     final remScore = (100 * math.min(1.0, (remValue / (asleepValue + 0.001)) / 0.22)).clamp(0, 100);
     final fragment = (100 - 100 * math.min(1.0, (awakeValue / (asleepValue + 0.001) - 0.05) / 0.10)).clamp(0, 100);
@@ -163,14 +208,36 @@ class CognitiveAlertnessCalculator {
     final zHRV = baseline.computeZScore(hrvValue, hrvBase);
     final zEDA = edaValue > 0 ? baseline.computeZScore(edaValue, edaBase) : 0.0;
     
+    // Autonomic balance from both HRV and EDA
     final autonomic = (50 + 12.5 * zHRV - 12.5 * math.max(0, zEDA)).clamp(0, 100);
     final mind = math.min(1.0, mindfulness / 10);
     
     final score = (0.35 * remScore + 0.25 * fragment + 0.30 * autonomic + 10 * mind).clamp(0, 100);
     
-    return {'score': score, 'confidence': 'high'};
+    return {
+      'score': score.toDouble(), 
+      'confidence': 'high',
+      'components': {
+        'rem_score': remScore.toDouble(),
+        'fragmentation': fragment.toDouble(),
+        'autonomic': autonomic.toDouble(),
+        'mindfulness_min': mindfulness.toDouble(),
+        'eda_z': zEDA.toDouble(),
+      }
+    };
   }
   
+  Future<double> _getSum(String userEmail, String type, DateTime start, DateTime end) async {
+    final r = await db.rawQuery('''
+      SELECT SUM(value) as total 
+      FROM health_metrics 
+      WHERE user_email = ? AND metric_type = ? 
+      AND timestamp >= ? AND timestamp <= ?
+    ''', [userEmail, type, start.millisecondsSinceEpoch, end.millisecondsSinceEpoch]);
+    
+    return (r.first['total'] as num?)?.toDouble() ?? 0.0;
+  }
+
   Future<double> _getValue(String userEmail, String type, DateTime date) async {
     final r = await db.query('health_metrics', where: 'user_email = ? AND metric_type = ? AND timestamp <= ?',
         whereArgs: [userEmail, type, date.millisecondsSinceEpoch], orderBy: 'timestamp DESC', limit: 1);
@@ -237,13 +304,13 @@ class AllSpecialtyScoresCalculator {
   Future<ScoreResult> calculateAltitudeScore({required String userEmail, required DateTime date}) async {
     final calc = AltitudeScoreCalculator(db: db, baseline: baseline);
     final res = await calc.calculate(userEmail: userEmail, date: date);
-    return ScoreResult(score: res['score'], confidence: res['confidence']);
+    return ScoreResult(score: res['score'], confidence: res['confidence'], components: res['components'] ?? {});
   }
   
   Future<ScoreResult> calculateCardiacSafetyPenalty({required String userEmail, required DateTime date}) async {
     final calc = CardiacSafetyCalculator(db: db, baseline: baseline);
     final res = await calc.calculate(userEmail: userEmail, date: date);
-    return ScoreResult(score: res['score'], confidence: res['confidence']);
+    return ScoreResult(score: res['score'], confidence: res['confidence'], components: res['components'] ?? {});
   }
   
   Future<ScoreResult> calculateSleepDebt({
@@ -257,7 +324,7 @@ class AllSpecialtyScoresCalculator {
       date: date,
       targetSleep: profile.targetSleep, // Use minutes directly
     );
-    return ScoreResult(score: res['score'], confidence: res['confidence']);
+    return ScoreResult(score: res['score'], confidence: res['confidence'], components: res['components'] ?? {});
   }
   
   Future<ScoreResult> calculateTrainingReadiness({
@@ -275,24 +342,25 @@ class AllSpecialtyScoresCalculator {
       fatigueScore: fatigueScore,
       injuryRisk: injuryRiskScore,
     );
-    return ScoreResult(score: res['score'], confidence: res['confidence']);
+    return ScoreResult(score: res['score'], confidence: res['confidence'], components: res['components'] ?? {});
   }
   
   Future<ScoreResult> calculateCognitiveAlertness({required String userEmail, required DateTime date}) async {
     final calc = CognitiveAlertnessCalculator(db: db, baseline: baseline);
     final res = await calc.calculate(userEmail: userEmail, date: date);
-    return ScoreResult(score: res['score'], confidence: res['confidence']);
+    return ScoreResult(score: res['score'], confidence: res['confidence'], components: res['components'] ?? {});
   }
   
   Future<ScoreResult> calculateThermoregulatoryAdaptation({required String userEmail, required DateTime date}) async {
     final calc = ThermoregulatoryAdaptationCalculator(db: db, baseline: baseline);
     final res = await calc.calculate(userEmail: userEmail, date: date);
-    return ScoreResult(score: res['score'], confidence: res['confidence']);
+    return ScoreResult(score: res['score'], confidence: res['confidence'], components: res['components'] ?? {});
   }
 }
 
 class ScoreResult {
   final double score;
   final String confidence;
-  ScoreResult({required this.score, required this.confidence});
+  final Map<String, dynamic> components;
+  ScoreResult({required this.score, required this.confidence, this.components = const {}});
 }

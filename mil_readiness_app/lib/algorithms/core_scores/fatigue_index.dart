@@ -14,6 +14,7 @@ class FatigueIndexResult {
   final double chronicLoad;
   final String riskCategory;
   final String confidence;
+  final Map<String, dynamic> components;
   
   const FatigueIndexResult({
     required this.score,
@@ -22,6 +23,7 @@ class FatigueIndexResult {
     required this.chronicLoad,
     required this.riskCategory,
     required this.confidence,
+    required this.components,
   });
 }
 
@@ -74,6 +76,12 @@ class FatigueIndexCalculator {
       chronicLoad: acwrResult.chronicLoad,
       riskCategory: acwrResult.riskCategory,
       confidence: acwrResult.acuteLoad > 0 ? 'high' : 'medium',
+      components: {
+        'acwr': acwrResult.acwr,
+        'acute_load': acwrResult.acuteLoad,
+        'chronic_load': acwrResult.chronicLoad,
+        'suppression': suppression.toDouble(),
+      },
     );
   }
   
