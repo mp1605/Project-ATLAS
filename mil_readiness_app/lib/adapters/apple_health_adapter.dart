@@ -12,9 +12,9 @@ class AppleHealthAdapter implements HealthDataAdapter {
   
   /// Military readiness metrics - AUTOMATIC from Apple Watch only
   /// No manual entry, no nutrition, no profile data
-  /// Comprehensive health metrics - ALL available in v11.1.1
+  /// Comprehensive health metrics - ALL available in v13.2.1
   static const List<HealthDataType> _metricTypes = <HealthDataType>[
-    // ========== CARDIOVASCULAR CORE (9) ==========
+    // ========== CARDIOVASCULAR CORE (12) ==========
     HealthDataType.HEART_RATE,
     HealthDataType.RESTING_HEART_RATE,
     HealthDataType.WALKING_HEART_RATE,
@@ -23,9 +23,11 @@ class AppleHealthAdapter implements HealthDataAdapter {
     HealthDataType.BLOOD_OXYGEN,
     HealthDataType.RESPIRATORY_RATE,
     HealthDataType.PERIPHERAL_PERFUSION_INDEX,
-    // NOTE: WALKING_SPEED not in v11.1.1
+    HealthDataType.WALKING_SPEED, // NEW in v13.2.1
+    HealthDataType.ATRIAL_FIBRILLATION_BURDEN, // NEW in v13.2.1
+    HealthDataType.ELECTROCARDIOGRAM, // NEW in v13.2.1
     
-    // ========== ACTIVITY & ENERGY (10) ==========
+    // ========== ACTIVITY & ENERGY (15) ==========
     HealthDataType.STEPS,
     HealthDataType.DISTANCE_WALKING_RUNNING,
     HealthDataType.DISTANCE_CYCLING,
@@ -33,11 +35,15 @@ class AppleHealthAdapter implements HealthDataAdapter {
     HealthDataType.FLIGHTS_CLIMBED,
     HealthDataType.ACTIVE_ENERGY_BURNED,
     HealthDataType.BASAL_ENERGY_BURNED,
+    HealthDataType.TOTAL_CALORIES_BURNED, // NEW in v13.2.1
     HealthDataType.EXERCISE_TIME,
     HealthDataType.WORKOUT,
-    // NOTE: APPLE_STAND_TIME, APPLE_MOVE_TIME, APPLE_STAND_HOUR, UV_INDEX not in v11.1.1
+    HealthDataType.APPLE_STAND_TIME, // NEW in v13.2.1
+    HealthDataType.APPLE_MOVE_TIME, // NEW in v13.2.1
+    HealthDataType.APPLE_STAND_HOUR, // NEW in v13.2.1
+    HealthDataType.UV_INDEX, // NEW in v13.2.1
     
-    // ========== SLEEP (8) ==========
+    // ========== SLEEP (10) ==========
     HealthDataType.SLEEP_ASLEEP,
     HealthDataType.SLEEP_DEEP,
     HealthDataType.SLEEP_REM,
@@ -45,8 +51,9 @@ class AppleHealthAdapter implements HealthDataAdapter {
     HealthDataType.SLEEP_AWAKE,
     HealthDataType.SLEEP_AWAKE_IN_BED,
     HealthDataType.SLEEP_IN_BED,
+    HealthDataType.SLEEP_OUT_OF_BED, // NEW in v13.2.1
     HealthDataType.SLEEP_SESSION,
-    // NOTE: SLEEP_OUT_OF_BED, SLEEP_UNKNOWN not in v11.1.1
+    HealthDataType.SLEEP_UNKNOWN, // NEW in v13.2.1
     
     // ========== STRESS & RECOVERY (2) ==========
     HealthDataType.ELECTRODERMAL_ACTIVITY,
@@ -59,13 +66,14 @@ class AppleHealthAdapter implements HealthDataAdapter {
     HealthDataType.BLOOD_PRESSURE_SYSTOLIC,
     HealthDataType.BLOOD_PRESSURE_DIASTOLIC,
     
-    // ========== BODY MEASUREMENTS (7) ==========
+    // ========== BODY MEASUREMENTS (9) ==========
     HealthDataType.BODY_TEMPERATURE,
     HealthDataType.WEIGHT,
     HealthDataType.HEIGHT,
     HealthDataType.BODY_MASS_INDEX,
     HealthDataType.BODY_FAT_PERCENTAGE,
-    // NOTE: LEAN_BODY_MASS, BODY_WATER_MASS not in v11.1.1
+    HealthDataType.LEAN_BODY_MASS, // NEW in v13.2.1
+    HealthDataType.BODY_WATER_MASS, // NEW in v13.2.1
     HealthDataType.WAIST_CIRCUMFERENCE,
     
     // ========== BLOOD GLUCOSE & INSULIN (2) ==========
@@ -73,10 +81,10 @@ class AppleHealthAdapter implements HealthDataAdapter {
     HealthDataType.INSULIN_DELIVERY,
     
     // ========== RESPIRATORY (1) ==========
-    // NOTE: FORCED_EXPIRATORY_VOLUME not in v11.1.1
+    HealthDataType.FORCED_EXPIRATORY_VOLUME, // NEW in v13.2.1 (FEV1)
     
     // ========== HEARING (1) ==========
-    // NOTE: AUDIOGRAM not in v11.1.1
+    HealthDataType.AUDIOGRAM, // NEW in v13.2.1
     
     // ========== REPRODUCTIVE HEALTH (1) ==========
     HealthDataType.MENSTRUATION_FLOW,
@@ -88,9 +96,10 @@ class AppleHealthAdapter implements HealthDataAdapter {
     HealthDataType.HEADACHE_SEVERE,
     HealthDataType.HEADACHE_UNSPECIFIED,
     
-    // ========== WATER & ENVIRONMENT (1) ==========
+    // ========== WATER & ENVIRONMENT (3) ==========
     HealthDataType.WATER,
-    // NOTE: WATER_TEMPERATURE, UNDERWATER_DEPTH not in v11.1.1
+    HealthDataType.WATER_TEMPERATURE, // NEW in v13.2.1
+    HealthDataType.UNDERWATER_DEPTH, // NEW in v13.2.1
     
     // ========== NUTRITION - MACROS (12) ==========
     HealthDataType.DIETARY_ENERGY_CONSUMED,
@@ -148,13 +157,17 @@ class AppleHealthAdapter implements HealthDataAdapter {
     'SLEEP_AWAKE',
     'SLEEP_AWAKE_IN_BED',
     'SLEEP_IN_BED',
+    'SLEEP_OUT_OF_BED', // NEW in v13.2.1
     'SLEEP_SESSION',
+    'SLEEP_UNKNOWN', // NEW in v13.2.1
     
     // Activity intervals
     'MINDFULNESS',
     'WORKOUT',
     'EXERCISE_TIME',
     'ELECTRODERMAL_ACTIVITY',
+    'APPLE_STAND_TIME', // NEW in v13.2.1
+    'APPLE_MOVE_TIME', // NEW in v13.2.1
     
     // Headache tracking (duration-based)
     'HEADACHE_NOT_PRESENT',
@@ -275,16 +288,20 @@ class AppleHealthAdapter implements HealthDataAdapter {
       HealthDataType.SLEEP_AWAKE,
       HealthDataType.SLEEP_AWAKE_IN_BED,
       HealthDataType.SLEEP_IN_BED,
+      HealthDataType.SLEEP_OUT_OF_BED, // NEW in v13.2.1
       HealthDataType.SLEEP_SESSION,
+      HealthDataType.SLEEP_UNKNOWN, // NEW in v13.2.1
       
       // Cardiovascular metrics (calculated once daily)
       HealthDataType.RESTING_HEART_RATE,  // Morning calculation
       HealthDataType.WALKING_HEART_RATE,   // Daily average
       HealthDataType.HEART_RATE_VARIABILITY_SDNN,  // Overnight
       HealthDataType.HEART_RATE_VARIABILITY_RMSSD, // Overnight
+      HealthDataType.ATRIAL_FIBRILLATION_BURDEN, // NEW in v13.2.1 - daily calculation
       
       // Respiratory metrics (measured during sleep)
       HealthDataType.RESPIRATORY_RATE,
+      HealthDataType.FORCED_EXPIRATORY_VOLUME, // NEW in v13.2.1 - periodic measurement
       
       // Blood oxygen (measured overnight)
       HealthDataType.BLOOD_OXYGEN,
@@ -296,13 +313,16 @@ class AppleHealthAdapter implements HealthDataAdapter {
       HealthDataType.DISTANCE_SWIMMING,
       HealthDataType.FLIGHTS_CLIMBED,
       HealthDataType.EXERCISE_TIME,
+      HealthDataType.TOTAL_CALORIES_BURNED, // NEW in v13.2.1 - daily total
+      HealthDataType.APPLE_STAND_HOUR, // NEW in v13.2.1 - hourly goals accumulated
       
-      // NEW: Metrics that often have fewer samples or are calculated/accumulated
+      // Metrics that often have fewer samples or are calculated/accumulated
       HealthDataType.BODY_TEMPERATURE,
       HealthDataType.WORKOUT,
       HealthDataType.BASAL_ENERGY_BURNED,
       HealthDataType.BLOOD_PRESSURE_SYSTOLIC,
       HealthDataType.BLOOD_PRESSURE_DIASTOLIC,
+      HealthDataType.AUDIOGRAM, // NEW in v13.2.1 - periodic tests
     };
 
     // Query each type individually to avoid one failure blocking everything

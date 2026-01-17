@@ -89,6 +89,9 @@ class _DataMonitorScreenState extends State<DataMonitorScreen> with SingleTicker
         'BLOOD_OXYGEN',
         'RESPIRATORY_RATE',
         'PERIPHERAL_PERFUSION_INDEX',
+        'WALKING_SPEED', // NEW v13.2.1
+        'ATRIAL_FIBRILLATION_BURDEN', // NEW v13.2.1
+        'ELECTROCARDIOGRAM', // NEW v13.2.1
         // Activity
         'STEPS',
         'DISTANCE_WALKING_RUNNING',
@@ -97,10 +100,13 @@ class _DataMonitorScreenState extends State<DataMonitorScreen> with SingleTicker
         'FLIGHTS_CLIMBED',
         'ACTIVE_ENERGY_BURNED',
         'BASAL_ENERGY_BURNED',
+        'TOTAL_CALORIES_BURNED', // NEW v13.2.1
         'EXERCISE_TIME',
         'WORKOUT',
         'APPLE_STAND_TIME',
         'APPLE_MOVE_TIME',
+        'APPLE_STAND_HOUR', // NEW v13.2.1
+        'UV_INDEX', // NEW v13.2.1
         // Sleep
         'SLEEP_ASLEEP',
         'SLEEP_DEEP',
@@ -109,7 +115,9 @@ class _DataMonitorScreenState extends State<DataMonitorScreen> with SingleTicker
         'SLEEP_AWAKE',
         'SLEEP_AWAKE_IN_BED',
         'SLEEP_IN_BED',
+        'SLEEP_OUT_OF_BED', // NEW v13.2.1
         'SLEEP_SESSION',
+        'SLEEP_UNKNOWN', // NEW v13.2.1
         // Stress & Recovery
         'ELECTRODERMAL_ACTIVITY',
         'MINDFULNESS',
@@ -126,11 +134,27 @@ class _DataMonitorScreenState extends State<DataMonitorScreen> with SingleTicker
         'BODY_MASS_INDEX',
         'BODY_FAT_PERCENTAGE',
         'LEAN_BODY_MASS',
+        'BODY_WATER_MASS', // NEW v13.2.1
         'WAIST_CIRCUMFERENCE',
-        // Blood Glucose
+        // Blood Glucose & Insulin
         'BLOOD_GLUCOSE',
+        'INSULIN_DELIVERY',
+        // Respiratory
+        'FORCED_EXPIRATORY_VOLUME', // NEW v13.2.1
+        // Hearing
+        'AUDIOGRAM', // NEW v13.2.1
         // Reproductive Health
         'MENSTRUATION_FLOW',
+        // Headache Tracking
+        'HEADACHE_NOT_PRESENT',
+        'HEADACHE_MILD',
+        'HEADACHE_MODERATE',
+        'HEADACHE_SEVERE',
+        'HEADACHE_UNSPECIFIED',
+        // Water & Environment
+        'WATER',
+        'WATER_TEMPERATURE', // NEW v13.2.1
+        'UNDERWATER_DEPTH', // NEW v13.2.1
         // Nutrition (optional - may not have data)
         'DIETARY_ENERGY_CONSUMED',
         'DIETARY_CARBS_CONSUMED',
@@ -340,7 +364,8 @@ class _DataMonitorScreenState extends State<DataMonitorScreen> with SingleTicker
            type == 'APPLE_STAND_TIME' ||
            type == 'APPLE_MOVE_TIME' ||
            type == 'BASAL_ENERGY_BURNED' ||
-           type == 'ACTIVE_ENERGY_BURNED';
+           type == 'ACTIVE_ENERGY_BURNED' ||
+           type.startsWith('HEADACHE_'); // NEW v13.2.1
   }
   @override
   Widget build(BuildContext context) {

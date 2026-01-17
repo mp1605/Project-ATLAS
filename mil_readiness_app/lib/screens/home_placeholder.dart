@@ -50,46 +50,77 @@ class _HomePlaceholderState extends State<HomePlaceholder> {
   /// Request Health permissions automatically if not already granted
   Future<void> _requestHealthPermissionsIfNeeded() async {
     final email = widget.session.email;
-    if (email == null) return;
+    if (email == null) {
+      print('❌ No email found, skipping permission request');
+      return;
+    }
+
+    print('🔍 Starting permission check for $email...');
 
     try {
       final adapter = HealthAdapterFactory.createAdapter(WearableType.appleWatch);
       
-      // Check if we've already asked the user on this device
-      final alreadyAsked = await LocalSecureStore.instance.getHealthAuthorizedFor(email);
-      if (alreadyAsked) {
-        print('⏭️ Health permissions already handled for $email (skipping auto-prompt)');
-        return;
-      }
-
-      // Check if we already have permissions (double check)
+      // Check actual iOS permission status
+      print('  → Checking iOS permission status...');
       final hasPerms = await adapter.hasPermissions();
+      print('  → iOS hasPermissions result: $hasPerms');
+      
       if (hasPerms) {
+        // We have permissions - update stored flag and continue
         await LocalSecureStore.instance.setHealthAuthorizedFor(email, true);
+        print('✅ Health permissions already granted by iOS');
         return;
       }
 
-      print('🔐 Health permissions not granted - requesting now...');
+      // iOS doesn't have permissions - ALWAYS show dialog on fresh login
+      // (Don't check stored flag because it persists after app deletion)
+      print('🔐 iOS permissions NOT granted - showing permission dialog...');
       
-      // Show explanation dialog
+      // Show explanation dialog with solid, readable styling
       if (mounted) {
         showDialog(
           context: context,
           barrierDismissible: false,
           builder: (context) => AlertDialog(
-            title: const Text('Health Data Required'),
+            backgroundColor: Colors.white, // Solid white background
+            elevation: 24, // Strong shadow for visibility
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            title: const Text(
+              'Health Data Required',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+            ),
             content: const Text(
               'This app needs access to your Health data to calculate readiness scores.\n\n'
               'You\'ll be asked to grant READ permissions for:\n'
               '• Heart Rate & HRV\n'
               '• Sleep Data\n'
               '• Activity (Steps, Exercise)\n'
-              '• Respiratory & Blood Oxygen\n\n'
+              '• Respiratory & Blood Oxygen\n'
+              '• Body Measurements\n'
+              '• Nutrition (optional)\n\n'
               'Your data stays encrypted on your device.',
-              style: TextStyle(fontSize: 14),
+              style: TextStyle(
+                fontSize: 15,
+                height: 1.4,
+                color: Colors.black87,
+              ),
             ),
             actions: [
               TextButton(
+                style: TextButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
                 onPressed: () async {
                   Navigator.pop(context);
                   
@@ -104,14 +135,23 @@ class _HomePlaceholderState extends State<HomePlaceholder> {
                     showDialog(
                       context: context,
                       builder: (context) => AlertDialog(
-                        title: const Text('Permissions Required'),
+                        backgroundColor: Colors.white,
+                        title: const Text(
+                          'Permissions Required',
+                          style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
+                        ),
                         content: const Text(
                           'Please grant Health permissions in:\n\n'
-                          'Settings → Privacy & Security → Health → military_readiness_app\n\n'
+                          'Settings → Privacy & Security → Health → {App Name}\n\n'
                           'Then restart the app.',
+                          style: TextStyle(fontSize: 15, color: Colors.black87),
                         ),
                         actions: [
                           TextButton(
+                            style: TextButton.styleFrom(
+                              backgroundColor: Colors.blue,
+                              foregroundColor: Colors.white,
+                            ),
                             onPressed: () => Navigator.pop(context),
                             child: const Text('OK'),
                           ),
@@ -120,7 +160,7 @@ class _HomePlaceholderState extends State<HomePlaceholder> {
                     );
                   }
                 },
-                child: const Text('Grant Access'),
+                child: const Text('Grant Access', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
               ),
             ],
           ),
