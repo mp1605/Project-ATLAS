@@ -98,12 +98,12 @@ class _HomePlaceholderState extends State<HomePlaceholder> {
             content: const Text(
               'This app needs access to your Health data to calculate readiness scores.\n\n'
               'You\'ll be asked to grant READ permissions for:\n'
-              '• Heart Rate & HRV\n'
-              '• Sleep Data\n'
-              '• Activity (Steps, Exercise)\n'
-              '• Respiratory & Blood Oxygen\n'
-              '• Body Measurements\n'
-              '• Nutrition (optional)\n\n'
+              '• Heart Rate, HRV & Blood Oxygen\n'
+              '• Sleep Stages & Duration\n'
+              '• Activity (Steps, Exercise, Distance)\n'
+              '• Body Metrics (Weight, Body Fat)\n'
+              '• Stress Indicators (EDA, Mindfulness)\n\n'
+              'Total: 35 core readiness metrics\n\n'
               'Your data stays encrypted on your device.',
               style: TextStyle(
                 fontSize: 15,

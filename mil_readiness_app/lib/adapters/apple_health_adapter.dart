@@ -12,38 +12,28 @@ class AppleHealthAdapter implements HealthDataAdapter {
   
   /// Military readiness metrics - AUTOMATIC from Apple Watch only
   /// No manual entry, no nutrition, no profile data
-  /// Comprehensive health metrics - ALL available in v13.2.1
+  /// Core readiness metrics - Scientifically justified Tier 1 & 2 only
+  /// Total: 35 metrics (reduced from 85)
   static const List<HealthDataType> _metricTypes = <HealthDataType>[
-    // ========== CARDIOVASCULAR CORE (12) ==========
+    // ========== TIER 1: CARDIOVASCULAR CORE (11) ==========
     HealthDataType.HEART_RATE,
     HealthDataType.RESTING_HEART_RATE,
-    HealthDataType.WALKING_HEART_RATE,
     HealthDataType.HEART_RATE_VARIABILITY_SDNN,
     HealthDataType.HEART_RATE_VARIABILITY_RMSSD,
     HealthDataType.BLOOD_OXYGEN,
     HealthDataType.RESPIRATORY_RATE,
-    HealthDataType.PERIPHERAL_PERFUSION_INDEX,
-    HealthDataType.WALKING_SPEED, // NEW in v13.2.1
-    HealthDataType.ATRIAL_FIBRILLATION_BURDEN, // NEW in v13.2.1
-    HealthDataType.ELECTROCARDIOGRAM, // NEW in v13.2.1
+    HealthDataType.BODY_TEMPERATURE,
     
-    // ========== ACTIVITY & ENERGY (15) ==========
-    HealthDataType.STEPS,
-    HealthDataType.DISTANCE_WALKING_RUNNING,
-    HealthDataType.DISTANCE_CYCLING,
-    HealthDataType.DISTANCE_SWIMMING,
-    HealthDataType.FLIGHTS_CLIMBED,
-    HealthDataType.ACTIVE_ENERGY_BURNED,
-    HealthDataType.BASAL_ENERGY_BURNED,
-    HealthDataType.TOTAL_CALORIES_BURNED, // NEW in v13.2.1
-    HealthDataType.EXERCISE_TIME,
-    HealthDataType.WORKOUT,
-    HealthDataType.APPLE_STAND_TIME, // NEW in v13.2.1
-    HealthDataType.APPLE_MOVE_TIME, // NEW in v13.2.1
-    HealthDataType.APPLE_STAND_HOUR, // NEW in v13.2.1
-    HealthDataType.UV_INDEX, // NEW in v13.2.1
+    // Heart Events - Safety
+    HealthDataType.HIGH_HEART_RATE_EVENT,
+    HealthDataType.LOW_HEART_RATE_EVENT,
+    HealthDataType.IRREGULAR_HEART_RATE_EVENT,
     
-    // ========== SLEEP (10) ==========
+    // Blood Pressure
+    HealthDataType.BLOOD_PRESSURE_SYSTOLIC,
+    HealthDataType.BLOOD_PRESSURE_DIASTOLIC,
+    
+    // ========== TIER 1: SLEEP (8) ==========
     HealthDataType.SLEEP_ASLEEP,
     HealthDataType.SLEEP_DEEP,
     HealthDataType.SLEEP_REM,
@@ -51,99 +41,27 @@ class AppleHealthAdapter implements HealthDataAdapter {
     HealthDataType.SLEEP_AWAKE,
     HealthDataType.SLEEP_AWAKE_IN_BED,
     HealthDataType.SLEEP_IN_BED,
-    HealthDataType.SLEEP_OUT_OF_BED, // NEW in v13.2.1
     HealthDataType.SLEEP_SESSION,
-    HealthDataType.SLEEP_UNKNOWN, // NEW in v13.2.1
     
-    // ========== STRESS & RECOVERY (2) ==========
-    HealthDataType.ELECTRODERMAL_ACTIVITY,
-    HealthDataType.MINDFULNESS,
+    // ========== TIER 1: ACTIVITY & LOAD (9) ==========
+    HealthDataType.ACTIVE_ENERGY_BURNED,
+    HealthDataType.BASAL_ENERGY_BURNED,
+    HealthDataType.EXERCISE_TIME,
+    HealthDataType.WORKOUT,
+    HealthDataType.STEPS,
+    HealthDataType.DISTANCE_WALKING_RUNNING,
+    HealthDataType.DISTANCE_CYCLING,
+    HealthDataType.DISTANCE_SWIMMING,
+    HealthDataType.FLIGHTS_CLIMBED,
     
-    // ========== HEART EVENTS - SAFETY (5) ==========
-    HealthDataType.HIGH_HEART_RATE_EVENT,
-    HealthDataType.LOW_HEART_RATE_EVENT,
-    HealthDataType.IRREGULAR_HEART_RATE_EVENT,
-    HealthDataType.BLOOD_PRESSURE_SYSTOLIC,
-    HealthDataType.BLOOD_PRESSURE_DIASTOLIC,
-    
-    // ========== BODY MEASUREMENTS (9) ==========
-    HealthDataType.BODY_TEMPERATURE,
+    // ========== TIER 2: BODY & STRESS (7) ==========
     HealthDataType.WEIGHT,
     HealthDataType.HEIGHT,
     HealthDataType.BODY_MASS_INDEX,
     HealthDataType.BODY_FAT_PERCENTAGE,
-    HealthDataType.LEAN_BODY_MASS, // NEW in v13.2.1
-    HealthDataType.BODY_WATER_MASS, // NEW in v13.2.1
-    HealthDataType.WAIST_CIRCUMFERENCE,
-    
-    // ========== BLOOD GLUCOSE & INSULIN (2) ==========
-    HealthDataType.BLOOD_GLUCOSE,
-    HealthDataType.INSULIN_DELIVERY,
-    
-    // ========== RESPIRATORY (1) ==========
-    HealthDataType.FORCED_EXPIRATORY_VOLUME, // NEW in v13.2.1 (FEV1)
-    
-    // ========== HEARING (1) ==========
-    HealthDataType.AUDIOGRAM, // NEW in v13.2.1
-    
-    // ========== REPRODUCTIVE HEALTH (1) ==========
-    HealthDataType.MENSTRUATION_FLOW,
-    
-    // ========== HEADACHE TRACKING (5) ==========
-    HealthDataType.HEADACHE_NOT_PRESENT,
-    HealthDataType.HEADACHE_MILD,
-    HealthDataType.HEADACHE_MODERATE,
-    HealthDataType.HEADACHE_SEVERE,
-    HealthDataType.HEADACHE_UNSPECIFIED,
-    
-    // ========== WATER & ENVIRONMENT (3) ==========
-    HealthDataType.WATER,
-    HealthDataType.WATER_TEMPERATURE, // NEW in v13.2.1
-    HealthDataType.UNDERWATER_DEPTH, // NEW in v13.2.1
-    
-    // ========== NUTRITION - MACROS (12) ==========
-    HealthDataType.DIETARY_ENERGY_CONSUMED,
-    HealthDataType.DIETARY_CARBS_CONSUMED,
-    HealthDataType.DIETARY_PROTEIN_CONSUMED,
-    HealthDataType.DIETARY_FATS_CONSUMED,
-    HealthDataType.DIETARY_FAT_SATURATED,
-    HealthDataType.DIETARY_FAT_MONOUNSATURATED,
-    HealthDataType.DIETARY_FAT_POLYUNSATURATED,
-    HealthDataType.DIETARY_CHOLESTEROL,
-    HealthDataType.DIETARY_FIBER,
-    HealthDataType.DIETARY_SUGAR,
-    HealthDataType.DIETARY_CAFFEINE,
-    HealthDataType.DIETARY_SODIUM,
-    
-    // ========== NUTRITION - VITAMINS (13) ==========
-    HealthDataType.DIETARY_VITAMIN_A,
-    HealthDataType.DIETARY_THIAMIN,
-    HealthDataType.DIETARY_RIBOFLAVIN,
-    HealthDataType.DIETARY_NIACIN,
-    HealthDataType.DIETARY_PANTOTHENIC_ACID,
-    HealthDataType.DIETARY_VITAMIN_B6,
-    HealthDataType.DIETARY_BIOTIN,
-    HealthDataType.DIETARY_VITAMIN_B12,
-    HealthDataType.DIETARY_FOLATE,
-    HealthDataType.DIETARY_VITAMIN_C,
-    HealthDataType.DIETARY_VITAMIN_D,
-    HealthDataType.DIETARY_VITAMIN_E,
-    HealthDataType.DIETARY_VITAMIN_K,
-    
-    // ========== NUTRITION - MINERALS (13) ==========
-    HealthDataType.DIETARY_CALCIUM,
-    HealthDataType.DIETARY_CHLORIDE,
-    HealthDataType.DIETARY_CHROMIUM,
-    HealthDataType.DIETARY_COPPER,
-    HealthDataType.DIETARY_IODINE,
-    HealthDataType.DIETARY_IRON,
-    HealthDataType.DIETARY_MAGNESIUM,
-    HealthDataType.DIETARY_MANGANESE,
-    HealthDataType.DIETARY_MOLYBDENUM,
-    HealthDataType.DIETARY_PHOSPHORUS,
-    HealthDataType.DIETARY_POTASSIUM,
-    HealthDataType.DIETARY_SELENIUM,
-    HealthDataType.DIETARY_ZINC,
+    HealthDataType.LEAN_BODY_MASS,
+    HealthDataType.ELECTRODERMAL_ACTIVITY,
+    HealthDataType.MINDFULNESS,
   ];
   
   /// Interval-based metrics (duration = dateTo - dateFrom)
@@ -157,24 +75,13 @@ class AppleHealthAdapter implements HealthDataAdapter {
     'SLEEP_AWAKE',
     'SLEEP_AWAKE_IN_BED',
     'SLEEP_IN_BED',
-    'SLEEP_OUT_OF_BED', // NEW in v13.2.1
     'SLEEP_SESSION',
-    'SLEEP_UNKNOWN', // NEW in v13.2.1
     
     // Activity intervals
     'MINDFULNESS',
     'WORKOUT',
     'EXERCISE_TIME',
     'ELECTRODERMAL_ACTIVITY',
-    'APPLE_STAND_TIME', // NEW in v13.2.1
-    'APPLE_MOVE_TIME', // NEW in v13.2.1
-    
-    // Headache tracking (duration-based)
-    'HEADACHE_NOT_PRESENT',
-    'HEADACHE_MILD',
-    'HEADACHE_MODERATE',
-    'HEADACHE_SEVERE',
-    'HEADACHE_UNSPECIFIED',
   };
   
   /// Check if a metric type represents an interval (duration) vs a point (numeric value)

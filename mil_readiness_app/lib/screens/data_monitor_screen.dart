@@ -78,35 +78,23 @@ class _DataMonitorScreenState extends State<DataMonitorScreen> with SingleTicker
       
       print('📊 DataMonitor: Found ${results.length} metrics in last 7 days');
       
-      // Define all metric types we're tracking (from AppleHealthAdapter)
+      // Define all metric types we're tracking - Core readiness metrics only
+      // Total: 35 metrics (Tier 1 + Tier 2)
       final allMetricTypes = [
         // Cardiovascular
         'HEART_RATE',
         'RESTING_HEART_RATE',
-        'WALKING_HEART_RATE',
         'HEART_RATE_VARIABILITY_SDNN',
         'HEART_RATE_VARIABILITY_RMSSD',
         'BLOOD_OXYGEN',
         'RESPIRATORY_RATE',
-        'PERIPHERAL_PERFUSION_INDEX',
-        'WALKING_SPEED', // NEW v13.2.1
-        'ATRIAL_FIBRILLATION_BURDEN', // NEW v13.2.1
-        'ELECTROCARDIOGRAM', // NEW v13.2.1
-        // Activity
-        'STEPS',
-        'DISTANCE_WALKING_RUNNING',
-        'DISTANCE_CYCLING',
-        'DISTANCE_SWIMMING',
-        'FLIGHTS_CLIMBED',
-        'ACTIVE_ENERGY_BURNED',
-        'BASAL_ENERGY_BURNED',
-        'TOTAL_CALORIES_BURNED', // NEW v13.2.1
-        'EXERCISE_TIME',
-        'WORKOUT',
-        'APPLE_STAND_TIME',
-        'APPLE_MOVE_TIME',
-        'APPLE_STAND_HOUR', // NEW v13.2.1
-        'UV_INDEX', // NEW v13.2.1
+        'BODY_TEMPERATURE',
+        // Heart Events
+        'HIGH_HEART_RATE_EVENT',
+        'LOW_HEART_RATE_EVENT',
+        'IRREGULAR_HEART_RATE_EVENT',
+        'BLOOD_PRESSURE_SYSTOLIC',
+        'BLOOD_PRESSURE_DIASTOLIC',
         // Sleep
         'SLEEP_ASLEEP',
         'SLEEP_DEEP',
@@ -115,55 +103,25 @@ class _DataMonitorScreenState extends State<DataMonitorScreen> with SingleTicker
         'SLEEP_AWAKE',
         'SLEEP_AWAKE_IN_BED',
         'SLEEP_IN_BED',
-        'SLEEP_OUT_OF_BED', // NEW v13.2.1
         'SLEEP_SESSION',
-        'SLEEP_UNKNOWN', // NEW v13.2.1
-        // Stress & Recovery
-        'ELECTRODERMAL_ACTIVITY',
-        'MINDFULNESS',
-        // Heart Events
-        'HIGH_HEART_RATE_EVENT',
-        'LOW_HEART_RATE_EVENT',
-        'IRREGULAR_HEART_RATE_EVENT',
-        'BLOOD_PRESSURE_SYSTOLIC',
-        'BLOOD_PRESSURE_DIASTOLIC',
-        // Body Measurements
-        'BODY_TEMPERATURE',
+        // Activity & Load
+        'ACTIVE_ENERGY_BURNED',
+        'BASAL_ENERGY_BURNED',
+        'EXERCISE_TIME',
+        'WORKOUT',
+        'STEPS',
+        'DISTANCE_WALKING_RUNNING',
+        'DISTANCE_CYCLING',
+        'DISTANCE_SWIMMING',
+        'FLIGHTS_CLIMBED',
+        // Body & Stress
         'WEIGHT',
         'HEIGHT',
         'BODY_MASS_INDEX',
         'BODY_FAT_PERCENTAGE',
         'LEAN_BODY_MASS',
-        'BODY_WATER_MASS', // NEW v13.2.1
-        'WAIST_CIRCUMFERENCE',
-        // Blood Glucose & Insulin
-        'BLOOD_GLUCOSE',
-        'INSULIN_DELIVERY',
-        // Respiratory
-        'FORCED_EXPIRATORY_VOLUME', // NEW v13.2.1
-        // Hearing
-        'AUDIOGRAM', // NEW v13.2.1
-        // Reproductive Health
-        'MENSTRUATION_FLOW',
-        // Headache Tracking
-        'HEADACHE_NOT_PRESENT',
-        'HEADACHE_MILD',
-        'HEADACHE_MODERATE',
-        'HEADACHE_SEVERE',
-        'HEADACHE_UNSPECIFIED',
-        // Water & Environment
-        'WATER',
-        'WATER_TEMPERATURE', // NEW v13.2.1
-        'UNDERWATER_DEPTH', // NEW v13.2.1
-        // Nutrition (optional - may not have data)
-        'DIETARY_ENERGY_CONSUMED',
-        'DIETARY_CARBS_CONSUMED',
-        'DIETARY_PROTEIN_CONSUMED',
-        'DIETARY_FATS_CONSUMED',
-        'DIETARY_FIBER',
-        'DIETARY_SUGAR',
-        'DIETARY_CAFFEINE',
-        'DIETARY_SODIUM',
+        'ELECTRODERMAL_ACTIVITY',
+        'MINDFULNESS',
       ];
       
       final Map<String, dynamic> metrics = {};
@@ -361,11 +319,8 @@ class _DataMonitorScreenState extends State<DataMonitorScreen> with SingleTicker
            type == 'WORKOUT' || 
            type == 'EXERCISE_TIME' ||
            type == 'ELECTRODERMAL_ACTIVITY' ||
-           type == 'APPLE_STAND_TIME' ||
-           type == 'APPLE_MOVE_TIME' ||
            type == 'BASAL_ENERGY_BURNED' ||
-           type == 'ACTIVE_ENERGY_BURNED' ||
-           type.startsWith('HEADACHE_'); // NEW v13.2.1
+           type == 'ACTIVE_ENERGY_BURNED';
   }
   @override
   Widget build(BuildContext context) {
