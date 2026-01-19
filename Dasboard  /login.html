@@ -114,6 +114,29 @@
             height: 20px;
             fill: var(--text-light);
         }
+
+        /* Message containers */
+        #error-message,
+        #success-message {
+            display: none;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        #error-message {
+            background: rgba(239, 68, 68, 0.15);
+            color: #fca5a5;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        #success-message {
+            background: rgba(16, 185, 129, 0.15);
+            color: #6ee7b7;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
     </style>
 </head>
 
@@ -128,16 +151,23 @@
     </header>
 
     <main class="login-main">
+        <!-- Message Containers (Shared) -->
+        <div style="max-width: 420px; width: 100%; margin: 0 auto;">
+            <div id="error-message"></div>
+            <div id="success-message"></div>
+        </div>
+
         <!-- Login Form -->
         <div class="login-container glass-panel" id="loginForm">
             <div class="form-header">
                 <h2>Sign In</h2>
                 <p>Welcome back, Commander.</p>
             </div>
-            <form id="login-form" onsubmit="handleLogin(event)">
+
+            <form id="login-form">
                 <div class="form-group">
-                    <label for="email">Email or Username</label>
-                    <input type="text" id="email" required placeholder="name@example.com">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" required placeholder="name@example.com">
                 </div>
                 <div class="form-group">
                     <label for="password">Password</label>
@@ -156,11 +186,7 @@
                 <h2>Create Account</h2>
                 <p>Join the elite force.</p>
             </div>
-            <form id="signup-form" onsubmit="handleSignUp(event)">
-                <div class="form-group">
-                    <label for="signup-name">Full Name</label>
-                    <input type="text" id="signup-name" required placeholder="John Doe">
-                </div>
+            <form id="signup-form">
                 <div class="form-group">
                     <label for="signup-email">Email</label>
                     <input type="email" id="signup-email" required placeholder="name@example.com">
@@ -172,6 +198,10 @@
                 <div class="form-group">
                     <label for="signup-confirm-password">Confirm Password</label>
                     <input type="password" id="signup-confirm-password" required placeholder="••••••••">
+                </div>
+                <div class="form-group">
+                    <label for="signup-invite-code">Admin Invite Code</label>
+                    <input type="text" id="signup-invite-code" placeholder="Required for first admin">
                 </div>
                 <button type="submit" class="btn-primary">Sign Up</button>
             </form>
@@ -189,27 +219,12 @@
             const signupForm = document.getElementById('signupForm');
 
             if (loginForm.style.display === 'none') {
-                loginForm.style.display = 'block'; // Or 'flex' if needed, but block is fine for this container
+                loginForm.style.display = 'block';
                 signupForm.style.display = 'none';
             } else {
                 loginForm.style.display = 'none';
                 signupForm.style.display = 'block';
             }
-        }
-
-        function handleLogin(e) {
-            e.preventDefault();
-            const email = document.getElementById('login-email').value;
-            console.log('Logging in with:', email);
-            window.location.href = 'dashboard.html';
-        }
-
-        function handleSignUp(e) {
-            e.preventDefault();
-            const name = document.getElementById('signup-name').value;
-            console.log('Signing up:', name);
-            alert('Sign up successful for ' + name + '! Please sign in.');
-            toggleForm();
         }
     </script>
 </body>

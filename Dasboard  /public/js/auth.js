@@ -1,5 +1,19 @@
-// API Base URL
-const API_URL = 'http://localhost:3000/api';
+// API Base URL - Use computer's IP if not on localhost
+const getAPIUrl = () => {
+    const hostname = window.location.hostname;
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+        return 'http://localhost:3000/api/v1';
+    }
+    if (!hostname || hostname === '') {
+        // Handle file:// URLs or empty hostnames by defaulting to localhost
+        return 'http://localhost:3000/api/v1';
+    }
+    return `http://${hostname}:3000/api/v1`;
+};
+
+const API_URL = getAPIUrl();
+window.API_URL = API_URL; // Make global
+console.log('Using API_URL:', API_URL);
 
 // Get token from localStorage
 function getToken() {
@@ -62,6 +76,12 @@ async function handleLogin(event) {
     const email = document.getElementById('email')?.value;
     const password = document.getElementById('password')?.value;
 
+    // Reset messages
+    const errorDiv = document.getElementById('error-message');
+    const successDiv = document.getElementById('success-message');
+    if (errorDiv) errorDiv.style.display = 'none';
+    if (successDiv) successDiv.style.display = 'none';
+
     if (!email || !password) {
         showError('Please enter both email and password');
         return;
@@ -96,12 +116,19 @@ async function handleLogin(event) {
 
 // Handle Registration
 async function handleRegister(event) {
+    console.log('Signup form submission detected');
     event.preventDefault();
 
-    const name = document.getElementById('signup-name')?.value;
     const email = document.getElementById('signup-email')?.value;
     const password = document.getElementById('signup-password')?.value;
     const confirmPassword = document.getElementById('signup-confirm-password')?.value;
+    const invite_code = document.getElementById('signup-invite-code')?.value;
+
+    // Reset messages
+    const errorDiv = document.getElementById('error-message');
+    const successDiv = document.getElementById('success-message');
+    if (errorDiv) errorDiv.style.display = 'none';
+    if (successDiv) successDiv.style.display = 'none';
 
     if (!email || !password) {
         showError('Email and password are required');
@@ -119,12 +146,18 @@ async function handleRegister(event) {
     }
 
     try {
+        console.log('Attempting registration for:', email);
         const response = await fetch(`${API_URL}/auth/register`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ email, password, name })
+            body: JSON.stringify({
+                email,
+                password,
+                role: 'ADMIN', // Dashboard users are always admins
+                invite_code
+            })
         });
 
         const data = await response.json();
@@ -162,17 +195,21 @@ function logout() {
     window.location.href = 'login.html';
 }
 
-// Initialize auth listeners when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
+// Initialize auth listeners
+function initAuth() {
+    console.log('Initializing Auth Listeners...');
+
     // Login form
     const loginForm = document.getElementById('login-form');
     if (loginForm) {
+        console.log('Attaching Login Listener');
         loginForm.addEventListener('submit', handleLogin);
     }
 
     // Sign up form
     const signupForm = document.getElementById('signup-form');
     if (signupForm) {
+        console.log('Attaching Signup Listener');
         signupForm.addEventListener('submit', handleRegister);
     }
 
@@ -186,4 +223,14 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     });
-});
+
+    // Run auth check
+    checkAuth();
+}
+
+// Run initialization
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAuth);
+} else {
+    initAuth();
+}

@@ -2757,6 +2757,8 @@ body.login-page {
     font-size: 0.9rem;
     font-weight: 500;
     transition: all 0.3s ease;
+    text-decoration: none;
+    /* For <a> tags */
 }
 
 .detail-tab-btn:hover {
@@ -4949,5 +4951,101 @@ body.login-page {
 
     .calendar-container-compact .calendar-day {
         min-height: 40px;
+    }
+}
+
+/* 18-Score Grid System */
+.readiness-18-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    margin-bottom: 24px;
+}
+
+.section-divider {
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.1rem;
+    color: #94a3b8;
+    /* Match var(--text-gray) */
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 15px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.score-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 15px;
+}
+
+.score-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 15px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.score-card:hover {
+    background: rgba(255, 255, 255, 0.05);
+    transform: translateY(-2px);
+}
+
+.score-label {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    margin-bottom: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.score-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #f8fafc;
+    margin-bottom: 5px;
+}
+
+.score-status {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 10px;
+    display: inline-block;
+}
+
+/* Status Colors */
+.status-go {
+    color: #10b981;
+    background: rgba(16, 185, 129, 0.1);
+}
+
+.status-caution {
+    color: #f59e0b;
+    background: rgba(245, 158, 11, 0.1);
+}
+
+.status-limited {
+    color: #fb923c;
+    background: rgba(251, 146, 60, 0.1);
+}
+
+.status-stop {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.status-pending {
+    color: #9ca3af;
+    background: rgba(156, 163, 175, 0.1);
+}
+
+@media (max-width: 768px) {
+    .score-cards {
+        grid-template-columns: repeat(2, 1fr);
     }
 }

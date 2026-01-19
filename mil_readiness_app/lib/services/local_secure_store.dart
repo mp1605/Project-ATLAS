@@ -207,6 +207,32 @@ class LocalSecureStore {
     return value != null ? int.tryParse(value) : null;
   }
 
+  // ===== DASHBOARD SYNC METHODS =====
+  
+  /// Store authentication token for dashboard API
+  Future<void> setAuthToken(String token) async {
+    await _ss.write(key: 'auth_token', value: token);
+  }
+  
+  /// Get authentication token for dashboard API
+  Future<String?> getAuthToken() async {
+    return await _ss.read(key: 'auth_token');
+  }
+  
+  /// Store last dashboard sync timestamp for a user
+  Future<void> setDashboardLastSyncFor(String email, DateTime timestamp) async {
+    await _ss.write(
+      key: 'dashboard_last_sync_$email',
+      value: timestamp.toIso8601String(),
+    );
+  }
+  
+  /// Get last dashboard sync timestamp for a user
+  Future<DateTime?> getDashboardLastSyncFor(String email) async {
+    final value = await _ss.read(key: 'dashboard_last_sync_$email');
+    return value != null ? DateTime.tryParse(value) : null;
+  }
+
   /// ⚠️ DANGER: Clear ALL stored data (for testing/reset)
   /// This will delete all users, sessions, and settings
   Future<void> clearAllData() async {

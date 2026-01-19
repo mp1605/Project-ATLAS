@@ -1,5 +1,5 @@
 // Dashboard Enhancements - Interactive Features
-const API_URL = 'http://localhost:3000/api';
+// Uses global API_URL from auth.js
 
 // ========== CALENDAR FUNCTIONS ==========
 
@@ -265,7 +265,7 @@ function updateSoldierList(soldiers) {
     }
 
     soldierList.innerHTML = soldiers.slice(0, 10).map(soldier => `
-    <a href="soldier_detail.html?id=${soldier.id}" class="soldier-row-text">
+    <a href="soldier_detail.html?email=${soldier.email || soldier.id}" class="soldier-row-text">
       <div class="s-name">${soldier.name}</div>
       <div class="s-info">
         <span class="score-${getScoreClass(soldier.readiness_score)}">${soldier.readiness_score}</span>

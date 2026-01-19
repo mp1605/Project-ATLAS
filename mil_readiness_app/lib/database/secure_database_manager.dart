@@ -96,7 +96,7 @@ class SecureDatabaseManager {
     // Open encrypted database
     _database = await openDatabase(
       path,
-      version: 3,  // Increment version to trigger upgrade for interval support
+      version: 4,  // Increment version to 4 for manual_activity_entries
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
       password: encryptionKey,  // SQLCipher encryption password
@@ -235,6 +235,42 @@ class SecureDatabaseManager {
       ''');
       
       print('✅ Database upgraded to v3 with interval support');
+    }
+
+    if (oldVersion < 4) {
+      print('📦 Creating manual_activity_entries table (v4)...');
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS manual_activity_entries (
+          id TEXT PRIMARY KEY,
+          user_email TEXT NOT NULL,
+          activity_type TEXT NOT NULL,
+          custom_name TEXT,
+          start_time_utc TEXT NOT NULL,
+          duration_minutes INTEGER NOT NULL,
+          rpe INTEGER NOT NULL,
+          feel_after TEXT NOT NULL,
+          purpose TEXT,
+          fatigue_after_0to5 INTEGER,
+          pain_severity TEXT NOT NULL,
+          pain_location TEXT,
+          distance_value REAL,
+          distance_unit TEXT,
+          load_value REAL,
+          load_unit TEXT,
+          indoor_outdoor TEXT,
+          heat_level TEXT,
+          notes TEXT,
+          created_at_utc TEXT NOT NULL,
+          updated_at_utc TEXT NOT NULL
+        )
+      ''');
+
+      await db.execute('''
+        CREATE INDEX IF NOT EXISTS idx_manual_activity_user_time
+        ON manual_activity_entries(user_email, start_time_utc DESC)
+      ''');
+      
+      print('✅ Database upgraded to v4');
     }
   }
 
@@ -459,6 +495,38 @@ class SecureDatabaseManager {
     await db.execute('''\
       CREATE INDEX idx_readiness_scores_date 
       ON daily_readiness_scores(user_email, date DESC)
+    ''');
+
+    // Manual activity entries
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS manual_activity_entries (
+        id TEXT PRIMARY KEY,
+        user_email TEXT NOT NULL,
+        activity_type TEXT NOT NULL,
+        custom_name TEXT,
+        start_time_utc TEXT NOT NULL,
+        duration_minutes INTEGER NOT NULL,
+        rpe INTEGER NOT NULL,
+        feel_after TEXT NOT NULL,
+        purpose TEXT,
+        fatigue_after_0to5 INTEGER,
+        pain_severity TEXT NOT NULL,
+        pain_location TEXT,
+        distance_value REAL,
+        distance_unit TEXT,
+        load_value REAL,
+        load_unit TEXT,
+        indoor_outdoor TEXT,
+        heat_level TEXT,
+        notes TEXT,
+        created_at_utc TEXT NOT NULL,
+        updated_at_utc TEXT NOT NULL
+      )
+    ''');
+
+    await db.execute('''
+      CREATE INDEX IF NOT EXISTS idx_manual_activity_user_time
+      ON manual_activity_entries(user_email, start_time_utc DESC)
     ''');
 
     print('✅ Database schema created');

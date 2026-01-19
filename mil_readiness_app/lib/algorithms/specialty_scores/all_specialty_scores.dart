@@ -4,6 +4,7 @@ import '../foundation/baseline_calculator_v2.dart';
 import '../../models/user_profile.dart';
 import '../safety_scores/all_safety_scores.dart';
 import '../../services/last_sleep_service.dart';
+import '../../services/sleep_source_resolver.dart';
 
 /// Score #13: Altitude/Oxygenation (0-100)
 class AltitudeScoreCalculator {
@@ -122,11 +123,12 @@ class SleepDebtCalculator {
     var totalDebt = 0.0;
     for (var i = 0; i < days; i++) {
       final checkDate = date.subtract(Duration(days: i));
-      final startOfDay = DateTime(checkDate.year, checkDate.month, checkDate.day);
-      final endOfDay = startOfDay.add(const Duration(hours: 23, minutes: 59, seconds: 59));
+      final dateStr = '${checkDate.year}-${checkDate.month.toString().padLeft(2, '0')}-${checkDate.day.toString().padLeft(2, '0')}';
       
-      // Sum all sleep asleep chunks for this specific day
-      final asleep = await _getSum(userEmail, 'SLEEP_ASLEEP', startOfDay, endOfDay);
+      // Use resolver to get manual or auto sleep for each day
+      final resolved = await SleepSourceResolver.getSleepForDate(userEmail, dateStr);
+      final asleep = resolved.minutes.toDouble();
+      
       totalDebt += math.max(0, target - asleep);
     }
     return totalDebt;
@@ -184,11 +186,14 @@ class CognitiveAlertnessCalculator {
   CognitiveAlertnessCalculator({required this.db, required this.baseline});
   
   Future<Map<String, dynamic>> calculate({required String userEmail, required DateTime date}) async {
-    // Get aggregated last night's sleep session
-    final lastSleep = await LastSleepService.getLastSleep(userEmail);
+    // Get resolved sleep (manual or auto) for total sleep duration
+    final dateStr = SleepSourceResolver.getTodayWakeDate();
+    final resolved = await SleepSourceResolver.getSleepForDate(userEmail, dateStr);
+    final asleepValue = resolved.minutes.toDouble();
     
+    // Get auto sleep for sleep stages (fallback to 0 for manual)
+    final lastSleep = await LastSleepService.getLastSleep(userEmail);
     final remValue = lastSleep?.remMinutes.toDouble() ?? 0.0;
-    final asleepValue = lastSleep?.totalMinutes.toDouble() ?? 0.0;
     final awakeValue = lastSleep?.awakeMinutes.toDouble() ?? 0.0;
     
     // Core physiological snapshots (latest is correct here for 'state')

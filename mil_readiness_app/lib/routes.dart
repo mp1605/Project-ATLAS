@@ -12,6 +12,8 @@ import 'screens/data_monitor_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/health_debug_screen.dart';
 import 'screens/score_detail_screen.dart';
+import 'screens/manual_activity_list_screen.dart';
+import 'screens/manual_activity_entry_screen.dart';
 import 'services/local_secure_store.dart';
 
 class SessionController extends ChangeNotifier {
@@ -123,6 +125,14 @@ GoRouter buildRouter(SessionController session) {
         path: '/home',
         builder: (context, state) => HomePlaceholder(session: session),
       ),
+      GoRoute(
+        path: '/log-activity',
+        builder: (context, state) => const ManualActivityListScreen(),
+      ),
+      GoRoute(
+        path: '/log-activity/add',
+        builder: (context, state) => const ManualActivityEntryScreen(),
+      ),
     ],
 
     redirect: (context, state) async {
@@ -143,6 +153,8 @@ GoRouter buildRouter(SessionController session) {
           loc == '/raw-consent' ||
           loc == '/raw-consent/edit' ||
           loc == '/select-wearable' ||
+          loc == '/log-activity' ||
+          loc == '/log-activity/add' ||
           loc == '/authorize') {
         return null;
       }

@@ -37,8 +37,10 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 		<key>NSAllowsArbitraryLoads</key>
-		<false/>
+		<true/>
 	</dict>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>This app needs to access your local network to sync readiness data to your computer's dashboard.</string>
 	<!-- HealthKit data access works best when app is in foreground.
 	     Background modes removed as 'fetch' is deprecated on iOS 13+ -->
 	<key>UILaunchStoryboardName</key>

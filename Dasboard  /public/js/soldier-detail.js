@@ -1,20 +1,40 @@
 // Soldier Detail View - JavaScript for Charts & Interactions
 
 // Tab Switching
-function switchDetailTab(tabName) {
-    // Hide all tabs
-    document.querySelectorAll('.detail-tab-content').forEach(tab => {
-        tab.classList.remove('active');
-    });
+function switchDetailTab(tabName, element) {
+    try {
+        console.log('Switching to tab:', tabName);
 
-    // Show selected tab
-    document.getElementById(tabName + '-tab').classList.add('active');
+        // Hide all tabs
+        document.querySelectorAll('.detail-tab-content').forEach(tab => {
+            tab.classList.remove('active');
+        });
 
-    // Update button states
-    document.querySelectorAll('.detail-tab-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    event.target.classList.add('active');
+        // Show selected tab
+        const selectedTab = document.getElementById(tabName + '-tab');
+        if (selectedTab) {
+            selectedTab.classList.add('active');
+        } else {
+            console.error('Missing tab content:', tabName + '-tab');
+        }
+
+        // Update button states
+        document.querySelectorAll('.detail-tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+
+        // Set active state on the button/link
+        if (element) {
+            element.classList.add('active');
+        } else if (window.event && window.event.currentTarget) {
+            window.event.currentTarget.classList.add('active');
+        } else if (window.event && window.event.target) {
+            const btn = window.event.target.closest('.detail-tab-btn');
+            if (btn) btn.classList.add('active');
+        }
+    } catch (err) {
+        console.error('Error in switchDetailTab:', err);
+    }
 }
 
 // Score Explainer Drawer
@@ -62,6 +82,10 @@ function toggleSleepPeriod(days) {
 
 // Initialize all charts on page load
 document.addEventListener('DOMContentLoaded', function () {
+    const urlParams = new URLSearchParams(window.location.search);
+    const userEmail = urlParams.get('email') || 'soldier_1@example.com';
+
+    loadSoldierData(userEmail);
     initOverviewCharts();
     initTrendsCharts();
     initSleepCharts();
@@ -69,36 +93,65 @@ document.addEventListener('DOMContentLoaded', function () {
     initActivityCharts();
 });
 
-// ===== OVERVIEW TAB CHARTS =====
-function initOverviewCharts() {
-    // Sleep Debt Sparkline
-    const sleepDebtCtx = document.getElementById('sleepDebtSpark');
-    if (sleepDebtCtx) {
-        new Chart(sleepDebtCtx, {
-            type: 'line',
-            data: {
-                labels: ['', '', '', '', '', '', ''],
-                datasets: [{
-                    data: [-3.2, -4.1, -3.8, -4.5, -5.2, -4.8, -4.8],
-                    borderColor: '#ef4444',
-                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                    borderWidth: 2,
-                    fill: true,
-                    tension: 0.4,
-                    pointRadius: 0
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    x: { display: false },
-                    y: { display: false }
-                }
+// Fetch Soldier Data from Backend
+async function loadSoldierData(userEmail) {
+    try {
+        const token = localStorage.getItem('auth_token');
+        if (!token) {
+            window.location.href = 'login.html';
+            return;
+        }
+
+        // Fetch latest readiness
+        const baseUrl = window.API_URL || 'http://localhost:3000/api/v1';
+        const response = await fetch(`${baseUrl}/readiness/${userEmail}/latest`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
             }
         });
+
+        if (!response.ok) throw new Error('Failed to fetch soldier data');
+
+        const data = await response.json();
+        update18ScoreGrid(data.scores);
+
+        // Update header info
+        const nameEl = document.querySelector('.soldier-name h1');
+        if (nameEl) nameEl.textContent = userEmail.split('@')[0].toUpperCase();
+
+    } catch (error) {
+        console.error('Error loading soldier data:', error);
     }
+}
+
+// Update the 18 Score Grid
+function update18ScoreGrid(scores) {
+    if (!scores) return;
+
+    for (const [key, value] of Object.entries(scores)) {
+        const card = document.getElementById(`card-${key}`);
+        if (card) {
+            const valueEl = card.querySelector('.score-value');
+            const statusEl = card.querySelector('.score-status');
+
+            const numericValue = parseFloat(value);
+            valueEl.textContent = numericValue.toFixed(1);
+
+            // Apply Status Class
+            let status = 'go';
+            if (numericValue < 40) status = 'stop';
+            else if (numericValue < 60) status = 'limited';
+            else if (numericValue < 75) status = 'caution';
+
+            statusEl.textContent = status.toUpperCase();
+            statusEl.className = `score-status status-${status}`;
+        }
+    }
+}
+
+// ===== OVERVIEW TAB CHARTS =====
+function initOverviewCharts() {
+    // Legacy support for sparklines if needed
 }
 
 // ===== TRENDS TAB CHARTS =====

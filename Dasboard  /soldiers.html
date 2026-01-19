@@ -14,8 +14,14 @@
     <link rel="stylesheet" href="public/css/modals.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="public/js/auth.js" defer></script>
-    <script src="public/js/soldier-management.js" defer></script>
+    <script src="public/js/soldier-management.js?v=9" defer></script>
     <script src="public/js/notifications.js" defer></script>
+    <script>
+        // Global function for soldier detail navigation
+        function viewSoldierDetail(email) {
+            window.location.href = '/soldier_detail.html?email=' + email;
+        }
+    </script>
 </head>
 
 <body>
@@ -219,7 +225,7 @@
                             <td>
                                 <div class="action-buttons">
                                     <button class="action-btn" title="View Details"
-                                        onclick="window.location.href='soldier_detail.html'">
+                                        onclick="window.location.href='soldier_detail.html?email=soldier_1@example.com'">
                                         <svg viewBox="0 0 24 24" width="18" height="18">
                                             <path fill="currentColor"
                                                 d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
@@ -282,7 +288,7 @@
                             <td>
                                 <div class="action-buttons">
                                     <button class="action-btn" title="View Details"
-                                        onclick="window.location.href='soldier_detail.html'">
+                                        onclick="window.location.href='soldier_detail.html?email=soldier_1@example.com'">
                                         <svg viewBox="0 0 24 24" width="18" height="18">
                                             <path fill="currentColor"
                                                 d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
@@ -346,7 +352,7 @@
                             <td>
                                 <div class="action-buttons">
                                     <button class="action-btn" title="View Details"
-                                        onclick="window.location.href='soldier_detail.html'">
+                                        onclick="window.location.href='soldier_detail.html?email=soldier_1@example.com'">
                                         <svg viewBox="0 0 24 24" width="18" height="18">
                                             <path fill="currentColor"
                                                 d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
@@ -409,7 +415,7 @@
                             <td>
                                 <div class="action-buttons">
                                     <button class="action-btn" title="View Details"
-                                        onclick="window.location.href='soldier_detail.html'">
+                                        onclick="window.location.href='soldier_detail.html?email=soldier_1@example.com'">
                                         <svg viewBox="0 0 24 24" width="18" height="18">
                                             <path fill="currentColor"
                                                 d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />

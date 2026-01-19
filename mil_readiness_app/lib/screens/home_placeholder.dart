@@ -9,6 +9,7 @@ import '../services/live_sync_controller.dart';
 import '../services/last_sleep_service.dart';
 import '../adapters/health_adapter_factory.dart';
 import '../models/wearable_type.dart';
+import '../repositories/manual_activity_repository.dart';
 
 /// Clean, professional home screen for soldiers with real data
 class HomePlaceholder extends StatefulWidget {
@@ -24,6 +25,7 @@ class _HomePlaceholderState extends State<HomePlaceholder> {
   String _heartRate = '--';
   String _hrv = '--';
   String _sleep = '--';
+  String _manualLoad = '0';
   DateTime? _lastUpdated;
   
   Timer? _refreshTimer;
@@ -263,12 +265,52 @@ class _HomePlaceholderState extends State<HomePlaceholder> {
           }
         });
         print('  ✅ Stats updated: HR=$_heartRate, HRV=$_hrv, Sleep=$_sleep');
+        
+        // Load manual activity load for today
+        _loadManualLoad();
+        
         if (_lastUpdated != null) {
           print('  ⏰ Last heart rate measurement: ${_lastUpdated!.toLocal()}');
         }
       }
     } catch (e) {
       print('❌ Error loading stats: $e');
+    }
+  }
+
+  Future<void> _loadManualLoad() async {
+    final email = widget.session.email;
+    if (email == null) return;
+
+    try {
+      final repo = ManualActivityRepository();
+      final entries = await repo.listForDay(userEmail: email, dayLocal: DateTime.now());
+      
+      int totalLoad = 0;
+      for (final entry in entries) {
+        double multiplier = 1.0;
+        final loadVal = entry.loadValue;
+        if (loadVal != null) {
+          if (loadVal > 45) {
+            multiplier = 1.30;
+          } else if (loadVal >= 26) {
+            multiplier = 1.20;
+          } else if (loadVal >= 11) {
+            multiplier = 1.10;
+          } else if (loadVal > 0) {
+            multiplier = 1.05;
+          }
+        }
+        totalLoad += (entry.durationMinutes * entry.rpe * multiplier).toInt();
+      }
+
+      if (mounted) {
+        setState(() {
+          _manualLoad = totalLoad.toString();
+        });
+      }
+    } catch (e) {
+      print('⚠️ Error loading manual load: $e');
     }
   }
 
@@ -333,6 +375,49 @@ class _HomePlaceholderState extends State<HomePlaceholder> {
                         subtitle: 'Real-time health metrics',
                         color: AppTheme.primaryCyan,
                         onTap: () => context.push('/data-monitor'),
+                      ),
+                      
+                      const SizedBox(height: 16),
+
+                      _buildActionButton(
+                        context,
+                        icon: Icons.add_task,
+                        label: 'LOG ACTIVITY',
+                        subtitle: 'Manual workout & event log',
+                        color: AppTheme.primaryCyan,
+                        onTap: () async {
+                          await context.push('/log-activity');
+                          _loadManualLoad(); // Refresh load after returning
+                        },
+                        trailing: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: AppTheme.primaryCyan.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: AppTheme.primaryCyan.withOpacity(0.3)),
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                _manualLoad,
+                                style: const TextStyle(
+                                  color: AppTheme.primaryCyan,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              const Text(
+                                'LOAD',
+                                style: TextStyle(
+                                  color: AppTheme.primaryCyan,
+                                  fontSize: 8,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                       
                       const SizedBox(height: 16),
@@ -472,6 +557,7 @@ class _HomePlaceholderState extends State<HomePlaceholder> {
     required String subtitle,
     required Color color,
     required VoidCallback onTap,
+    Widget? trailing,
   }) {
     return InkWell(
       onTap: onTap,
@@ -506,6 +592,10 @@ class _HomePlaceholderState extends State<HomePlaceholder> {
                 ],
               ),
             ),
+            if (trailing != null) ...[
+              trailing,
+              const SizedBox(width: 8),
+            ],
             Icon(Icons.arrow_forward_ios, color: AppTheme.textGray, size: 20),
           ],
         ),
