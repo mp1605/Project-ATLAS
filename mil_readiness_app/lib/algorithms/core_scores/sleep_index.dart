@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'package:sqflite_sqlcipher/sqflite.dart';
 import '../../services/last_sleep_service.dart';
+import '../../services/sleep_source_resolver.dart';
 import '../../models/user_profile.dart';
 import '../foundation/baseline_calculator_v2.dart';
 
@@ -34,12 +35,16 @@ class SleepIndexCalculator {
     required DateTime date,
     required UserProfile profile,
   }) async {
-    // Use LastSleepService to get the LATEST complete sleep session
-    // This is more robust than querying individual metric types
-    final lastSleep = await LastSleepService.getLastSleep(userEmail);
+    // Get resolved sleep (manual or auto) for today's wake date
+    final dateStr = SleepSourceResolver.getTodayWakeDate();
+    final resolved = await SleepSourceResolver.getSleepForDate(userEmail, dateStr);
     
-    final sleepAsleep = lastSleep?.totalMinutes.toDouble() ?? 0.0;
-    final sleepInBed = lastSleep?.inBedMinutes.toDouble() ?? 0.0;
+    // Extract sleep metrics (manual sleep won't have stages, will be 0)
+    final sleepAsleep = resolved.minutes.toDouble();
+    final sleepInBed = resolved.minutes.toDouble(); // Manual assumes 100% efficiency
+    
+    // Get auto sleep data for stages if available (fallback to 0 for manual)
+    final lastSleep = await LastSleepService.getLastSleep(userEmail);
     final sleepDeep = lastSleep?.deepMinutes.toDouble() ?? 0.0;
     final sleepREM = lastSleep?.remMinutes.toDouble() ?? 0.0;
     final sleepAwake = lastSleep?.awakeMinutes.toDouble() ?? 0.0;

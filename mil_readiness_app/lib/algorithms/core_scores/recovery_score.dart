@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'package:sqflite_sqlcipher/sqflite.dart';
 import '../../services/last_sleep_service.dart';
+import '../../services/sleep_source_resolver.dart';
 import '../../models/user_profile.dart';
 import '../foundation/baseline_calculator_v2.dart';
 import '../foundation/data_sufficiency_checker.dart';
@@ -48,10 +49,14 @@ class RecoveryScoreCalculator {
     
     final confidence = dataCheck.getOverallConfidence(quality);
     
-    // Use LastSleepService for aggregated sleep stages
+    // Get resolved sleep (manual or auto) for total sleep duration
+    final dateStr = SleepSourceResolver.getTodayWakeDate();
+    final resolved = await SleepSourceResolver.getSleepForDate(userEmail, dateStr);
+    final sleepAsleep = resolved.minutes.toDouble();
+    
+    // Get auto sleep for sleep stages (fallback to 0 for manual)
     final lastSleep = await LastSleepService.getLastSleep(userEmail);
     final sleepDeep = lastSleep?.deepMinutes.toDouble() ?? 0.0;
-    final sleepAsleep = lastSleep?.totalMinutes.toDouble() ?? 0.0;
     
     // Get latest values for physiological markers
     final hrvValue = await _getLatestValue(userEmail, 'HRV_RMSSD', date);

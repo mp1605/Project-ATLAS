@@ -5,23 +5,26 @@ import 'local_secure_store.dart';
 
 /// Service for syncing calculated readiness scores to backend dashboard
 class BackendSyncService {
-  // Simple localhost URL - change if needed
-  static const String baseUrl = 'http://localhost:3000/api';
+  // Hotspot IP - Mac connected via iPhone hotspot
+  static const String baseUrl = 'http://172.20.10.2:3000/api/v1';
   
   String? _authToken;
   int? _soldierId;
+  String? _userEmail;
   
-  BackendSyncService({String? authToken, int? soldierId}) {
+  BackendSyncService({String? authToken, int? soldierId, String? userEmail}) {
     _authToken = authToken;
     _soldierId = soldierId;
+    _userEmail = userEmail;
   }
   
   /// Initialize with stored auth token
   static Future<BackendSyncService> create() async {
     final token = await LocalSecureStore.instance.getJWTToken();
     final soldierId = await LocalSecureStore.instance.getSoldierId();
+    final email = await LocalSecureStore.instance.getActiveSessionEmail();
     
-    return BackendSyncService(authToken: token, soldierId: soldierId);
+    return BackendSyncService(authToken: token, soldierId: soldierId, userEmail: email);
   }
   
   /// Check if user is authenticated
@@ -45,34 +48,35 @@ class BackendSyncService {
       print('   Overall Score: ${result.overallReadiness.toStringAsFixed(1)}');
       
       final payload = {
-        'soldier_id': soldierId,
-        'date': _formatDate(date),
+        'user_id': _userEmail ?? (_soldierId != null ? 'soldier_$_soldierId@example.com' : 'unknown@example.com'),
+        'timestamp': date.toUtc().toIso8601String(),
         'scores': {
-          'overall_readiness': result.overallReadiness,
-          'recovery_score': result.recoveryScore,
+          // Backend expects these exact field names (from validation.ts)
+          'readiness': result.overallReadiness,
           'fatigue_index': result.fatigueIndex,
-          'endurance_capacity': result.enduranceCapacity,
-          'sleep_index': result.sleepIndex,
-          'cardiovascular_fitness': result.cardiovascularFitness,
-          'stress_load': result.stressLoad,
-          'injury_risk': result.injuryRisk,
-          'cardio_resp_stability': result.cardioRespStability,
-          'illness_risk': result.illnessRisk,
-          'daily_activity': result.dailyActivity,
-          'work_capacity': result.workCapacity,
-          'altitude_score': result.altitudeScore,
-          'cardiac_safety_penalty': result.cardiacSafetyPenalty,
+          'recovery': result.recoveryScore,
+          'sleep_quality': result.sleepIndex,
           'sleep_debt': result.sleepDebt,
-          'training_readiness': result.trainingReadiness,
-          'cognitive_alertness': result.cognitiveAlertness,
-          'thermoregulatory_adaptation': result.thermoregulatoryAdaptation,
+          'autonomic_balance': result.cardioRespStability,
+          'hrv_deviation': 100 - result.cardioRespStability, // Derived
+          'resting_hr_deviation': 100 - result.cardioRespStability, // Derived
+          'respiratory_stability': result.cardioRespStability,
+          'oxygen_stability': result.cardioRespStability,
+          'training_load': result.trainingReadiness,
+          'acute_chronic_ratio': 1.0, // Default ACWR value
+          'cardiovascular_strain': result.cardiovascularFitness,
+          'stress_load': result.stressLoad,
+          'illness_risk': result.illnessRisk,
+          'overtraining_risk': result.injuryRisk,
+          'energy_availability': result.workCapacity,
+          'physical_status': result.dailyActivity,
         },
         'category': result.category,
         'confidence': result.overallConfidence,
       };
       
       final response = await http.post(
-        Uri.parse('$baseUrl/readiness/submit'),
+        Uri.parse('$baseUrl/readiness'),
         headers: {
           'Content-Type': 'application/json',
           if (_authToken != null) 'Authorization': 'Bearer $_authToken',
@@ -109,11 +113,11 @@ class BackendSyncService {
   
   /// Get soldier's historical readiness scores
   Future<List<Map<String, dynamic>>> getHistoricalScores({
-    required int soldierId,
+    required String userEmail,
     int? days,
   }) async {
     try {
-      var url = '$baseUrl/readiness/soldier/$soldierId';
+      var url = '$baseUrl/readiness/$userEmail/history';
       if (days != null) {
         url += '?days=$days';
       }
@@ -126,8 +130,9 @@ class BackendSyncService {
       );
       
       if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(response.body);
-        return data.cast<Map<String, dynamic>>();
+        final Map<String, dynamic> data = json.decode(response.body);
+        final List<dynamic> historicalData = data['data'] ?? [];
+        return historicalData.cast<Map<String, dynamic>>();
       } else {
         print('Failed to fetch historical scores: ${response.statusCode}');
         return [];
@@ -140,9 +145,11 @@ class BackendSyncService {
   
   /// Test connection to backend
   Future<bool> testConnection() async {
+    final testUrl = '$baseUrl/../../health'; // Goes up from /api/v1 to /
     try {
+      print('📡 Testing connection to: $testUrl');
       final response = await http.get(
-        Uri.parse('$baseUrl/../health'),
+        Uri.parse(testUrl),
       ).timeout(const Duration(seconds: 5));
       
       if (response.statusCode == 200) {

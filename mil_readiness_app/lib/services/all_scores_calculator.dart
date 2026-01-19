@@ -14,6 +14,7 @@ import '../algorithms/specialty_scores/all_specialty_scores.dart';
 import '../algorithms/foundation/ewma_calculator.dart';
 import '../algorithms/foundation/acwr_calculator.dart';
 import '../algorithms/foundation/trimp_calculator.dart';
+import 'dashboard_sync_service.dart';
 
 /// Service to calculate all 18 military readiness scores in a coordinated manner
 class AllScoresCalculator {
@@ -226,7 +227,7 @@ class AllScoresCalculator {
     print('     Overall: ${overall.score.toStringAsFixed(1)} (${overall.category})');
     print('     Confidence: $overallConfidence');
     
-    return ComprehensiveReadinessResult(
+    final result = ComprehensiveReadinessResult(
       overallReadiness: overall.score,
       category: overall.category,
       recoveryScore: recovery.score,
@@ -251,6 +252,35 @@ class AllScoresCalculator {
       overallConfidence: overallConfidence,
       componentBreakdown: componentBreakdown,
     );
+    
+    // Sync to dashboard (asynchronous, don't block on failure)
+    _syncToDashboard(userEmail, result);
+    
+    return result;
+  }
+  
+  /// Sync scores to dashboard backend (fire-and-forget)
+  void _syncToDashboard(String userEmail, ComprehensiveReadinessResult result) async {
+    try {
+      final syncService = DashboardSyncService(
+        baseUrl: 'http://172.20.10.2:3000', // Hotspot IP for testing
+      );
+      
+      print('📤 Syncing scores to dashboard for $userEmail...');
+      final success = await syncService.syncWithRetry(
+        userEmail: userEmail,
+        scores: result,
+        maxRetries: 2, // Quick retry, don't block too long
+      );
+      
+      if (success) {
+        print('✅ Dashboard sync successful');
+      } else {
+        print('⚠️ Dashboard sync failed (app continues normally)');
+      }
+    } catch (e) {
+      print('⚠️ Dashboard sync error: $e (app continues normally)');
+    }
   }
   
   /// Determine overall confidence from individual score confidences

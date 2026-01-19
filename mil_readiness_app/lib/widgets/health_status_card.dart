@@ -60,10 +60,18 @@ class _HealthStatusCardState extends State<HealthStatusCard> {
     try {
       final service = HealthService();
 
-      // This should show the Health permission sheet (if not already granted)
-      await service.requestAuthorization();
+      // Check if we already have permissions before showing prompt
+      final hasPerms = await service.hasPermissions();
+      
+      if (!hasPerms) {
+        // Only show permission sheet if not already granted
+        print('🔐 HealthStatusCard: Requesting first-time authorization...');
+        await service.requestAuthorization();
+      } else {
+        print('✅ HealthStatusCard: Permissions already granted, skipping prompt');
+      }
 
-      // Re-check OS truth
+      // Re-check actual data access (the reliable way on iOS)
       await _refreshFromOs();
     } finally {
       if (mounted) setState(() => _busy = false);

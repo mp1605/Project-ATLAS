@@ -7,7 +7,11 @@ import '../services/last_sleep_service.dart';
 import '../database/secure_database_manager.dart';
 import '../services/all_scores_calculator.dart';
 import '../models/user_profile.dart';
+import '../models/comprehensive_readiness_result.dart';
+import '../services/backend_sync_service.dart';
 import '../routes.dart';
+import '../widgets/sleep_status_card.dart';
+import '../services/sleep_source_resolver.dart';
 
 /// Monitoring screen with tabs for real-time data and calculated scores
 class DataMonitorScreen extends StatefulWidget {
@@ -34,6 +38,11 @@ class _DataMonitorScreenState extends State<DataMonitorScreen> with SingleTicker
   Map<String, Map<String, dynamic>> _componentBreakdowns = {};
   bool _loadingScores = true;
   String _overallCategory = 'UNKNOWN';
+  
+  // Last sync result for sync button
+  bool? _lastSyncSuccess;
+  String? _lastSyncMessage;
+  bool _syncing = false;
 
   @override
   void initState() {
@@ -249,7 +258,7 @@ class _DataMonitorScreenState extends State<DataMonitorScreen> with SingleTicker
       final dbManager = SecureDatabaseManager.instance;
       final calculator = AllScoresCalculator(db: dbManager);
       
-      // Get user profile - use default if table doesn't exist
+      // Get user profile
       UserProfile profile = UserProfile(
         email: email,
         fullName: 'User',
@@ -272,7 +281,7 @@ class _DataMonitorScreenState extends State<DataMonitorScreen> with SingleTicker
           profile = UserProfile.fromJson(profiles.first);
         }
       } catch (e) {
-        print('⚠️ Using default profile (user_profiles table not found)');
+        print('⚠️ Using default profile');
       }
       
       final result = await calculator.calculateAll(
@@ -306,10 +315,86 @@ class _DataMonitorScreenState extends State<DataMonitorScreen> with SingleTicker
         _confidenceLevels = result.confidenceLevels;
         _componentBreakdowns = result.componentBreakdown;
         _loadingScores = false;
+        
+        // Cache result for sync
+        _latestResult = result;
       });
     } catch (e) {
       print('❌ Error calculating scores: $e');
       setState(() => _loadingScores = false);
+    }
+  }
+
+  ComprehensiveReadinessResult? _latestResult;
+
+  Future<void> _syncToBackend() async {
+    if (_latestResult == null) return;
+    
+    setState(() {
+      _syncing = true;
+      _lastSyncSuccess = null;
+      _lastSyncMessage = null;
+    });
+
+    try {
+      final syncService = await BackendSyncService.create();
+      final ok = await syncService.submitReadinessScores(
+        soldierId: 0, // Not used by backend anymore, email is primary
+        date: DateTime.now(),
+        result: _latestResult!,
+      );
+
+      setState(() {
+        _lastSyncSuccess = ok;
+        _syncing = false;
+        if (!ok) {
+          _lastSyncMessage = "Sync failed. Check connection/firewall.";
+        }
+      });
+
+      if (mounted && ok) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('✅ Data synced successfully to dashboard!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _syncing = false;
+        _lastSyncSuccess = false;
+        _lastSyncMessage = "Error: $e";
+      });
+    }
+  }
+
+  Future<void> _testConnection() async {
+    setState(() => _syncing = true);
+    try {
+      final syncService = await BackendSyncService.create();
+      final ok = await syncService.testConnection();
+      
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: Text(ok ? '✅ Connection OK' : '❌ Connection Failed'),
+            content: Text(ok 
+              ? 'Successfully reached the backend at http://192.168.1.155:3000' 
+              : 'Could not reach http://192.168.1.155:3000. \n\n1. Ensure IP is correct in backend_sync_service.dart\n2. Disable Mac Firewall\n3. Ensure phone is on same Wi-Fi.'),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('OK'))
+            ],
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Test error: $e')));
+      }
+    } finally {
+      setState(() => _syncing = false);
     }
   }
 
@@ -335,6 +420,11 @@ class _DataMonitorScreenState extends State<DataMonitorScreen> with SingleTicker
           ],
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.network_check),
+            onPressed: _testConnection,
+            tooltip: 'Test Connection',
+          ),
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _loadData,
@@ -386,6 +476,12 @@ class _DataMonitorScreenState extends State<DataMonitorScreen> with SingleTicker
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          // Sleep Status Card (Manual/Auto Sleep)
+          SleepStatusCard(
+            userEmail: widget.session.email!,
+            date: SleepSourceResolver.getTodayWakeDate(),
+          ),
+          
           // Last sync time
           Card(
             color: Colors.green.shade50,
@@ -484,6 +580,46 @@ class _DataMonitorScreenState extends State<DataMonitorScreen> with SingleTicker
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          // Sync Button and Status
+          if (_lastSyncSuccess == false)
+            Container(
+              margin: const EdgeInsets.only(bottom: 16),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.red.shade50,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.red.shade200),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.error_outline, color: Colors.red),
+                  const SizedBox(width: 8),
+                  Expanded(child: Text(_lastSyncMessage ?? "Sync failed")),
+                  TextButton(onPressed: _testConnection, child: const Text("TEST")),
+                ],
+              ),
+            ),
+
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: _syncing ? null : _syncToBackend,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue.shade700,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  icon: _syncing 
+                    ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                    : const Icon(Icons.cloud_upload),
+                  label: const Text('SYNC TO DASHBOARD'),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
           // Overall category banner
           Card(
             color: _getCategoryColor(_overallCategory),
