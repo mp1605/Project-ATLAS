@@ -15,6 +15,7 @@ import '../algorithms/foundation/ewma_calculator.dart';
 import '../algorithms/foundation/acwr_calculator.dart';
 import '../algorithms/foundation/trimp_calculator.dart';
 import 'dashboard_sync_service.dart';
+import '../config/app_config.dart';
 
 /// Service to calculate all 18 military readiness scores in a coordinated manner
 class AllScoresCalculator {
@@ -263,7 +264,7 @@ class AllScoresCalculator {
   void _syncToDashboard(String userEmail, ComprehensiveReadinessResult result) async {
     try {
       final syncService = DashboardSyncService(
-        baseUrl: 'http://172.20.10.2:3000', // Hotspot IP for testing
+        baseUrl: AppConfig.apiBaseUrl,
       );
       
       print('📤 Syncing scores to dashboard for $userEmail...');

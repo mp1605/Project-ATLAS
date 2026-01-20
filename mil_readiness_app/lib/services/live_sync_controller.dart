@@ -109,10 +109,22 @@ class LiveSyncController {
       
       Duration windowToUse = window; // Default (e.g. 10 mins)
       
-      if (prevSyncAt == null || metricsCount == 0) {
-        // Step 0: Initial sync or empty database - fetch last 7 days of history
-        windowToUse = const Duration(days: 7);
-        print('🌟 DEEP SYNC: Fetching last 7 days of history for $_email (Metrics count: $metricsCount)');
+
+      
+      // AUTO-REPAIR: Check if we have valid data keys (e.g., HRV_RMSSD)
+      // If user has synced before but acts like a new user (static score), they likely have wrong keys.
+      final hasCorrectKeys = (await HealthDataRepository.getRecentMetrics(
+        _email, 
+        window: const Duration(hours: 24),
+        metricType: 'HRV_RMSSD'
+      )).isNotEmpty;
+      
+      if (prevSyncAt == null || metricsCount == 0 || (!hasCorrectKeys && metricsCount > 0)) {
+        // Step 0: Deep Sync / Repair
+        // Fetch 30 days to ensure robust baselines
+        windowToUse = const Duration(days: 30);
+        print('🌟 DEEP SYNC / REPAIR: Fetching last 30 days for $_email');
+        print('   Reason: ${prevSyncAt == null ? "First Sync" : "Repairing Corrupt Keys"}');
       } else {
         // Step 0: Incremental sync - bridge the gap since last success
         final gap = now.difference(prevSyncAt);

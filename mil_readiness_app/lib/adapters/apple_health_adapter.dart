@@ -252,8 +252,8 @@ class AppleHealthAdapter implements HealthDataAdapter {
           
           // Convert to HealthMetric format
           for (var point in points) {
-            final metricTypeName = point.type.name;
-            final isInterval = isIntervalMetric(metricTypeName);
+            final metricTypeName = _mapToLegacyType(point.type.name); // Normalize Keys
+            final isInterval = isIntervalMetric(point.type.name); // Use original for interval check
             
             double value;
             
@@ -406,5 +406,17 @@ class AppleHealthAdapter implements HealthDataAdapter {
     
     // Default: keep raw unit
     return rawUnit;
-}
+  }
+
+  /// Map modern HealthKit types to legacy keys expected by calculators
+  String _mapToLegacyType(String type) {
+    switch (type) {
+      case 'HEART_RATE_VARIABILITY_RMSSD':
+        return 'HRV_RMSSD';
+      case 'HEART_RATE_VARIABILITY_SDNN':
+        return 'HRV_SDNN';
+      default:
+        return type;
+    }
+  }
 }

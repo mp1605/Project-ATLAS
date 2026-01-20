@@ -2,11 +2,15 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/comprehensive_readiness_result.dart';
 import 'local_secure_store.dart';
+import 'device_auth_service.dart';
+
+
+import '../config/app_config.dart';
 
 /// Service for syncing calculated readiness scores to backend dashboard
 class BackendSyncService {
-  // Hotspot IP - Mac connected via iPhone hotspot
-  static const String baseUrl = 'http://172.20.10.2:3000/api/v1';
+  // Configured Base URL
+  static const String baseUrl = '${AppConfig.apiBaseUrl}/api/v1';
   
   String? _authToken;
   int? _soldierId;
@@ -27,6 +31,14 @@ class BackendSyncService {
     return BackendSyncService(authToken: token, soldierId: soldierId, userEmail: email);
   }
   
+  /// Ensure we have a valid auth token (Auto-Login)
+  Future<void> _ensureAuth() async {
+    if (_authToken == null) {
+      print('🔄 BackendSync: Token missing, attempting device auto-login...');
+      _authToken = await DeviceAuthService.instance.authenticateDevice(userEmail: _userEmail);
+    }
+  }
+
   /// Check if user is authenticated
   bool get isAuthenticated => _authToken != null;
   
@@ -42,6 +54,8 @@ class BackendSyncService {
     required ComprehensiveReadinessResult result,
   }) async {
     try {
+      await _ensureAuth(); // Auto-login if needed
+      
       print('📡 Submitting readiness scores to backend...');
       print('   Soldier ID: $soldierId');
       print('   Date: ${_formatDate(date)}');
@@ -50,6 +64,7 @@ class BackendSyncService {
       final payload = {
         'user_id': _userEmail ?? (_soldierId != null ? 'soldier_$_soldierId@example.com' : 'unknown@example.com'),
         'timestamp': date.toUtc().toIso8601String(),
+        'overall_score': result.overallReadiness, // Added to match backend schema
         'scores': {
           // Backend expects these exact field names (from validation.ts)
           'readiness': result.overallReadiness,
@@ -94,6 +109,9 @@ class BackendSyncService {
         return true;
       } else if (response.statusCode == 401) {
         print('❌ Authentication failed - token may be expired');
+        // Clear token to force re-auth next time
+        _authToken = null; 
+        await LocalSecureStore.instance.clearJWTToken();
         return false;
       } else {
         print('❌ Failed to submit scores: ${response.statusCode}');

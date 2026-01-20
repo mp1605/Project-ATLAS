@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AUIX - Soldiers Management</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Roboto:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="public/css/modals.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="public/js/auth.js" defer></script>
+    <script src="public/js/soldier-management.js?v=9" defer></script>
+    <script src="public/js/notifications.js" defer></script>
+    <script>
+        // Global function for soldier detail navigation
+        function viewSoldierDetail(email) {
+            window.location.href = '/soldier_detail.html?email=' + email;
+        }
+    </script>
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <aside class="sidebar glass-panel"
+        style="margin: 20px 0 20px 20px; height: calc(100vh - 40px); border-radius: 12px;">
+        <div class="brand">
+            <img src="assets/AUiX-Acronym-White-With-Accents-RGB.png" alt="AUIX" style="height: 50px; width: auto;">
+        </div>
+
+        <ul class="nav-menu">
+            <a href="Dashboard.html" class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24">
+                    <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" />
+                </svg>
+                Dashboard
+            </a>
+            <a href="soldiers.html" class="nav-item active">
+                <svg class="nav-icon" viewBox="0 0 24 24">
+                    <path
+                        d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
+                </svg>
+                Soldiers
+            </a>
+            <a href="analytics.html" class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24">
+                    <path
+                        d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z" />
+                </svg>
+                Analytics
+            </a>
+            <a href="#" class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24">
+                    <path
+                        d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" />
+                </svg>
+                Reports
+            </a>
+            <a href="events.html" class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24">
+                    <path
+                        d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2zm-7 5h5v5h-5z" />
+                </svg>
+                Events
+            </a>
+        </ul>
+
+        <div class="sidebar-footer">
+            <div class="footer-icons">
+                <a href="#" class="nav-item">
+                    <svg class="nav-icon" viewBox="0 0 24 24">
+                        <path
+                            d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.58 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z" />
+                    </svg>
+                    Settings
+                </a>
+                <a href="login.html" class="nav-item">
+                    <svg class="nav-icon" viewBox="0 0 24 24">
+                        <path
+                            d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z" />
+                    </svg>
+                    Logout
+                </a>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-board">
+
+        <!-- Header -->
+        <header class="board-header">
+            <div class="board-title" style="display:flex; align-items:center;">
+                <h2>SOLDIERS MANAGEMENT</h2>
+            </div>
+            <div class="header-actions">
+                <!-- Notification Bell with Badge -->
+                <div class="notification-container">
+                    <svg class="notification-bell" viewBox="0 0 24 24" width="24" height="24" fill="none"
+                        stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        onclick="toggleNotifications()">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                    </svg>
+                    <span class="notification-badge" id="notificationBadge">3</span>
+
+                    <!-- Notifications Dropdown -->
+                    <div class="notifications-dropdown" id="notificationsDropdown">
+                        <div class="notifications-header">
+                            <h3>Notifications</h3>
+                            <button class="mark-all-read" onclick="markAllRead()">Mark all read</button>
+                        </div>
+                        <div class="notifications-list">
+                            <div class="notification-item notification-high">
+                                <div class="notification-dot"></div>
+                                <div class="notification-content">
+                                    <div class="notification-title">Medical Hold Expiring</div>
+                                    <div class="notification-desc">SGT. Johnson - Medical clearance needed by Jan 15
+                                    </div>
+                                    <div class="notification-time">2 hours ago</div>
+                                </div>
+                            </div>
+                            <div class="notification-item notification-medium">
+                                <div class="notification-dot"></div>
+                                <div class="notification-content">
+                                    <div class="notification-title">PT Test Due</div>
+                                    <div class="notification-desc">12 soldiers require PT testing this month</div>
+                                    <div class="notification-time">5 hours ago</div>
+                                </div>
+                            </div>
+                            <div class="notification-item notification-medium">
+                                <div class="notification-dot"></div>
+                                <div class="notification-content">
+                                    <div class="notification-title">Training Expiration</div>
+                                    <div class="notification-desc">CPL. Martinez - Weapons qual expires Jan 20</div>
+                                    <div class="notification-time">1 day ago</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="notifications-footer">
+                            <a href="#" class="view-all-link">View all notifications</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="user-profile-circle"></div>
+            </div>
+        </header>
+
+        <!-- Enhanced Soldier Management -->
+        <div class="widget widget-soldiers-page">
+            <div class="widget-header">
+                <div class="table-controls">
+                    <input type="text" id="soldierSearch" class="search-bar"
+                        placeholder="Search by name, rank, or MOS...">
+                    <select id="statusFilter" class="filter-dropdown">
+                        <option value="all">All Status</option>
+                        <option value="ready">Ready</option>
+                        <option value="at-risk">At Risk</option>
+                        <option value="not-ready">Not Ready</option>
+                    </select>
+                </div>
+            </div>
+            <div class="soldier-table-container">
+                <table class="soldier-table">
+                    <thead>
+                        <tr>
+                            <th class="sortable" data-sort="name">
+                                <input type="checkbox" id="selectAll">
+                            </th>
+                            <th class="sortable" data-sort="name">Soldier</th>
+                            <th class="sortable" data-sort="mos">MOS</th>
+                            <th class="sortable" data-sort="readiness">Readiness</th>
+                            <th class="sortable" data-sort="deployment">Deployment</th>
+                            <th class="sortable" data-sort="medical">Medical</th>
+                            <th class="sortable" data-sort="pt">PT Test</th>
+                            <th class="sortable" data-sort="training">Training</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="soldierTableBody">
+                        <!-- Row 1 -->
+                        <tr class="table-row" data-status="ready">
+                            <td><input type="checkbox" class="row-checkbox"></td>
+                            <td>
+                                <div class="soldier-cell">
+                                    <img src="https://i.pravatar.cc/150?img=12" class="soldier-avatar" alt="Avatar">
+                                    <div>
+                                        <div class="soldier-name">SGT. Boris Activin</div>
+                                        <div class="soldier-rank">E-5 Sergeant</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><span class="mos-badge">11B</span> Infantry</td>
+                            <td><span class="badge badge-green">82</span></td>
+                            <td><span class="status-pill status-ready">Ready</span></td>
+                            <td>
+                                <svg viewBox="0 0 24 24" width="20" height="20" class="status-icon status-icon-green">
+                                    <path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                                </svg>
+                            </td>
+                            <td>
+                                <div class="pt-info">
+                                    <span class="pt-score">285</span>
+                                    <span class="pt-date">Dec 2025</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="progress-circle" data-progress="95">
+                                    <svg viewBox="0 0 36 36">
+                                        <path
+                                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                            fill="none" stroke="#334155" stroke-width="3" />
+                                        <path
+                                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                            fill="none" stroke="#10b981" stroke-width="3" stroke-dasharray="95, 100" />
+                                        <text x="18" y="20.35" class="progress-text">95%</text>
+                                    </svg>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="action-btn" title="View Details"
+                                        onclick="window.location.href='soldier_detail.html?email=soldier_1@example.com'">
+                                        <svg viewBox="0 0 24 24" width="18" height="18">
+                                            <path fill="currentColor"
+                                                d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
+                                        </svg>
+                                    </button>
+                                    <button class="action-btn" title="Edit">
+                                        <svg viewBox="0 0 24 24" width="18" height="18">
+                                            <path fill="currentColor"
+                                                d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+                                        </svg>
+                                    </button>
+                                    <button class="action-btn" title="Notify">
+                                        <svg viewBox="0 0 24 24" width="18" height="18">
+                                            <path fill="currentColor"
+                                                d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9zm-5.5 14c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2z" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <!-- Row 2 -->
+                        <tr class="table-row" data-status="at-risk">
+                            <td><input type="checkbox" class="row-checkbox"></td>
+                            <td>
+                                <div class="soldier-cell">
+                                    <img src="https://i.pravatar.cc/150?img=33" class="soldier-avatar" alt="Avatar">
+                                    <div>
+                                        <div class="soldier-name">CPL. Sarah Martinez</div>
+                                        <div class="soldier-rank">E-4 Corporal</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><span class="mos-badge">68W</span> Medic</td>
+                            <td><span class="badge badge-orange">58</span></td>
+                            <td><span class="status-pill status-training">Training</span></td>
+                            <td>
+                                <svg viewBox="0 0 24 24" width="20" height="20" class="status-icon status-icon-green">
+                                    <path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                                </svg>
+                            </td>
+                            <td>
+                                <div class="pt-info">
+                                    <span class="pt-score">245</span>
+                                    <span class="pt-date">Oct 2025</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="progress-circle" data-progress="72">
+                                    <svg viewBox="0 0 36 36">
+                                        <path
+                                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                            fill="none" stroke="#334155" stroke-width="3" />
+                                        <path
+                                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                            fill="none" stroke="#f59e0b" stroke-width="3" stroke-dasharray="72, 100" />
+                                        <text x="18" y="20.35" class="progress-text">72%</text>
+                                    </svg>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="action-btn" title="View Details"
+                                        onclick="window.location.href='soldier_detail.html?email=soldier_1@example.com'">
+                                        <svg viewBox="0 0 24 24" width="18" height="18">
+                                            <path fill="currentColor"
+                                                d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
+                                        </svg>
+                                    </button>
+                                    <button class="action-btn" title="Edit">
+                                        <svg viewBox="0 0 24 24" width="18" height="18">
+                                            <path fill="currentColor"
+                                                d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+                                        </svg>
+                                    </button>
+                                    <button class="action-btn" title="Notify">
+                                        <svg viewBox="0 0 24 24" width="18" height="18">
+                                            <path fill="currentColor"
+                                                d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9zm-5.5 14c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2z" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <!-- Row 3 -->
+                        <tr class="table-row" data-status="not-ready">
+                            <td><input type="checkbox" class="row-checkbox"></td>
+                            <td>
+                                <div class="soldier-cell">
+                                    <img src="https://i.pravatar.cc/150?img=68" class="soldier-avatar" alt="Avatar">
+                                    <div>
+                                        <div class="soldier-name">PFC. David Johnson</div>
+                                        <div class="soldier-rank">E-3 Private First Class</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><span class="mos-badge">92Y</span> Supply</td>
+                            <td><span class="badge badge-red">34</span></td>
+                            <td><span class="status-pill status-medical">Medical Hold</span></td>
+                            <td>
+                                <svg viewBox="0 0 24 24" width="20" height="20" class="status-icon status-icon-red">
+                                    <path fill="currentColor"
+                                        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+                                </svg>
+                            </td>
+                            <td>
+                                <div class="pt-info">
+                                    <span class="pt-score pt-overdue">N/A</span>
+                                    <span class="pt-date">Overdue</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="progress-circle" data-progress="45">
+                                    <svg viewBox="0 0 36 36">
+                                        <path
+                                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                            fill="none" stroke="#334155" stroke-width="3" />
+                                        <path
+                                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                            fill="none" stroke="#ef4444" stroke-width="3" stroke-dasharray="45, 100" />
+                                        <text x="18" y="20.35" class="progress-text">45%</text>
+                                    </svg>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="action-btn" title="View Details"
+                                        onclick="window.location.href='soldier_detail.html?email=soldier_1@example.com'">
+                                        <svg viewBox="0 0 24 24" width="18" height="18">
+                                            <path fill="currentColor"
+                                                d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
+                                        </svg>
+                                    </button>
+                                    <button class="action-btn" title="Edit">
+                                        <svg viewBox="0 0 24 24" width="18" height="18">
+                                            <path fill="currentColor"
+                                                d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+                                        </svg>
+                                    </button>
+                                    <button class="action-btn" title="Notify">
+                                        <svg viewBox="0 0 24 24" width="18" height="18">
+                                            <path fill="currentColor"
+                                                d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9zm-5.5 14c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2z" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <!-- Row 4 -->
+                        <tr class="table-row" data-status="ready">
+                            <td><input type="checkbox" class="row-checkbox"></td>
+                            <td>
+                                <div class="soldier-cell">
+                                    <img src="https://i.pravatar.cc/150?img=51" class="soldier-avatar" alt="Avatar">
+                                    <div>
+                                        <div class="soldier-name">SPC. Michael Chen</div>
+                                        <div class="soldier-rank">E-4 Specialist</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><span class="mos-badge">25B</span> IT Specialist</td>
+                            <td><span class="badge badge-green">88</span></td>
+                            <td><span class="status-pill status-ready">Ready</span></td>
+                            <td>
+                                <svg viewBox="0 0 24 24" width="20" height="20" class="status-icon status-icon-green">
+                                    <path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                                </svg>
+                            </td>
+                            <td>
+                                <div class="pt-info">
+                                    <span class="pt-score">298</span>
+                                    <span class="pt-date">Nov 2025</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="progress-circle" data-progress="100">
+                                    <svg viewBox="0 0 36 36">
+                                        <path
+                                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                            fill="none" stroke="#334155" stroke-width="3" />
+                                        <path
+                                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                            fill="none" stroke="#10b981" stroke-width="3" stroke-dasharray="100, 100" />
+                                        <text x="18" y="20.35" class="progress-text">100%</text>
+                                    </svg>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="action-btn" title="View Details"
+                                        onclick="window.location.href='soldier_detail.html?email=soldier_1@example.com'">
+                                        <svg viewBox="0 0 24 24" width="18" height="18">
+                                            <path fill="currentColor"
+                                                d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
+                                        </svg>
+                                    </button>
+                                    <button class="action-btn" title="Edit">
+                                        <svg viewBox="0 0 24 24" width="18" height="18">
+                                            <path fill="currentColor"
+                                                d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+                                        </svg>
+                                    </button>
+                                    <button class="action-btn" title="Notify">
+                                        <svg viewBox="0 0 24 24" width="18" height="18">
+                                            <path fill="currentColor"
+                                                d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9zm-5.5 14c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2z" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="table-footer">
+                <div class="bulk-actions">
+                    <button class="bulk-btn" disabled id="bulkExport">Export Selected</button>
+                    <button class="bulk-btn" disabled id="bulkNotify">Notify Selected</button>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+</body>
+
+</html>

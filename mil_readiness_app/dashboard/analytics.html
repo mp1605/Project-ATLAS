@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AUIX - Analytics</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Roboto:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="public/js/auth.js" defer></script>
+    <script src="public/js/notifications.js" defer></script>
+    <script src="public/js/analytics.js" defer></script>
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <aside class="sidebar glass-panel"
+        style="margin: 20px 0 20px 20px; height: calc(100vh - 40px); border-radius: 12px;">
+        <div class="brand">
+            <img src="assets/AUiX-Acronym-White-With-Accents-RGB.png" alt="AUIX" style="height: 50px; width: auto;">
+        </div>
+
+        <ul class="nav-menu">
+            <a href="Dashboard.html" class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24">
+                    <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" />
+                </svg>
+                Dashboard
+            </a>
+            <a href="soldiers.html" class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24">
+                    <path
+                        d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
+                </svg>
+                Soldiers
+            </a>
+            <a href="analytics.html" class="nav-item active">
+                <svg class="nav-icon" viewBox="0 0 24 24">
+                    <path
+                        d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z" />
+                </svg>
+                Analytics
+            </a>
+            <a href="#" class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24">
+                    <path
+                        d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" />
+                </svg>
+                Reports
+            </a>
+            <a href="events.html" class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24">
+                    <path
+                        d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2zm-7 5h5v5h-5z" />
+                </svg>
+                Events
+            </a>
+        </ul>
+
+        <div class="sidebar-footer">
+            <div class="footer-icons">
+                <a href="#" class="nav-item">
+                    <svg class="nav-icon" viewBox="0 0 24 24">
+                        <path
+                            d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.58 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z" />
+                    </svg>
+                    Settings
+                </a>
+                <a href="login.html" class="nav-item">
+                    <svg class="nav-icon" viewBox="0 0 24 24">
+                        <path
+                            d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z" />
+                    </svg>
+                    Logout
+                </a>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-board">
+
+        <!-- Header -->
+        <header class="board-header">
+            <div class="board-title">
+                <h2>ANALYTICS DASHBOARD</h2>
+            </div>
+            <div class="header-actions">
+                <!-- Notification Bell with Badge -->
+                <div class="notification-container">
+                    <svg class="notification-bell" viewBox="0 0 24 24" width="24" height="24" fill="none"
+                        stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        onclick="toggleNotifications()">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                    </svg>
+                    <span class="notification-badge" id="notificationBadge">2</span>
+
+                    <!-- Notifications Dropdown -->
+                    <div class="notifications-dropdown" id="notificationsDropdown">
+                        <div class="notifications-header">
+                            <h3>Notifications</h3>
+                            <button class="mark-all-read" onclick="markAllRead()">Mark all read</button>
+                        </div>
+                        <div class="notifications-list">
+                            <div class="notification-item notification-high">
+                                <div class="notification-dot"></div>
+                                <div class="notification-content">
+                                    <div class="notification-title">Readiness Declining</div>
+                                    <div class="notification-desc">Unit readiness down 5% in last 7 days</div>
+                                    <div class="notification-time">1 hour ago</div>
+                                </div>
+                            </div>
+                            <div class="notification-item notification-medium">
+                                <div class="notification-dot"></div>
+                                <div class="notification-content">
+                                    <div class="notification-title">Data Sync Warning</div>
+                                    <div class="notification-desc">8 soldiers missing wearable data</div>
+                                    <div class="notification-time">3 hours ago</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="notifications-footer">
+                            <a href="#" class="view-all-link">View all notifications</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="user-profile-circle"></div>
+            </div>
+        </header>
+
+        <!-- Analytics Tabs -->
+        <div class="analytics-tabs">
+            <button class="tab-btn active" onclick="switchTab('overview')">📊 Overview</button>
+            <button class="tab-btn" onclick="switchTab('factor')">🔬 Factor Analysis</button>
+            <button class="tab-btn" onclick="switchTab('forecast')">📈 Trends & Forecast</button>
+            <button class="tab-btn" onclick="switchTab('parameter')">⚙️ Parameter Impact</button>
+        </div>
+
+        <!-- Tab Content Container -->
+        <div class="analytics-content">
+
+            <!-- SECTION 1: OVERVIEW -->
+            <div id="overview-section" class="analytics-section active">
+
+                <!-- Readiness Trend Chart -->
+                <div class="widget">
+                    <div class="widget-header">
+                        Unit Readiness Trend
+                        <div class="toggle-buttons">
+                            <button class="toggle-btn active" onclick="toggleTimeframe(30)">30 Days</button>
+                            <button class="toggle-btn" onclick="toggleTimeframe(90)">90 Days</button>
+                        </div>
+                    </div>
+                    <div class="chart-container chart-container-large">
+                        <canvas id="readinessTrendChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Grid: Distribution + Metrics -->
+                <div class="analytics-grid-2x2" style="margin-top: 20px;">
+
+                    <!-- Readiness Distribution -->
+                    <div class="widget">
+                        <div class="widget-header">Readiness Distribution</div>
+                        <div class="chart-container">
+                            <canvas id="distributionChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Metrics Grid -->
+                    <div class="metrics-grid">
+                        <!-- Avg Sleep Debt -->
+                        <div class="analytics-metric-card">
+                            <div class="metric-icon" style="color: #f59e0b;">💤</div>
+                            <div class="metric-value">6.2 hrs</div>
+                            <div class="metric-label">Avg Sleep Debt</div>
+                            <div class="metric-trend trend-down">↓ 0.8 hrs from last week</div>
+                        </div>
+
+                        <!-- Avg HRV Deviation -->
+                        <div class="analytics-metric-card">
+                            <div class="metric-icon" style="color: #ef4444;">🧠</div>
+                            <div class="metric-value">-8%</div>
+                            <div class="metric-label">Avg HRV Deviation</div>
+                            <div class="metric-trend trend-down">↓ 3% from baseline</div>
+                        </div>
+
+                        <!-- Fatigue Load -->
+                        <div class="analytics-metric-card">
+                            <div class="metric-icon" style="color: #f59e0b;">⚡</div>
+                            <div class="metric-value">High</div>
+                            <div class="metric-label">Fatigue Load</div>
+                            <div class="chart-mini">
+                                <canvas id="fatigueChartMini"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Data Sync Health -->
+                        <div class="analytics-metric-card">
+                            <div class="metric-icon" style="color: #10b981;">🔄</div>
+                            <div class="metric-value">94%</div>
+                            <div class="metric-label">Data Sync Health</div>
+                            <div class="metric-trend trend-up">↑ 171/183 soldiers synced</div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- SECTION 2: FACTOR ANALYSIS -->
+            <div id="factor-section" class="analytics-section">
+
+                <!-- Correlation Matrix -->
+                <div class="widget">
+                    <div class="widget-header">Correlation Matrix (Readiness Drivers)</div>
+                    <div class="correlation-matrix">
+                        <div class="correlation-cell" style="background: rgba(16, 185, 129, 0.3);">
+                            <div class="corr-label">Sleep ↔ Readiness</div>
+                            <div class="corr-value">0.78</div>
+                            <div class="corr-strength">Strong</div>
+                        </div>
+                        <div class="correlation-cell" style="background: rgba(59, 130, 246, 0.3);">
+                            <div class="corr-label">HRV ↔ Readiness</div>
+                            <div class="corr-value">0.65</div>
+                            <div class="corr-strength">Medium</div>
+                        </div>
+                        <div class="correlation-cell" style="background: rgba(239, 68, 68, 0.3);">
+                            <div class="corr-label">Fatigue ↔ Readiness</div>
+                            <div class="corr-value">-0.72</div>
+                            <div class="corr-strength">Strong (Inverse)</div>
+                        </div>
+                        <div class="correlation-cell" style="background: rgba(59, 130, 246, 0.2);">
+                            <div class="corr-label">Recovery ↔ Readiness</div>
+                            <div class="corr-value">0.58</div>
+                            <div class="corr-strength">Medium</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Scatter Plots -->
+                <div class="analytics-grid-3col" style="margin-top: 20px;">
+
+                    <div class="widget">
+                        <div class="widget-header">Sleep vs Readiness</div>
+                        <div class="chart-container">
+                            <canvas id="sleepScatterChart"></canvas>
+                        </div>
+                        <div class="chart-insight">R² = 0.61 | Strong positive relationship</div>
+                    </div>
+
+                    <div class="widget">
+                        <div class="widget-header">HRV vs Readiness</div>
+                        <div class="chart-container">
+                            <canvas id="hrvScatterChart"></canvas>
+                        </div>
+                        <div class="chart-insight">R² = 0.42 | Moderate positive relationship</div>
+                    </div>
+
+                    <div class="widget">
+                        <div class="widget-header">Fatigue vs Readiness</div>
+                        <div class="chart-container">
+                            <canvas id="fatigueScatterChart"></canvas>
+                        </div>
+                        <div class="chart-insight">R² = 0.52 | Strong inverse relationship</div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- SECTION 3: TRENDS & FORECAST -->
+            <div id="forecast-section" class="analytics-section">
+
+                <!-- Alert Box -->
+                <div class="analytics-alert">
+                    <strong>⚠️ Predictive Warning:</strong> 5 soldiers projected to enter risk zone within next 7 days
+                    based on current trends
+                </div>
+
+                <!-- Forecast Chart -->
+                <div class="widget">
+                    <div class="widget-header">Readiness Forecast (Next 14 Days)</div>
+                    <div class="chart-container chart-container-large">
+                        <canvas id="forecastChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Trends Grid -->
+                <div class="analytics-grid-2x2" style="margin-top: 20px;">
+
+                    <div class="widget">
+                        <div class="widget-header">Sleep Trend</div>
+                        <div class="chart-container">
+                            <canvas id="sleepTrendChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="widget">
+                        <div class="widget-header">Fatigue Accumulation</div>
+                        <div class="chart-container">
+                            <canvas id="fatigueAccumChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="widget">
+                        <div class="widget-header">HRV Trend from Baseline</div>
+                        <div class="chart-container">
+                            <canvas id="hrvTrendChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="analytics-metric-card"
+                        style="display: flex; flex-direction: column; justify-content: center;">
+                        <div class="metric-icon" style="color: #ef4444; font-size: 3rem;">⚠️</div>
+                        <div class="metric-value" style="font-size: 2.5rem; color: #ef4444;">18%</div>
+                        <div class="metric-label" style="font-size: 1.1rem;">Overtraining Risk</div>
+                        <div class="metric-trend">5 soldiers at risk</div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- SECTION 4: PARAMETER IMPACT -->
+            <div id="parameter-section" class="analytics-section">
+
+                <!-- Parameter Weights -->
+                <div class="widget">
+                    <div class="widget-header">Current Parameter Weights (Readiness Algorithm)</div>
+                    <div class="parameter-sliders">
+                        <div class="parameter-item">
+                            <div class="param-info">
+                                <span class="param-name">Sleep Quality</span>
+                                <span class="param-value">40%</span>
+                            </div>
+                            <div class="param-bar" style="width: 40%; background: #10b981;"></div>
+                        </div>
+                        <div class="parameter-item">
+                            <div class="param-info">
+                                <span class="param-name">HRV Baseline</span>
+                                <span class="param-value">30%</span>
+                            </div>
+                            <div class="param-bar" style="width: 30%; background: #3b82f6;"></div>
+                        </div>
+                        <div class="parameter-item">
+                            <div class="param-info">
+                                <span class="param-name">Fatigue Load</span>
+                                <span class="param-value">20%</span>
+                            </div>
+                            <div class="param-bar" style="width: 20%; background: #f59e0b;"></div>
+                        </div>
+                        <div class="parameter-item">
+                            <div class="param-info">
+                                <span class="param-name">Recovery Score</span>
+                                <span class="param-value">10%</span>
+                            </div>
+                            <div class="param-bar" style="width: 10%; background: #8b5cf6;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sensitivity Analysis -->
+                <div class="analytics-grid-2x2" style="margin-top: 20px;">
+
+                    <div class="widget">
+                        <div class="widget-header">Sensitivity Analysis (±10% Weight Change)</div>
+                        <div class="chart-container">
+                            <canvas id="sensitivityChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="widget">
+                        <div class="widget-header">Before vs After Comparison</div>
+                        <div class="chart-container">
+                            <canvas id="beforeAfterChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="analytics-metric-card"
+                        style="display: flex; flex-direction: column; justify-content: center;">
+                        <div class="metric-icon" style="color: #3b82f6; font-size: 2.5rem;">👥</div>
+                        <div class="metric-value" style="font-size: 2rem;">23</div>
+                        <div class="metric-label">Soldiers Affected</div>
+                        <div class="metric-desc"
+                            style="margin-top: 8px; font-size: 0.85rem; color: var(--text-gray); text-align: center;">
+                            by ±10% sleep weight change
+                        </div>
+                    </div>
+
+                    <div class="analytics-metric-card"
+                        style="display: flex; flex-direction: column; justify-content: center;">
+                        <div class="metric-icon" style="color: #10b981; font-size: 2.5rem;">📊</div>
+                        <div class="metric-value" style="font-size: 2rem;">±4.2</div>
+                        <div class="metric-label">Avg Readiness Change</div>
+                        <div class="metric-desc"
+                            style="margin-top: 8px; font-size: 0.85rem; color: var(--text-gray); text-align: center;">
+                            points per 10% weight adjustment
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Impact Summary -->
+                <div class="widget" style="margin-top: 20px;">
+                    <div class="widget-header">Parameter Impact Summary</div>
+                    <div class="impact-summary">
+                        <div class="impact-row">
+                            <div class="impact-param">Sleep +10%</div>
+                            <div class="impact-arrow">→</div>
+                            <div class="impact-result">12 soldiers move from "Monitor" to "Fit"</div>
+                        </div>
+                        <div class="impact-row">
+                            <div class="impact-param">Sleep -10%</div>
+                            <div class="impact-arrow">→</div>
+                            <div class="impact-result">11 soldiers move from "Fit" to "Monitor"</div>
+                        </div>
+                        <div class="impact-row">
+                            <div class="impact-param">HRV +10%</div>
+                            <div class="impact-arrow">→</div>
+                            <div class="impact-result">8 soldiers change category</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+</body>
+
+</html>

@@ -24,6 +24,10 @@ class LocalSecureStore {
   static String _userKey(String email) => "user.profile.${email.toLowerCase()}";
   static String _scoped(String email, String key) => "$key.${email.toLowerCase()}";
 
+  // Generic read/write for internal services (like DeviceAuth)
+  Future<String?> read({required String key}) => _ss.read(key: key);
+  Future<void> write({required String key, required String value}) => _ss.write(key: key, value: value);
+
   // ---------- Helpers ----------
   String _randomSalt({int length = 16}) {
     const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
