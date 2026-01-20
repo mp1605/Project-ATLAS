@@ -68,6 +68,7 @@ class DashboardSyncService {
     return {
       'user_id': userEmail,
       'timestamp': scores.calculatedAt.toUtc().toIso8601String(),
+      'overall_score': scores.overallReadiness, // REQUIRED by backend schema
       'scores': {
         // Using dashboard-friendly names (as per requirements)
         'readiness': scores.overallReadiness,

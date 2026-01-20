@@ -19,6 +19,10 @@ app = FastAPI(
 app.include_router(auth.router)
 app.include_router(readiness.router)
 
+# Register Middleware
+from .middleware import AuditMiddleware
+app.add_middleware(AuditMiddleware)
+
 # Mount Dashboard Static Files
 import os
 dashboard_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "dashboard")
