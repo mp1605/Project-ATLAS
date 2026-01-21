@@ -1,21 +1,7 @@
 // API Base URL - Use computer's IP if not on localhost
+// API Base URL - Use relative path for production
 const getAPIUrl = () => {
-    const hostname = window.location.hostname;
-    // Since we are served BY the backend on port 8000, we can just use relative path /api/v1
-    // But if developing separately, we might need absolute URL.
-    // Let's deduce based on port.
-
-    if (window.location.port === '8000') {
-        return '/api/v1'; // Relative path if served by FastAPI
-    }
-
-    if (hostname === 'localhost' || hostname === '127.0.0.1') {
-        return 'http://localhost:8000/api/v1';
-    }
-    if (!hostname || hostname === '') {
-        return 'http://localhost:8000/api/v1';
-    }
-    return `http://${hostname}:8000/api/v1`;
+    return '/api/v1';
 };
 
 const API_URL = getAPIUrl();

@@ -103,7 +103,7 @@ async function loadSoldierData(userEmail) {
         }
 
         // Fetch latest readiness
-        const baseUrl = window.API_URL || 'http://localhost:3000/api/v1';
+        const baseUrl = window.API_URL || '/api/v1';
         const response = await fetch(`${baseUrl}/readiness/${userEmail}/latest`, {
             headers: {
                 'Authorization': `Bearer ${token}`
