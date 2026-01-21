@@ -167,3 +167,11 @@ This project is part of an ongoing academic and applied research initiative focu
 For access or collaboration inquiries, contact the project owner.
 
 
+
+
+
+
+Backend Render Link
+
+https://atlas-backend-dx6g.onrender.com
+
