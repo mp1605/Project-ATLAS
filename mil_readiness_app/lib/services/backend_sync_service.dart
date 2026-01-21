@@ -98,7 +98,7 @@ class BackendSyncService {
         },
         body: json.encode(payload),
       ).timeout(
-        const Duration(seconds: 10),
+        const Duration(seconds: 90),
         onTimeout: () {
           throw Exception('Request timeout - server may be offline');
         },
@@ -163,12 +163,12 @@ class BackendSyncService {
   
   /// Test connection to backend
   Future<bool> testConnection() async {
-    final testUrl = '$baseUrl/../../health'; // Goes up from /api/v1 to /
+    final testUrl = '${AppConfig.apiBaseUrl}/health';
     try {
       print('📡 Testing connection to: $testUrl');
       final response = await http.get(
         Uri.parse(testUrl),
-      ).timeout(const Duration(seconds: 5));
+      ).timeout(const Duration(seconds: 60));
       
       if (response.statusCode == 200) {
         print('✅ Backend connection successful');
