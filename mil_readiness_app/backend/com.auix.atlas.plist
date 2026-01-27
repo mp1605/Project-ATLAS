@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.auix.atlas.backend</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>/Users/Shared/Project-ATLAS/mil_readiness_app/backend/run_production.sh</string>
+    </array>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>KeepAlive</key>
+    <true/>
+
+    <key>StandardOutPath</key>
+    <string>/tmp/com.auix.atlas.stdout</string>
+    
+    <key>StandardErrorPath</key>
+    <string>/tmp/com.auix.atlas.stderr</string>
+    
+    <key>WorkingDirectory</key>
+    <string>/Users/Shared/Project-ATLAS/mil_readiness_app/backend</string>
+</dict>
+</plist>

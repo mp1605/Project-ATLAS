@@ -12,6 +12,7 @@ import '../services/backend_sync_service.dart';
 import '../routes.dart';
 import '../widgets/sleep_status_card.dart';
 import '../services/sleep_source_resolver.dart';
+import '../config/app_config.dart';
 
 /// Monitoring screen with tabs for real-time data and calculated scores
 class DataMonitorScreen extends StatefulWidget {
@@ -381,8 +382,8 @@ class _DataMonitorScreenState extends State<DataMonitorScreen> with SingleTicker
           builder: (ctx) => AlertDialog(
             title: Text(ok ? '✅ Connection OK' : '❌ Connection Failed'),
             content: Text(ok 
-              ? 'Successfully reached the backend at http://192.168.1.155:3000' 
-              : 'Could not reach http://192.168.1.155:3000. \n\n1. Ensure IP is correct in backend_sync_service.dart\n2. Disable Mac Firewall\n3. Ensure phone is on same Wi-Fi.'),
+              ? 'Successfully reached the backend at ${AppConfig.apiBaseUrl}' 
+              : 'Could not reach ${AppConfig.apiBaseUrl}. \n\n1. Ensure IP is correct in Settings\n2. Disable Mac Firewall\n3. Ensure phone is on same Wi-Fi.'),
             actions: [
               TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('OK'))
             ],
