@@ -1,0 +1,590 @@
+Analyzing mil_readiness_app...                                  
+
+   info • Don't invoke 'print' in production code • lib/adapters/apple_health_adapter.dart:98:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/adapters/apple_health_adapter.dart:134:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/adapters/apple_health_adapter.dart:137:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/adapters/apple_health_adapter.dart:139:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/adapters/apple_health_adapter.dart:141:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/adapters/apple_health_adapter.dart:146:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/adapters/apple_health_adapter.dart:161:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/adapters/apple_health_adapter.dart:164:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/adapters/apple_health_adapter.dart:180:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/adapters/apple_health_adapter.dart:181:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/adapters/apple_health_adapter.dart:182:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/adapters/apple_health_adapter.dart:251:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/adapters/apple_health_adapter.dart:267:17 • avoid_print
+   info • Unnecessary braces in a string interpolation • lib/adapters/apple_health_adapter.dart:267:31 • unnecessary_brace_in_string_interps
+   info • Don't invoke 'print' in production code • lib/adapters/apple_health_adapter.dart:280:19 • avoid_print
+   info • Don't invoke 'print' in production code • lib/adapters/apple_health_adapter.dart:312:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/adapters/apple_health_adapter.dart:316:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/adapters/apple_health_adapter.dart:317:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/adapters/apple_health_adapter.dart:330:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/adapters/apple_health_adapter.dart:333:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/adapters/apple_health_adapter.dart:334:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/adapters/apple_health_adapter.dart:335:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/adapters/apple_health_adapter.dart:336:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/algorithms/banister_model.dart:65:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/algorithms/banister_model.dart:108:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/algorithms/baseline_calculator.dart:98:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/algorithms/baseline_calculator.dart:121:5 • avoid_print
+warning • Unused import: 'dart:math' • lib/algorithms/core_scores/cardiovascular_fitness.dart:1:8 • unused_import
+warning • The value of the local variable 'confidence' isn't used • lib/algorithms/core_scores/cardiovascular_fitness.dart:63:11 • unused_local_variable
+warning • Unused import: 'dart:math' • lib/algorithms/core_scores/endurance_capacity.dart:1:8 • unused_import
+warning • Unused import: '../../models/user_profile.dart' • lib/algorithms/core_scores/recovery_score.dart:5:8 • unused_import
+   info • Don't invoke 'print' in production code • lib/algorithms/fitness_calculator.dart:21:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/algorithms/fitness_calculator.dart:52:5 • avoid_print
+warning • Unused import: 'dart:math' • lib/algorithms/foundation/baseline_calculator_v2.dart:1:8 • unused_import
+warning • The value of the local variable 'medCount' isn't used • lib/algorithms/foundation/data_sufficiency_checker.dart:141:11 • unused_local_variable
+warning • Unused import: 'dart:math' • lib/algorithms/foundation/ewma_calculator.dart:1:8 • unused_import
+warning • Unused import: 'package:sqflite_sqlcipher/sqflite.dart' • lib/algorithms/illness_detector.dart:4:8 • unused_import
+   info • Don't invoke 'print' in production code • lib/algorithms/illness_detector.dart:35:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/algorithms/illness_detector.dart:68:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/algorithms/readiness_calculator.dart:33:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/algorithms/readiness_calculator.dart:42:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/algorithms/readiness_calculator.dart:53:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/algorithms/readiness_calculator.dart:117:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/algorithms/readiness_calculator.dart:145:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/algorithms/readiness_calculator.dart:146:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/algorithms/readiness_calculator.dart:147:5 • avoid_print
+warning • Unused import: 'zscore_calculator.dart' • lib/algorithms/recovery_calculator.dart:3:8 • unused_import
+   info • Don't invoke 'print' in production code • lib/algorithms/recovery_calculator.dart:28:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/algorithms/recovery_calculator.dart:41:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/algorithms/sleep_score_calculator.dart:48:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/algorithms/sleep_score_calculator.dart:76:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/algorithms/sleep_score_calculator.dart:110:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/algorithms/sleep_score_calculator.dart:130:5 • avoid_print
+warning • The value of the local variable 'start' isn't used • lib/algorithms/sleep_score_calculator.dart:194:11 • unused_local_variable
+warning • Unused import: '../safety_scores/all_safety_scores.dart' • lib/algorithms/specialty_scores/all_specialty_scores.dart:5:8 • unused_import
+warning • The declaration '_getSum' isn't referenced • lib/algorithms/specialty_scores/all_specialty_scores.dart:137:18 • unused_element
+warning • The declaration '_getValue' isn't referenced • lib/algorithms/specialty_scores/all_specialty_scores.dart:148:18 • unused_element
+   info • Don't invoke 'print' in production code • lib/algorithms/training_load_calculator.dart:28:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/algorithms/training_load_calculator.dart:90:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/algorithms/training_load_calculator.dart:91:5 • avoid_print
+warning • Duplicate import • lib/algorithms/zscore_calculator.dart:7:8 • duplicate_import
+   info • Don't invoke 'print' in production code • lib/algorithms/zscore_calculator.dart:61:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/algorithms/zscore_calculator.dart:67:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/algorithms/zscore_calculator.dart:82:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/algorithms/zscore_calculator.dart:88:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/algorithms/zscore_calculator.dart:103:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/algorithms/zscore_calculator.dart:109:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/algorithms/zscore_calculator.dart:140:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/algorithms/zscore_calculator.dart:169:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/config/security_config.dart:220:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/health_data_repository.dart:82:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/health_data_repository.dart:227:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/health_data_repository.dart:251:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/health_data_repository.dart:271:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/readiness_score_repository.dart:39:5 • avoid_print
+warning • Unused import: 'package:health/health.dart' • lib/database/secure_database_examples.dart:2:8 • unused_import
+   info • Don't invoke 'print' in production code • lib/database/secure_database_examples.dart:18:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_examples.dart:55:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_examples.dart:65:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_examples.dart:67:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_examples.dart:77:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_examples.dart:82:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_examples.dart:93:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_examples.dart:94:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_examples.dart:95:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_examples.dart:96:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_examples.dart:97:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_examples.dart:101:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_examples.dart:102:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_examples.dart:103:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_examples.dart:104:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_examples.dart:105:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_examples.dart:110:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_examples.dart:117:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_examples.dart:122:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_examples.dart:129:5 • avoid_print
+   info • Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check • lib/database/secure_database_examples.dart:208:46 • use_build_context_synchronously
+   info • The imported package 'path' isn't a dependency of the importing package • lib/database/secure_database_manager.dart:4:8 • depend_on_referenced_packages
+   info • 'encryptedSharedPreferences' is deprecated and shouldn't be used. EncryptedSharedPreferences is deprecated and will be removed in v11. The Jetpack Security library is deprecated by Google. Your data will be automatically migrated to custom ciphers on first access. Remove this parameter - it will be ignored • lib/database/secure_database_manager.dart:36:7 • deprecated_member_use
+   info • Don't invoke 'print' in production code • lib/database/secure_database_manager.dart:80:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_manager.dart:83:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_manager.dart:95:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_manager.dart:100:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_manager.dart:103:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_manager.dart:105:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_manager.dart:112:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_manager.dart:124:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_manager.dart:141:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_manager.dart:157:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_manager.dart:171:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_manager.dart:185:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_manager.dart:193:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_manager.dart:205:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_manager.dart:210:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_manager.dart:213:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_manager.dart:233:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_manager.dart:255:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_manager.dart:259:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_manager.dart:291:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_manager.dart:295:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_manager.dart:304:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_manager.dart:308:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_manager.dart:310:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_manager.dart:314:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_manager.dart:327:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_manager.dart:340:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_manager.dart:614:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_manager.dart:632:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_manager.dart:636:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_manager.dart:647:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_manager.dart:650:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_manager.dart:654:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_manager.dart:666:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_manager.dart:670:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_manager.dart:673:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_manager.dart:723:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_manager.dart:729:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_manager.dart:746:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/database/secure_database_manager.dart:751:5 • avoid_print
+   info • Use interpolation to compose strings and values • lib/database/secure_database_manager.dart:751:11 • prefer_interpolation_to_compose_strings
+   info • Don't invoke 'print' in production code • lib/database/secure_database_manager.dart:753:5 • avoid_print
+warning • Unused import: 'services/daily_readiness_service.dart' • lib/main.dart:5:8 • unused_import
+warning • Unused import: 'theme/app_theme.dart' • lib/main.dart:6:8 • unused_import
+   info • Don't invoke 'print' in production code • lib/main.dart:31:5 • avoid_print
+warning • Unused import: 'dart:math' • lib/models/readiness/sleep_score.dart:1:8 • unused_import
+   info • Don't invoke 'print' in production code • lib/repositories/comprehensive_score_repository.dart:56:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/repositories/manual_sleep_repository.dart:54:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/repositories/manual_sleep_repository.dart:74:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/repositories/manual_sleep_repository.dart:121:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/repositories/manual_sleep_repository.dart:208:5 • avoid_print
+warning • Unused import: 'package:shared_preferences/shared_preferences.dart' • lib/routes.dart:24:8 • unused_import
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/analytics_screen.dart:101:33 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/analytics_screen.dart:102:37 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/analytics_screen.dart:103:36 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/analytics_screen.dart:135:81 • deprecated_member_use
+warning • The declaration '_getScoreColor' isn't referenced • lib/screens/analytics_screen.dart:168:9 • unused_element
+   info • Don't invoke 'print' in production code • lib/screens/authorize_screen.dart:128:7 • avoid_print
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/biometric_setup_screen.dart:127:44 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/biometric_setup_screen.dart:175:43 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/biometric_setup_screen.dart:178:45 • deprecated_member_use
+warning • Unused import: 'dart:math' • lib/screens/data_monitor_screen.dart:1:8 • unused_import
+warning • Unused import: 'package:sqflite_sqlcipher/sqflite.dart' • lib/screens/data_monitor_screen.dart:2:8 • unused_import
+warning • The value of the field '_lastSleepSummary' isn't used • lib/screens/data_monitor_screen.dart:31:14 • unused_field
+   info • Don't invoke 'print' in production code • lib/screens/data_monitor_screen.dart:88:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/screens/data_monitor_screen.dart:237:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/screens/data_monitor_screen.dart:246:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/screens/data_monitor_screen.dart:284:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/screens/data_monitor_screen.dart:323:7 • avoid_print
+   info • Unnecessary use of 'toList' in a spread • lib/screens/data_monitor_screen.dart:548:14 • unnecessary_to_list_in_spreads
+   info • Unnecessary use of 'toList' in a spread • lib/screens/data_monitor_screen.dart:677:14 • unnecessary_to_list_in_spreads
+warning • The declaration '_buildStageLabel' isn't referenced • lib/screens/data_monitor_screen.dart:797:10 • unused_element
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/data_monitor_screen.dart:802:22 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/data_monitor_screen.dart:804:41 • deprecated_member_use
+warning • Unused import: '../routes.dart' • lib/screens/database_test_screen.dart:4:8 • unused_import
+   info • Don't invoke 'print' in production code • lib/screens/database_test_screen.dart:37:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/screens/database_test_screen.dart:53:7 • avoid_print
+warning • Unused import: '../services/local_secure_store.dart' • lib/screens/developer_diagnostics_screen.dart:4:8 • unused_import
+warning • The declaration '_email' isn't referenced • lib/screens/developer_diagnostics_screen.dart:20:14 • unused_element
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/developer_diagnostics_screen.dart:44:46 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/developer_diagnostics_screen.dart:46:65 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeThumbColor instead. This feature was deprecated after v3.31.0-2.0.pre • lib/screens/developer_diagnostics_screen.dart:211:7 • deprecated_member_use
+   info • Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check • lib/screens/health_debug_screen.dart:143:40 • use_build_context_synchronously
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/health_debug_screen.dart:185:56 • deprecated_member_use
+warning • Unused import: '../services/last_sleep_service.dart' • lib/screens/home_placeholder.dart:9:8 • unused_import
+   info • Don't invoke 'print' in production code • lib/screens/home_placeholder.dart:69:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/screens/home_placeholder.dart:73:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/screens/home_placeholder.dart:80:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/screens/home_placeholder.dart:86:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/screens/home_placeholder.dart:99:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/screens/home_placeholder.dart:104:7 • avoid_print
+   info • Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check • lib/screens/home_placeholder.dart:163:23 • use_build_context_synchronously
+   info • Don't invoke 'print' in production code • lib/screens/home_placeholder.dart:197:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/screens/home_placeholder.dart:229:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/screens/home_placeholder.dart:242:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/screens/home_placeholder.dart:256:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/screens/home_placeholder.dart:258:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/screens/home_placeholder.dart:270:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/screens/home_placeholder.dart:272:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/screens/home_placeholder.dart:293:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/screens/home_placeholder.dart:299:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/screens/home_placeholder.dart:303:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/screens/home_placeholder.dart:339:7 • avoid_print
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/home_placeholder.dart:422:57 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/home_placeholder.dart:424:76 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/home_placeholder.dart:605:30 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/home_placeholder.dart:651:51 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/home_placeholder.dart:651:91 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/home_placeholder.dart:716:59 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/home_placeholder.dart:760:37 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/home_placeholder.dart:762:56 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/home_placeholder.dart:802:38 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/home_placeholder.dart:804:57 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/lock_screen.dart:92:44 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/lock_screen.dart:204:50 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/lock_screen.dart:241:41 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/lock_screen.dart:244:43 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/login_screen.dart:105:45 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/login_screen.dart:107:64 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/login_screen.dart:118:43 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/login_screen.dart:120:62 • deprecated_member_use
+   info • Don't invoke 'print' in production code • lib/screens/manual_activity_entry_screen.dart:119:7 • avoid_print
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_activity_entry_screen.dart:251:56 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_activity_entry_screen.dart:268:29 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_activity_entry_screen.dart:270:48 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_activity_entry_screen.dart:280:39 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_activity_entry_screen.dart:299:60 • deprecated_member_use
+   info • 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre • lib/screens/manual_activity_entry_screen.dart:301:13 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_activity_entry_screen.dart:338:53 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_activity_entry_screen.dart:340:52 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_activity_entry_screen.dart:375:69 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_activity_entry_screen.dart:398:74 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_activity_entry_screen.dart:414:68 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_activity_entry_screen.dart:415:69 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_activity_entry_screen.dart:427:75 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_activity_entry_screen.dart:432:33 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_activity_entry_screen.dart:491:74 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_activity_entry_screen.dart:582:45 • deprecated_member_use
+   info • Don't invoke 'print' in production code • lib/screens/manual_activity_list_screen.dart:40:7 • avoid_print
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_activity_list_screen.dart:88:70 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_activity_list_screen.dart:92:50 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_activity_list_screen.dart:98:50 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_activity_list_screen.dart:124:29 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_activity_list_screen.dart:126:48 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_activity_list_screen.dart:164:55 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_activity_list_screen.dart:192:43 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_activity_list_screen.dart:220:35 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_activity_list_screen.dart:248:22 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_activity_list_screen.dart:250:41 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_activity_list_screen.dart:288:37 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_sleep_entry_sheet.dart:305:29 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_sleep_entry_sheet.dart:307:48 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_sleep_entry_sheet.dart:324:35 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_sleep_entry_sheet.dart:337:37 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_sleep_entry_sheet.dart:340:57 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_sleep_entry_sheet.dart:340:89 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_sleep_entry_sheet.dart:374:37 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_sleep_entry_sheet.dart:377:60 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_sleep_entry_sheet.dart:377:92 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_sleep_entry_sheet.dart:409:36 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_sleep_entry_sheet.dart:411:55 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_sleep_entry_sheet.dart:440:29 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_sleep_entry_sheet.dart:442:48 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_sleep_entry_sheet.dart:459:35 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_sleep_entry_sheet.dart:490:37 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_sleep_entry_sheet.dart:490:69 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_sleep_entry_sheet.dart:493:54 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_sleep_entry_sheet.dart:503:58 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_sleep_entry_sheet.dart:533:45 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_sleep_entry_sheet.dart:554:29 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_sleep_entry_sheet.dart:556:48 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_sleep_entry_sheet.dart:573:35 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_sleep_entry_sheet.dart:603:45 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_sleep_entry_sheet.dart:603:77 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_sleep_entry_sheet.dart:606:62 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_sleep_entry_sheet.dart:629:29 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_sleep_entry_sheet.dart:631:48 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_sleep_entry_sheet.dart:648:35 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_sleep_entry_sheet.dart:677:53 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_sleep_entry_sheet.dart:677:86 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_sleep_entry_sheet.dart:680:70 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_sleep_entry_sheet.dart:690:74 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_sleep_entry_sheet.dart:741:29 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_sleep_entry_sheet.dart:743:48 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_sleep_entry_sheet.dart:760:35 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_sleep_entry_sheet.dart:798:54 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_sleep_entry_sheet.dart:798:85 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_sleep_entry_sheet.dart:799:38 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_sleep_entry_sheet.dart:804:40 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_sleep_entry_sheet.dart:847:34 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/manual_sleep_entry_sheet.dart:849:53 • deprecated_member_use
+warning • Unused import: '../widgets/score_card.dart' • lib/screens/readiness_dashboard_screen.dart:14:8 • unused_import
+   info • Don't invoke 'print' in production code • lib/screens/readiness_dashboard_screen.dart:59:7 • avoid_print
+warning • The value of the local variable 'db' isn't used • lib/screens/readiness_dashboard_screen.dart:91:13 • unused_local_variable
+   info • Statements in an if should be enclosed in a block • lib/screens/readiness_dashboard_screen.dart:108:26 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/screens/readiness_dashboard_screen.dart:109:18 • curly_braces_in_flow_control_structures
+   info • Unnecessary use of 'toList' in a spread • lib/screens/readiness_dashboard_screen.dart:172:90 • unnecessary_to_list_in_spreads
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/readiness_dashboard_screen.dart:272:62 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/readiness_dashboard_screen.dart:288:66 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/readiness_dashboard_screen.dart:327:49 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/readiness_dashboard_screen.dart:328:51 • deprecated_member_use
+   info • Unnecessary use of multiple underscores • lib/screens/readiness_dashboard_screen.dart:357:31 • unnecessary_underscores
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/readiness_dashboard_screen.dart:379:95 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/readiness_dashboard_screen.dart:387:117 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/readiness_dashboard_screen.dart:407:22 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/readiness_dashboard_screen.dart:409:41 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/readiness_dashboard_screen.dart:437:59 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/readiness_dashboard_screen.dart:455:62 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/readiness_dashboard_screen.dart:455:170 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/readiness_dashboard_screen.dart:470:140 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/readiness_dashboard_screen.dart:564:182 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/readiness_dashboard_screen.dart:564:270 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/register_screen.dart:136:43 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/register_screen.dart:138:62 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/register_screen.dart:360:42 • deprecated_member_use
+   info • Unnecessary use of 'toList' in a spread • lib/screens/score_detail_screen.dart:85:95 • unnecessary_to_list_in_spreads
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/score_detail_screen.dart:178:26 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/score_detail_screen.dart:180:45 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/score_detail_screen.dart:227:111 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/score_detail_screen.dart:238:53 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/score_detail_screen.dart:239:71 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/score_detail_screen.dart:250:66 • deprecated_member_use
+warning • The value of the field '_textScale' isn't used • lib/screens/settings_screen.dart:33:10 • unused_field
+warning • The value of the field '_reduceMotion' isn't used • lib/screens/settings_screen.dart:34:8 • unused_field
+warning • Dead code • lib/screens/settings_screen.dart:77:40 • dead_code
+warning • The left operand can't be null, so the right operand is never executed • lib/screens/settings_screen.dart:77:43 • dead_null_aware_expression
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/settings_screen.dart:186:57 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/settings_screen.dart:584:33 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/settings_screen.dart:586:52 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/settings_screen.dart:589:37 • deprecated_member_use
+   info • 'activeColor' is deprecated and shouldn't be used. Use activeThumbColor instead. This feature was deprecated after v3.31.0-2.0.pre • lib/screens/settings_screen.dart:612:7 • deprecated_member_use
+   info • Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check • lib/screens/settings_screen.dart:697:17 • use_build_context_synchronously
+   info • Don't invoke 'print' in production code • lib/screens/sleep_debug_screen.dart:67:7 • avoid_print
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/wearable_selection_screen.dart:226:46 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/screens/wearable_selection_screen.dart:272:44 • deprecated_member_use
+   info • Don't invoke 'print' in production code • lib/services/all_scores_calculator.dart:32:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/all_scores_calculator.dart:64:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/all_scores_calculator.dart:99:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/all_scores_calculator.dart:143:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/all_scores_calculator.dart:187:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/all_scores_calculator.dart:227:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/all_scores_calculator.dart:228:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/all_scores_calculator.dart:229:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/all_scores_calculator.dart:270:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/all_scores_calculator.dart:278:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/all_scores_calculator.dart:280:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/all_scores_calculator.dart:283:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/backend_sync_service.dart:37:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/backend_sync_service.dart:59:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/backend_sync_service.dart:60:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/backend_sync_service.dart:61:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/backend_sync_service.dart:62:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/backend_sync_service.dart:108:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/backend_sync_service.dart:111:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/backend_sync_service.dart:117:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/backend_sync_service.dart:118:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/backend_sync_service.dart:122:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/backend_sync_service.dart:125:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/backend_sync_service.dart:127:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/backend_sync_service.dart:155:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/backend_sync_service.dart:159:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/backend_sync_service.dart:168:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/backend_sync_service.dart:174:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/backend_sync_service.dart:177:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/backend_sync_service.dart:181:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/backend_sync_service.dart:182:7 • avoid_print
+warning • The declaration '_confidenceToNumeric' isn't referenced • lib/services/backend_sync_service.dart:193:10 • unused_element
+   info • Don't invoke 'print' in production code • lib/services/biometric_auth_service.dart:47:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/biometric_auth_service.dart:57:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/biometric_auth_service.dart:91:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/biometric_auth_service.dart:105:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/biometric_auth_service.dart:112:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/biometric_auth_service.dart:119:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/biometric_auth_service.dart:141:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/biometric_auth_service.dart:174:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/biometric_auth_service.dart:183:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/biometric_auth_service.dart:231:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/biometric_auth_service.dart:266:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/biometric_auth_service.dart:301:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/biometric_auth_service.dart:312:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/biometric_auth_service.dart:320:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/biometric_auth_service.dart:334:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/biometric_auth_service.dart:344:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/biometric_auth_service.dart:366:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/biometric_auth_service.dart:382:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/biometric_auth_service.dart:399:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/cert_pinning_service.dart:44:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/cert_pinning_service.dart:48:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/cert_pinning_service.dart:67:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/cert_pinning_service.dart:87:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/cert_pinning_service.dart:108:15 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/cert_pinning_service.dart:130:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/cert_pinning_service.dart:217:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/daily_readiness_service.dart:13:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/daily_readiness_service.dart:25:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/daily_readiness_service.dart:28:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/daily_readiness_service.dart:41:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/daily_readiness_service.dart:52:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/daily_readiness_service.dart:59:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/daily_readiness_service.dart:77:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/daily_readiness_service.dart:116:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/daily_readiness_service.dart:119:7 • avoid_print
+   info • 'isInDebugMode' is deprecated and shouldn't be used. Use WorkmanagerDebug handlers instead. This parameter has no effect • lib/services/daily_readiness_service.dart:129:7 • deprecated_member_use
+   info • Don't invoke 'print' in production code • lib/services/daily_readiness_service.dart:134:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/daily_readiness_service.dart:151:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/daily_readiness_service.dart:165:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/daily_readiness_service.dart:178:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/daily_readiness_service.dart:184:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/dashboard_sync_service.dart:28:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/dashboard_sync_service.dart:49:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/dashboard_sync_service.dart:53:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/dashboard_sync_service.dart:57:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/dashboard_sync_service.dart:58:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/dashboard_sync_service.dart:204:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/dashboard_sync_service.dart:216:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/dashboard_sync_service.dart:221:5 • avoid_print
+warning • Unused import: '../database/health_data_repository.dart' • lib/services/data_availability_checker.dart:2:8 • unused_import
+warning • Unused import: '../algorithms/baseline_calculator.dart' • lib/services/data_availability_checker.dart:3:8 • unused_import
+   info • Don't invoke 'print' in production code • lib/services/device_auth_service.dart:37:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/device_auth_service.dart:46:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/device_auth_service.dart:66:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/device_auth_service.dart:69:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/device_auth_service.dart:73:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/health_service.dart:9:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/health_service.dart:61:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/health_service.dart:67:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/health_service.dart:68:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/health_service.dart:71:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/health_service.dart:72:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/health_service.dart:78:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/health_service.dart:85:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/health_service.dart:86:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/health_service.dart:89:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/health_service.dart:90:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/health_service.dart:98:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/health_service.dart:103:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/health_service.dart:105:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/health_service.dart:109:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/health_service.dart:118:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/health_service.dart:134:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/health_service.dart:137:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/health_service.dart:141:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/health_service.dart:154:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/health_service.dart:155:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/health_service.dart:164:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/health_service.dart:167:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/health_service.dart:173:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/health_service.dart:176:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/health_service.dart:179:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/health_service.dart:180:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/health_service.dart:181:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/health_service.dart:182:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/health_service.dart:183:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/health_service.dart:188:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/health_service.dart:189:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/health_service.dart:190:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/health_service.dart:191:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/health_service.dart:192:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/health_service.dart:193:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/health_service.dart:194:7 • avoid_print
+   info • The imported package 'path_provider' isn't a dependency of the importing package • lib/services/key_rotation_service.dart:6:8 • depend_on_referenced_packages
+   info • Don't invoke 'print' in production code • lib/services/key_rotation_service.dart:98:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/key_rotation_service.dart:115:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/key_rotation_service.dart:116:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/key_rotation_service.dart:198:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/key_rotation_service.dart:199:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/key_rotation_service.dart:207:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/key_rotation_service.dart:220:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/key_rotation_service.dart:238:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/key_rotation_service.dart:276:13 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/key_rotation_service.dart:292:15 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/key_rotation_service.dart:301:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/last_sleep_service.dart:56:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/last_sleep_service.dart:77:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/last_sleep_service.dart:88:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/last_sleep_service.dart:95:7 • avoid_print
+   info • Statements in an if should be enclosed in a block • lib/services/last_sleep_service.dart:115:35 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/services/last_sleep_service.dart:116:38 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/services/last_sleep_service.dart:117:37 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/services/last_sleep_service.dart:118:39 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/services/last_sleep_service.dart:119:39 • curly_braces_in_flow_control_structures
+   info • Don't invoke 'print' in production code • lib/services/last_sleep_service.dart:145:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/last_sleep_service.dart:146:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/last_sleep_service.dart:149:7 • avoid_print
+   info • Use an initializing formal to assign a parameter to a field • lib/services/live_sync_controller.dart:18:9 • prefer_initializing_formals
+   info • Use an initializing formal to assign a parameter to a field • lib/services/live_sync_controller.dart:19:9 • prefer_initializing_formals
+   info • Don't invoke 'print' in production code • lib/services/live_sync_controller.dart:20:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/live_sync_controller.dart:21:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/live_sync_controller.dart:46:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/live_sync_controller.dart:50:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/live_sync_controller.dart:57:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/live_sync_controller.dart:61:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/live_sync_controller.dart:64:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/live_sync_controller.dart:67:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/live_sync_controller.dart:76:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/live_sync_controller.dart:77:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/live_sync_controller.dart:81:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/live_sync_controller.dart:87:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/live_sync_controller.dart:91:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/live_sync_controller.dart:97:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/live_sync_controller.dart:98:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/live_sync_controller.dart:99:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/live_sync_controller.dart:126:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/live_sync_controller.dart:127:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/live_sync_controller.dart:135:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/live_sync_controller.dart:137:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/live_sync_controller.dart:145:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/live_sync_controller.dart:155:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/live_sync_controller.dart:162:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/live_sync_controller.dart:166:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/live_sync_controller.dart:177:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/live_sync_controller.dart:188:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/live_sync_controller.dart:191:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/live_sync_controller.dart:192:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/live_sync_controller.dart:193:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/live_sync_controller.dart:194:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/live_sync_controller.dart:195:7 • avoid_print
+   info • Unnecessary braces in a string interpolation • lib/services/live_sync_controller.dart:195:32 • unnecessary_brace_in_string_interps
+   info • Unnecessary braces in a string interpolation • lib/services/live_sync_controller.dart:195:60 • unnecessary_brace_in_string_interps
+   info • Don't invoke 'print' in production code • lib/services/live_sync_controller.dart:196:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/live_sync_controller.dart:201:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/live_sync_controller.dart:202:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/live_sync_controller.dart:203:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/live_sync_controller.dart:204:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/live_sync_controller.dart:205:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/live_sync_controller.dart:223:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/live_sync_controller.dart:224:7 • avoid_print
+   info • Unnecessary braces in a string interpolation • lib/services/live_sync_controller.dart:224:32 • unnecessary_brace_in_string_interps
+   info • Unnecessary braces in a string interpolation • lib/services/live_sync_controller.dart:224:60 • unnecessary_brace_in_string_interps
+   info • Don't invoke 'print' in production code • lib/services/live_sync_controller.dart:225:7 • avoid_print
+   info • Use interpolation to compose strings and values • lib/services/live_sync_controller.dart:240:13 • prefer_interpolation_to_compose_strings
+   info • The imported package 'crypto' isn't a dependency of the importing package • lib/services/local_secure_store.dart:4:8 • depend_on_referenced_packages
+   info • Don't invoke 'print' in production code • lib/services/local_secure_store.dart:194:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/local_secure_store.dart:260:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/manual_load_service.dart:70:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/sleep_source_resolver.dart:58:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/sleep_source_resolver.dart:72:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/sleep_source_resolver.dart:87:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/sleep_source_resolver.dart:102:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/sleep_source_resolver.dart:116:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/sleep_source_resolver.dart:145:7 • avoid_print
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/theme/app_theme.dart:85:29 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/theme/app_theme.dart:99:29 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/theme/app_theme.dart:204:42 • deprecated_member_use
+warning • Unused import: 'dart:math' • lib/utils/validation_utils.dart:1:8 • unused_import
+   info • Don't invoke 'print' in production code • lib/widgets/app_lock_wrapper.dart:53:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/widgets/app_lock_wrapper.dart:79:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/widgets/app_lock_wrapper.dart:122:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/widgets/app_lock_wrapper.dart:145:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/widgets/app_lock_wrapper.dart:159:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/widgets/app_lock_wrapper.dart:181:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/widgets/health_status_card.dart:38:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/widgets/health_status_card.dart:41:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/widgets/health_status_card.dart:68:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/widgets/health_status_card.dart:71:9 • avoid_print
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/logging_dialogs.dart:15:65 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/logging_dialogs.dart:62:65 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/logging_dialogs.dart:111:65 • deprecated_member_use
+   info • Don't use 'BuildContext's across async gaps • lib/widgets/logging_dialogs.dart:164:25 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps • lib/widgets/logging_dialogs.dart:165:32 • use_build_context_synchronously
+   info • Statements in an if should be enclosed in a block • lib/widgets/main_scaffold.dart:23:44 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/widgets/main_scaffold.dart:24:49 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/widgets/main_scaffold.dart:26:48 • curly_braces_in_flow_control_structures
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/main_scaffold.dart:30:68 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/main_scaffold.dart:34:42 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/manual_logging_fab.dart:91:40 • deprecated_member_use
+warning • The value of the local variable 'confidenceBadge' isn't used • lib/widgets/score_card.dart:28:11 • unused_local_variable
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/security_privacy_wrapper.dart:56:37 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/security_privacy_wrapper.dart:70:47 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/sleep_status_card.dart:128:31 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/sleep_status_card.dart:129:31 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/sleep_status_card.dart:133:48 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/sleep_status_card.dart:155:33 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/sleep_status_card.dart:156:33 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/sleep_status_card.dart:160:49 • deprecated_member_use
+warning • The value of the local variable 'shouldShowPrompt' isn't used • lib/widgets/sleep_status_card.dart:218:11 • unused_local_variable
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/sleep_status_card.dart:231:31 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/sleep_status_card.dart:232:31 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/sleep_status_card.dart:236:47 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/sleep_status_card.dart:263:49 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/sleep_status_card.dart:265:68 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/sleep_status_card.dart:294:64 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/sleep_status_card.dart:371:33 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/sleep_status_card.dart:372:33 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/sleep_status_card.dart:376:49 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/trend_sparkline.dart:94:19 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/widgets/trend_sparkline.dart:95:19 • deprecated_member_use
+
+586 issues found. (ran in 2.0s)

@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../routes.dart';
 import '../services/local_secure_store.dart';
+import '../services/biometric_auth_service.dart';
 import '../config/app_config.dart' as import_config;
 
 class LoginScreen extends StatefulWidget {
@@ -22,6 +23,30 @@ class _LoginScreenState extends State<LoginScreen> {
 
   bool _loading = false;
   String? _error;
+  bool _biometricAvailable = false;
+  bool _faceIdEnabled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkBiometrics();
+  }
+
+  Future<void> _checkBiometrics() async {
+    final available = await BiometricAuthService.instance.isBiometricAvailable();
+    if (available) {
+      final enabled = await BiometricAuthService.instance.isBiometricEnabled();
+      setState(() {
+        _biometricAvailable = true;
+        _faceIdEnabled = enabled;
+      });
+
+      // Automatically trigger biometric sign-in if enabled
+      if (enabled) {
+        Future.delayed(const Duration(milliseconds: 500), _biometricSignIn);
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -55,22 +80,62 @@ class _LoginScreenState extends State<LoginScreen> {
 
     widget.session.setSignedIn(true, email: _email.text.trim().toLowerCase());
 
-    // Router redirect will push to /raw-consent automatically
-    context.go('/home');
+    // Check if user has completed biometric setup
+    final biometricService = BiometricAuthService.instance;
+    final hasCompletedSetup = await biometricService.hasCompletedBiometricSetup();
+    
+    if (!mounted) return;
+    
+    if (!hasCompletedSetup) {
+      // First login - show biometric setup screen
+      context.go('/biometric-setup');
+    } else {
+      // Already set up - go directly to home
+      context.go('/home');
+    }
+  }
+
+  Future<void> _biometricSignIn() async {
+    if (!_biometricAvailable || !_faceIdEnabled) return;
+
+    final authenticated = await BiometricAuthService.instance.authenticate(
+      reason: 'Sign in to AUIX with ${BiometricAuthService.instance.getBiometricTypeName()}',
+    );
+
+    if (authenticated) {
+      // Get the stored email and sign in
+      final storedEmail = await LocalSecureStore.instance.getStoredUserEmail();
+      if (storedEmail != null) {
+        widget.session.setSignedIn(true, email: storedEmail);
+        if (mounted) context.go('/home');
+      } else {
+        // No stored email, user needs to enter it first
+        if (mounted) {
+          setState(() {
+            _error = "Please enter your email and sign in once with password to enable biometric login.";
+          });
+        }
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 440),
-            child: Padding(
-              padding: const EdgeInsets.all(18),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
+        child: SingleChildScrollView(
+          child: Container(
+            constraints: BoxConstraints(
+              minHeight: MediaQuery.of(context).size.height - MediaQuery.of(context).padding.top - MediaQuery.of(context).padding.bottom,
+            ),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 440),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 24),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
                   // AUIX Logo
                   Image.asset('assets/auix_logo.png', height: 60),
                   const SizedBox(height: 20),
@@ -149,12 +214,53 @@ class _LoginScreenState extends State<LoginScreen> {
                                 return null;
                               },
                             ),
-                            const SizedBox(height: 14),
-                            FilledButton(
-                              onPressed: _loading ? null : _submit,
-                              child: _loading
-                                  ? const SizedBox(height: 22, width: 22, child: CircularProgressIndicator(strokeWidth: 2))
-                                  : const Text("Sign In"),
+                            const SizedBox(height: 8),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                if (_biometricAvailable)
+                                  Row(
+                                    children: [
+                                      Switch(
+                                        value: _faceIdEnabled,
+                                        onChanged: (v) {
+                                          setState(() => _faceIdEnabled = v);
+                                          BiometricAuthService.instance.setBiometricEnabled(v);
+                                        },
+                                        activeColor: Theme.of(context).primaryColor,
+                                      ),
+                                      const Text("Face ID", style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
+                                    ],
+                                  )
+                                else
+                                  const SizedBox.shrink(),
+                                TextButton(
+                                  onPressed: () => context.push('/forgot-password'),
+                                  child: const Text("Forgot Password?", style: TextStyle(fontSize: 13)),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: FilledButton(
+                                    onPressed: _loading ? null : _submit,
+                                    child: _loading
+                                        ? const SizedBox(height: 22, width: 22, child: CircularProgressIndicator(strokeWidth: 2))
+                                        : const Text("Sign In"),
+                                  ),
+                                ),
+                                if (_biometricAvailable && _faceIdEnabled) ...[
+                                  const SizedBox(width: 12),
+                                  IconButton.filledTonal(
+                                    onPressed: _loading ? null : _biometricSignIn,
+                                    icon: const Icon(Icons.face),
+                                    iconSize: 28,
+                                    padding: const EdgeInsets.all(12),
+                                  ),
+                                ],
+                              ],
                             ),
                             const SizedBox(height: 8),
                             TextButton(
@@ -166,7 +272,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 20),
+x                  const SizedBox(height: 20),
                   TextButton.icon(
                     onPressed: _showServerSettings,
                     icon: const Icon(Icons.settings, size: 16),

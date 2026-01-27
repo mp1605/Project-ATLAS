@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../models/user_profile.dart';
 import '../routes.dart';
+import '../utils/validation_utils.dart';
 import '../services/local_secure_store.dart';
 import '../models/wearable_type.dart';
 import '../adapters/health_adapter_factory.dart';
@@ -32,6 +33,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _background = TextEditingController();
 
   bool _loading = false;
+  bool _obscurePass = true;
   String? _error;
 
   // Selected wearable device
@@ -65,7 +67,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       return;
     }
 
-    final normalizedEmail = _email.text.trim().toLowerCase();
+    final normalizedEmail = ValidationUtils.normalizeEmail(_email.text);
     final existing = await LocalSecureStore.instance.getRegisteredUser(normalizedEmail);
 
     if (!mounted) return;
@@ -80,10 +82,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     final profile = UserProfile(
       email: normalizedEmail,
-      fullName: _name.text.trim(),
-      age: int.parse(_age.text.trim()),
-      heightCm: double.parse(_height.text.trim()),
-      weightKg: double.parse(_weight.text.trim()),
+      fullName: ValidationUtils.normalize(_name.text),
+      age: int.parse(ValidationUtils.normalize(_age.text)),
+      heightCm: double.parse(ValidationUtils.normalize(_height.text)),
+      weightKg: double.parse(ValidationUtils.normalize(_weight.text)),
       backgroundInfo: _background.text.trim().isEmpty ? null : _background.text.trim(),
     );
 
@@ -157,7 +159,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                       labelText: "Full Name",
                                       prefixIcon: Icon(Icons.person_outline),
                                     ),
-                                    validator: (v) => (v ?? "").trim().isEmpty ? "Name required" : null,
+                                    validator: ValidationUtils.validateName,
                                   ),
                                 ),
                               ],
@@ -173,13 +175,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                       labelText: "Age",
                                       prefixIcon: Icon(Icons.numbers),
                                     ),
-                                    validator: (v) {
-                                      final s = (v ?? "").trim();
-                                      final n = int.tryParse(s);
-                                      if (n == null) return "Valid age required";
-                                      if (n < 16 || n > 80) return "Age looks incorrect";
-                                      return null;
-                                    },
+                                    validator: ValidationUtils.validateAge,
                                   ),
                                 ),
                                 const SizedBox(width: 12),
@@ -191,12 +187,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                       labelText: "Height (cm)",
                                       prefixIcon: Icon(Icons.height),
                                     ),
-                                    validator: (v) {
-                                      final n = double.tryParse((v ?? "").trim());
-                                      if (n == null) return "Valid height required";
-                                      if (n < 100 || n > 250) return "Height looks incorrect";
-                                      return null;
-                                    },
+                                    validator: ValidationUtils.validateHeight,
                                   ),
                                 ),
                               ],
@@ -209,12 +200,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 labelText: "Weight (kg)",
                                 prefixIcon: Icon(Icons.monitor_weight_outlined),
                               ),
-                              validator: (v) {
-                                final n = double.tryParse((v ?? "").trim());
-                                if (n == null) return "Valid weight required";
-                                if (n < 30 || n > 250) return "Weight looks incorrect";
-                                return null;
-                              },
+                              validator: ValidationUtils.validateWeight,
                             ),
 
                             const SizedBox(height: 16),
@@ -229,27 +215,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 labelText: "Email",
                                 prefixIcon: Icon(Icons.alternate_email),
                               ),
-                              validator: (v) {
-                                final s = (v ?? "").trim();
-                                if (s.isEmpty) return "Email required";
-                                if (!s.contains("@")) return "Enter a valid email";
-                                return null;
-                              },
+                              validator: ValidationUtils.validateEmail,
                             ),
                             const SizedBox(height: 12),
                             TextFormField(
                               controller: _pass,
-                              obscureText: true,
-                              decoration: const InputDecoration(
+                              obscureText: _obscurePass,
+                              decoration: InputDecoration(
                                 labelText: "Password",
-                                prefixIcon: Icon(Icons.lock_outline),
+                                prefixIcon: const Icon(Icons.lock_outline),
+                                suffixIcon: IconButton(
+                                  icon: Icon(_obscurePass ? Icons.visibility_off : Icons.visibility),
+                                  onPressed: () => setState(() => _obscurePass = !_obscurePass),
+                                ),
                               ),
-                              validator: (v) {
-                                final s = (v ?? "");
-                                if (s.isEmpty) return "Password required";
-                                if (s.length < 6) return "Minimum 6 characters";
-                                return null;
-                              },
+                              validator: ValidationUtils.validatePassword,
                             ),
                             const SizedBox(height: 12),
                             TextFormField(

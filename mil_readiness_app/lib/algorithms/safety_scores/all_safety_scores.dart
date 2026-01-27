@@ -17,7 +17,7 @@ class StressLoadCalculator {
     final edaValue = await _getValue(userEmail, 'ELECTRODERMAL_ACTIVITY', date);
     final hrValue = await _getValue(userEmail, 'HEART_RATE', date);
     final hrvValue = await _getValue(userEmail, 'HRV_RMSSD', date);
-    final mindfulness = await _getValue(userEmail, 'MINDFULNESS', date);
+    final mindfulness = await _getDailySum(userEmail, 'MINDFULNESS', date);
     
     final edaBase = await baseline.calculate(userEmail: userEmail, metricType: 'ELECTRODERMAL_ACTIVITY', endDate: date);
     final hrBase = await baseline.calculate(userEmail: userEmail, metricType: 'HEART_RATE', endDate: date);
@@ -28,8 +28,8 @@ class StressLoadCalculator {
     final zHRV = baseline.computeZScore(hrvValue, hrvBase);
     
     final stressRaw = 0.5 * math.max(0, zEDA) + 0.3 * math.max(0, zHR) + 0.2 * math.max(0, -zHRV);
-    final mind = math.min(1.0, mindfulness / 10);
-    final score = (50 + 25 * stressRaw - 10 * mind).clamp(0, 100);
+    final mind = math.min(1.0, mindfulness / 10.0);
+    final score = (50 + 25 * stressRaw - 10 * mind).clamp(0.0, 100.0);
     
     return {'score': score, 'confidence': edaValue > 0 ? 'medium' : 'low'};
   }
@@ -38,6 +38,25 @@ class StressLoadCalculator {
     final r = await db.query('health_metrics', where: 'user_email = ? AND metric_type = ? AND timestamp <= ?',
         whereArgs: [userEmail, type, date.millisecondsSinceEpoch], orderBy: 'timestamp DESC', limit: 1);
     return r.isEmpty ? 0.0 : (r.first['value'] as num).toDouble();
+  }
+
+  Future<double> _getDailySum(String userEmail, String type, DateTime date) async {
+    final startOfDay = DateTime(date.year, date.month, date.day);
+    final nextDay = startOfDay.add(const Duration(days: 1));
+    
+    final r = await db.rawQuery('''
+      SELECT SUM(value) as total 
+      FROM health_metrics 
+      WHERE user_email = ? AND metric_type = ? 
+      AND timestamp >= ? AND timestamp < ?
+    ''', [
+      userEmail, 
+      type, 
+      startOfDay.millisecondsSinceEpoch, 
+      nextDay.millisecondsSinceEpoch
+    ]);
+    
+    return (r.first['total'] as num?)?.toDouble() ?? 0.0;
   }
 }
 
@@ -69,10 +88,14 @@ class InjuryRiskCalculator {
   }
   
   Future<double> _getWeeklySum(String userEmail, String type, DateTime date) async {
-    final start = date.subtract(Duration(days: 7));
-    final r = await db.query('health_metrics', where: 'user_email = ? AND metric_type = ? AND timestamp >= ? AND timestamp <= ?',
-        whereArgs: [userEmail, type, start.millisecondsSinceEpoch, date.millisecondsSinceEpoch]);
-    double sum = 0.0; for (var row in r) { sum += (row["value"] as num).toDouble(); } return sum;
+    final start = DateTime(date.year, date.month, date.day).subtract(const Duration(days: 7));
+    final r = await db.rawQuery('''
+      SELECT SUM(value) as total 
+      FROM health_metrics 
+      WHERE user_email = ? AND metric_type = ? 
+      AND timestamp >= ? AND timestamp <= ?
+    ''', [userEmail, type, start.millisecondsSinceEpoch, date.millisecondsSinceEpoch]);
+    return (r.first['total'] as num?)?.toDouble() ?? 0.0;
   }
 }
 
@@ -177,26 +200,26 @@ class DailyActivityCalculator {
   DailyActivityCalculator(this.db);
   
   Future<Map<String, dynamic>> calculate({required String userEmail, required DateTime date}) async {
-    final steps = await _getValue(userEmail, 'STEPS', date);
-    final distance = await _getValue(userEmail, 'DISTANCE_WALKING_RUNNING', date);
-    final floors = await _getValue(userEmail, 'FLIGHTS_CLIMBED', date);
-    final energy = await _getValue(userEmail, 'ACTIVE_ENERGY_BURNED', date);
+    final steps = await _getDailySum(userEmail, 'STEPS', date);
+    final distance = await _getDailySum(userEmail, 'DISTANCE_WALKING_RUNNING', date);
+    final floors = await _getDailySum(userEmail, 'FLIGHTS_CLIMBED', date);
+    final energy = await _getDailySum(userEmail, 'ACTIVE_ENERGY_BURNED', date);
     
-    final stepsScore = (100 * math.min(1.0, steps / 10000)).clamp(0, 100);
-    final distScore = (100 * math.min(1.0, distance / 8000)).clamp(0, 100);
-    final floorsScore = (100 * math.min(1.0, floors / 20)).clamp(0, 100);
-    final energyScore = (100 * math.min(1.0, energy / 600)).clamp(0, 100);
+    final stepsScore = (100 * math.min(1.0, steps / 10000.0)).clamp(0.0, 100.0);
+    final distScore = (100 * math.min(1.0, distance / 8000.0)).clamp(0.0, 100.0);
+    final floorsScore = (100 * math.min(1.0, floors / 20.0)).clamp(0.0, 100.0);
+    final energyScore = (100 * math.min(1.0, energy / 600.0)).clamp(0.0, 100.0);
     
     final score = (0.35 * stepsScore + 0.25 * distScore + 0.15 * floorsScore + 0.25 * energyScore);
     return {
-      'score': score, 
+      'score': score.toDouble(), 
       'confidence': 'high',
       'components': {
-        'steps': steps,
-        'distance_m': distance,
-        'floors': floors,
-        'energy_kcal': energy,
-        'step_score': stepsScore,
+        'steps': steps.toDouble(),
+        'distance_m': distance.toDouble(),
+        'floors': floors.toDouble(),
+        'energy_kcal': energy.toDouble(),
+        'step_score': stepsScore.toDouble(),
       }
     };
   }
@@ -205,6 +228,25 @@ class DailyActivityCalculator {
     final r = await db.query('health_metrics', where: 'user_email = ? AND metric_type = ? AND timestamp <= ?',
         whereArgs: [userEmail, type, date.millisecondsSinceEpoch], orderBy: 'timestamp DESC', limit: 1);
     return r.isEmpty ? 0.0 : (r.first['value'] as num).toDouble();
+  }
+
+  Future<double> _getDailySum(String userEmail, String type, DateTime date) async {
+    final startOfDay = DateTime(date.year, date.month, date.day);
+    final nextDay = startOfDay.add(const Duration(days: 1));
+    
+    final r = await db.rawQuery('''
+      SELECT SUM(value) as total 
+      FROM health_metrics 
+      WHERE user_email = ? AND metric_type = ? 
+      AND timestamp >= ? AND timestamp < ?
+    ''', [
+      userEmail, 
+      type, 
+      startOfDay.millisecondsSinceEpoch, 
+      nextDay.millisecondsSinceEpoch
+    ]);
+    
+    return (r.first['total'] as num?)?.toDouble() ?? 0.0;
   }
 }
 
@@ -219,7 +261,11 @@ class AllSafetyScoresCalculator {
   Future<ScoreResult> calculateStressLoad({required String userEmail, required DateTime date}) async {
     final calc = StressLoadCalculator(db: db, baseline: baseline);
     final res = await calc.calculate(userEmail: userEmail, date: date);
-    return ScoreResult(score: res['score'], confidence: res['confidence'], components: res['components'] ?? {});
+    return ScoreResult(
+      score: (res['score'] as num).toDouble(), 
+      confidence: (res['confidence'] as String), 
+      components: (res['components'] as Map<String, dynamic>?) ?? {}
+    );
   }
   
   Future<ScoreResult> calculateInjuryRisk({
@@ -236,15 +282,23 @@ class AllSafetyScoresCalculator {
       acwr: 1.0, 
       fatigueScore: fatigueScore,
       sleepAsleep: 420.0,
-      targetSleep: profile.targetSleep ~/ 60,
+      targetSleep: profile.targetSleep ?? 480,
     );
-    return ScoreResult(score: res['score'], confidence: res['confidence'], components: res['components'] ?? {});
+    return ScoreResult(
+      score: (res['score'] as num).toDouble(), 
+      confidence: (res['confidence'] as String), 
+      components: (res['components'] as Map<String, dynamic>?) ?? {}
+    );
   }
   
   Future<ScoreResult> calculateCardioRespStability({required String userEmail, required DateTime date}) async {
     final calc = CardioRespStabilityCalculator(db: db, baseline: baseline);
     final res = await calc.calculate(userEmail: userEmail, date: date);
-    return ScoreResult(score: res['score'], confidence: res['confidence'], components: res['components'] ?? {});
+    return ScoreResult(
+      score: (res['score'] as num).toDouble(), 
+      confidence: (res['confidence'] as String), 
+      components: (res['components'] as Map<String, dynamic>?) ?? {}
+    );
   }
   
   Future<ScoreResult> calculateIllnessRisk({
@@ -257,15 +311,23 @@ class AllSafetyScoresCalculator {
       userEmail: userEmail,
       date: date,
       sleepAsleep: 420.0,
-      targetSleep: profile.targetSleep ~/ 60,
+      targetSleep: profile.targetSleep ?? 480,
     );
-    return ScoreResult(score: res['score'], confidence: res['confidence'], components: res['components'] ?? {});
+    return ScoreResult(
+      score: (res['score'] as num).toDouble(), 
+      confidence: (res['confidence'] as String), 
+      components: (res['components'] as Map<String, dynamic>?) ?? {}
+    );
   }
   
   Future<ScoreResult> calculateDailyActivity({required String userEmail, required DateTime date}) async {
     final calc = DailyActivityCalculator(db);
     final res = await calc.calculate(userEmail: userEmail, date: date);
-    return ScoreResult(score: res['score'], confidence: res['confidence'], components: res['components'] ?? {});
+    return ScoreResult(
+      score: (res['score'] as num).toDouble(), 
+      confidence: (res['confidence'] as String), 
+      components: (res['components'] as Map<String, dynamic>?) ?? {}
+    );
   }
   
   Future<ScoreResult> calculateWorkCapacity({
@@ -276,7 +338,11 @@ class AllSafetyScoresCalculator {
   }) async {
     final calc = WorkCapacityCalculator(db);
     final res = await calc.calculate(recoveryScore: recoveryScore, sleepScore: sleepScore);
-    return ScoreResult(score: res['score'], confidence: res['confidence'], components: res['components'] ?? {});
+    return ScoreResult(
+      score: (res['score'] as num).toDouble(), 
+      confidence: (res['confidence'] as String), 
+      components: (res['components'] as Map<String, dynamic>?) ?? {}
+    );
   }
 }
 

@@ -1,10 +1,7 @@
 import '../database/secure_database_manager.dart';
-
 import 'dart:math';
-import '../database/health_data_repository.dart';
-import 'package:sqflite_sqlcipher/sqflite.dart';
 import '../models/readiness/sleep_score.dart';
-import 'baseline_calculator.dart';
+import '../services/sleep_source_resolver.dart';
 
 /// Calculates sleep quality score (E2) using 4 components
 /// 
@@ -13,6 +10,8 @@ import 'baseline_calculator.dart';
 /// 2. Stage ratio - Deep + REM (30% weight)
 /// 3. Fragmentation - wake time (20% weight)
 /// 4. Regularity - consistent timing (10% weight)
+/// 
+/// Supports both auto (Apple Watch) and manual sleep entries
 class SleepScoreCalculator {
   /// Target sleep duration in hours
   static const double targetSleepHours = 7.5;
@@ -32,39 +31,129 @@ class SleepScoreCalculator {
   static const double maxRegularityPenalty = 2.0;
 
   /// Calculate sleep score for a given date
+  /// 
+  /// Uses SleepSourceResolver to get the best available sleep data
+  /// (auto from Apple Watch, or manual entry from user)
   static Future<SleepScore?> calculate({
     required String userEmail,
     required DateTime date,
   }) async {
-    // Get sleep data for the night (query from evening of date to morning of next day)
+    // Format date for SleepSourceResolver (YYYY-MM-DD)
+    final dateStr = '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+    
+    // Resolve sleep source (auto vs manual)
+    final resolvedSleep = await SleepSourceResolver.getSleepForDate(userEmail, dateStr);
+    
+    if (resolvedSleep.isMissing) {
+      print('⚠️ No sleep data for $date (source: ${resolvedSleep.source})');
+      return null;
+    }
+
+    final totalSleepMinutes = resolvedSleep.minutes.toDouble();
+    final totalSleepHours = totalSleepMinutes / 60.0;
+
+    // Component 1: Duration adequacy (sigmoid) - works for both auto and manual
+    final d = _sigmoid((totalSleepHours - targetSleepHours) / durationSensitivity);
+
+    double s, f, regularityScore;
+
+    if (resolvedSleep.source == 'manual' && resolvedSleep.manualSleepData != null) {
+      // === MANUAL SLEEP: Use quality ratings ===
+      final manual = resolvedSleep.manualSleepData!;
+      
+      // Stage component from sleep quality rating (1-5 → 0-1)
+      final qualityRating = manual.sleepQuality1to5 ?? 3;
+      s = (qualityRating - 1) / 4.0; // Maps 1-5 to 0-1
+      
+      // Fragmentation from wake frequency (0=none, 3=many → invert to 0-1)
+      final wakeFreq = manual.wakeFrequency ?? 1;
+      f = 1 - (wakeFreq / 3.0); // Maps 0-3 to 1-0
+      
+      // Regularity from rested feeling (1-5 → 0-1)
+      final restedRating = manual.restedFeeling1to5 ?? 3;
+      regularityScore = (restedRating - 1) / 4.0; // Maps 1-5 to 0-1
+      
+      print('📝 Using MANUAL sleep: ${totalSleepHours.toStringAsFixed(1)}h, quality=$qualityRating, wakeFreq=$wakeFreq');
+      
+    } else {
+      // === AUTO SLEEP: Use actual stage data ===
+      final stageData = await _getAutoSleepStages(userEmail, date);
+      
+      if (stageData != null) {
+        final deepMinutes = stageData['deep'] ?? 0.0;
+        final remMinutes = stageData['rem'] ?? 0.0;
+        final awakeMinutes = stageData['awake'] ?? 0.0;
+        
+        // Component 2: Stages (deep + REM ratio)
+        final stageRatio = (deepMinutes + remMinutes) / totalSleepMinutes;
+        s = _clip((stageRatio - targetStageRatio) / stageRatioRange, 0, 1);
+        
+        // Component 3: Fragmentation (lower is better, inverted)
+        final fragmentation = awakeMinutes / totalSleepMinutes;
+        f = 1 - _clip((fragmentation - targetFragmentation) / fragmentationRange, 0, 1);
+      } else {
+        // No stage data - use neutral values
+        s = 0.5;
+        f = 0.5;
+      }
+      
+      // Component 4: Regularity
+      final sleepMidpoint = resolvedSleep.sleepStart != null && resolvedSleep.sleepEnd != null
+          ? resolvedSleep.sleepStart!.add(Duration(minutes: (totalSleepMinutes / 2).round()))
+          : DateTime(date.year, date.month, date.day, 2, 30); // Default to 2:30 AM
+          
+      regularityScore = await _calculateRegularity(
+        userEmail: userEmail,
+        sleepMidpoint: sleepMidpoint,
+      );
+      
+      print('🍎 Using AUTO sleep: ${totalSleepHours.toStringAsFixed(1)}h');
+    }
+
+    // Combined score (weighted)
+    final totalScore = 100 * (0.40 * d + 0.30 * s + 0.20 * f + 0.10 * regularityScore);
+
+    final score = SleepScore(
+      totalScore: totalScore,
+      duration: d * 100,
+      stages: s * 100,
+      fragmentation: f * 100,
+      regularity: regularityScore * 100,
+      totalSleepHours: totalSleepHours,
+      deepMinutes: 0, // TODO: populate from stage data if available
+      remMinutes: 0,
+      awakeMinutes: 0,
+      sleepMidpoint: DateTime(date.year, date.month, date.day, 2, 30),
+      source: resolvedSleep.source,
+    );
+
+    print('✅ Sleep score for $date: ${totalScore.toStringAsFixed(1)} (source: ${resolvedSleep.source})');
+    return score;
+  }
+
+  /// Get auto sleep stage data from database
+  static Future<Map<String, double>?> _getAutoSleepStages(String userEmail, DateTime date) async {
     final sleepStart = DateTime(date.year, date.month, date.day, 20, 0); // 8 PM
     final sleepEnd = sleepStart.add(Duration(hours: 14)); // Next day 10 AM
 
     final db = await SecureDatabaseManager.instance.database;
     
-    // Get sleep metrics
     final sleepMetrics = await db.query(
       'health_metrics',
       where: 'user_email = ? AND timestamp >= ? AND timestamp <= ? AND '
-             '(metric_type = ? OR metric_type = ? OR metric_type = ? OR metric_type = ?)',
+             '(metric_type = ? OR metric_type = ? OR metric_type = ?)',
       whereArgs: [
         userEmail,
         sleepStart.millisecondsSinceEpoch,
         sleepEnd.millisecondsSinceEpoch,
-        'SLEEP_ASLEEP',
         'SLEEP_DEEP',
         'SLEEP_REM',
         'SLEEP_AWAKE',
       ],
     );
 
-    if (sleepMetrics.isEmpty) {
-      print('⚠️ No sleep data for $date');
-      return null;
-    }
+    if (sleepMetrics.isEmpty) return null;
 
-    // Extract values (sum if multiple records)
-    double totalSleepMinutes = 0;
     double deepMinutes = 0;
     double remMinutes = 0;
     double awakeMinutes = 0;
@@ -74,9 +163,6 @@ class SleepScoreCalculator {
       final value = (metric['value'] as num).toDouble();
       
       switch (type) {
-        case 'SLEEP_ASLEEP':
-          totalSleepMinutes += value;
-          break;
         case 'SLEEP_DEEP':
           deepMinutes += value;
           break;
@@ -89,52 +175,11 @@ class SleepScoreCalculator {
       }
     }
 
-    if (totalSleepMinutes == 0) {
-      print('⚠️ Total sleep time is zero for $date');
-      return null;
-    }
-
-    final totalSleepHours = totalSleepMinutes / 60.0;
-
-    // Calculate sleep midpoint (approximate as middle of sleep window)
-    // In production, use actual sleep start/end from HealthKit
-    final sleepMidpoint = sleepStart.add(Duration(minutes: (totalSleepMinutes / 2).round()));
-
-    // Component 1: Duration adequacy (sigmoid)
-    final d = _sigmoid((totalSleepHours - targetSleepHours) / durationSensitivity);
-
-    // Component 2: Stages (deep + REM ratio)
-    final stageRatio = (deepMinutes + remMinutes) / totalSleepMinutes;
-    final s = _clip((stageRatio - targetStageRatio) / stageRatioRange, 0, 1);
-
-    // Component 3: Fragmentation (lower is better, inverted)
-    final fragmentation = awakeMinutes / totalSleepMinutes;
-    final f = 1 - _clip((fragmentation - targetFragmentation) / fragmentationRange, 0, 1);
-
-    // Component 4: Regularity
-    final regularityScore = await _calculateRegularity(
-      userEmail: userEmail,
-      sleepMidpoint: sleepMidpoint,
-    );
-
-    // Combined score (weighted)
-    final totalScore = 100 * (0.40 * d + 0.30 * s + 0.20 * f + 0.10 * regularityScore);
-
-    final score = SleepScore(
-      totalScore: totalScore,
-      duration: d * 100,
-      stages: s * 100,
-      fragmentation: f * 100,
-      regularity: regularityScore * 100,
-      totalSleepHours: totalSleepHours,
-      deepMinutes: deepMinutes,
-      remMinutes: remMinutes,
-      awakeMinutes: awakeMinutes,
-      sleepMidpoint: sleepMidpoint,
-    );
-
-    print('✅ Sleep score for $date: $score');
-    return score;
+    return {
+      'deep': deepMinutes,
+      'rem': remMinutes,
+      'awake': awakeMinutes,
+    };
   }
 
   /// Calculate regularity component (0-1)

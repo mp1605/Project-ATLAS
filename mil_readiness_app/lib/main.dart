@@ -5,6 +5,9 @@ import 'services/local_secure_store.dart';
 import 'services/daily_readiness_service.dart';
 import 'config/app_config.dart';
 import 'theme/app_theme.dart';  // Professional theme
+import 'widgets/app_lock_wrapper.dart'; // Biometric lock wrapper
+
+import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,21 +26,44 @@ Future<void> main() async {
 
   final session = SessionController();
 
-   // ✅ TEST MODE: Always start signed out (forces Login every app launch)
-  await LocalSecureStore.instance.clearSession();
+  // Restore session & theme (if any)
+  final prefs = await SharedPreferences.getInstance();
+  
+  // PATCH: Clear iOS Keychain on fresh install (prevent persistent data survival)
+  const String kFreshInstallFlag = 'v1_fresh_install_checked';
+  if (!prefs.containsKey(kFreshInstallFlag)) {
+    print('🔄 Fresh installation detected. Purging legacy secure storage...');
+    await LocalSecureStore.instance.clearAllData();
+    await prefs.setBool(kFreshInstallFlag, true);
+  }
 
-  // Do NOT restore session in this mode
-  session.setSignedIn(false, email: null);
+  final email = await LocalSecureStore.instance.getActiveSessionEmail();
+  final themeStr = await LocalSecureStore.instance.getString('pref_theme');
+  
+  // Restore briefing status
+  final briefingCompleted = prefs.getBool('briefing_completed') ?? false;
+  session.setBriefingCompleted(briefingCompleted);
 
-  // Restore session (if any)
-  //final email = await LocalSecureStore instance.getActiveSessionEmail();
-  //if (email != null && email.isNotEmpty) {
-    //session.setSignedIn(true, email: email);
-  //}
+  if (email != null && email.isNotEmpty) {
+    session.setSignedIn(true, email: email);
+  }
+
+  // Set initial theme
+  if (themeStr != null) {
+    session.setThemeMode(
+      themeStr == 'dark' ? ThemeMode.dark : (themeStr == 'light' ? ThemeMode.light : ThemeMode.system)
+    );
+  }
 
   session.setReady(true);
 
   final router = buildRouter(session);
 
-  runApp(MilReadinessApp(router: router));
+  // Wrap app with biometric lock for security
+  runApp(
+    AppLockWrapper(
+      child: MilReadinessApp(router: router, session: session),
+    ),
+  );
 }
+

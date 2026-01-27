@@ -1,18 +1,19 @@
 import '../database/secure_database_manager.dart';
-
-import 'dart:math';
-import 'package:sqflite_sqlcipher/sqflite.dart';
 import '../models/readiness/training_load.dart';
+import '../services/manual_load_service.dart';
 
 /// Calculates TRIMP (Training Impulse) from heart rate data (B5)
 /// 
 /// TRIMP = Σ (heart rate reserve ratio) for all workout minutes
 /// where reserve ratio = (HR - HRrest) / (HRmax - HRrest)
+/// 
+/// Also includes manual activity load from user-entered workouts
 class TrainingLoadCalculator {
   /// Default max HR formula: 220 - age
   static int estimateMaxHR(int age) => 220 - age;
 
   /// Calculate TRIMP for a specific date
+  /// Combines auto HR-based TRIMP with manual activity RPE-based load
   static Future<TrainingLoad?> calculate({
     required String userEmail,
     required DateTime date,
@@ -25,46 +26,69 @@ class TrainingLoadCalculator {
     final restingHR = await _getRestingHR(userEmail, date);
     if (restingHR == null) {
       print('⚠️ No resting HR available for $date');
+      // Still calculate manual load even without resting HR
+      final manualResult = await ManualLoadService.calculateForDate(
+        userEmail: userEmail,
+        date: date,
+      );
+      
+      if (manualResult.totalLoad > 0) {
+        return TrainingLoad(
+          trimp: manualResult.totalLoad,
+          workoutMinutes: manualResult.totalMinutes,
+          averageHeartRate: 0,
+          maxHeartRateUsed: maxHR,
+          restingHeartRate: 0,
+          manualLoad: manualResult.totalLoad,
+          autoLoad: 0,
+        );
+      }
       return null;
     }
 
-    // Get workout heart rate samples for the day
+    // Get workout heart rate samples for the day (auto-detected)
     final hrSamples = await _getWorkoutHeartRates(userEmail, date);
-    if (hrSamples.isEmpty) {
-      print('ℹ️ No workout data for $date');
-      return TrainingLoad(
-        trimp: 0,
-        workoutMinutes: 0,
-        averageHeartRate: restingHR,
-        maxHeartRateUsed: maxHR,
-        restingHeartRate: restingHR,
-      );
-    }
-
-    // Calculate TRIMP (sum of reserve ratios)
-    double trimp = 0;
+    
+    // Calculate auto TRIMP (sum of reserve ratios)
+    double autoTrimp = 0;
     double totalHR = 0;
+    int autoWorkoutMinutes = 0;
 
-    for (var hr in hrSamples) {
-      // Reserve ratio: (HR - HRrest) / (HRmax - HRrest)
-      final reserve = (hr - restingHR) / (maxHR - restingHR);
-      final clampedReserve = reserve.clamp(0.0, 1.0);
-      trimp += clampedReserve;
-      totalHR += hr;
+    if (hrSamples.isNotEmpty) {
+      for (var hr in hrSamples) {
+        // Reserve ratio: (HR - HRrest) / (HRmax - HRrest)
+        final reserve = (hr - restingHR) / (maxHR - restingHR);
+        final clampedReserve = reserve.clamp(0.0, 1.0);
+        autoTrimp += clampedReserve;
+        totalHR += hr;
+      }
+      autoWorkoutMinutes = hrSamples.length; // Assume 1 sample per minute
     }
 
-    final avgHR = totalHR / hrSamples.length;
-    final workoutMinutes = hrSamples.length; // Assume 1 sample per minute
+    final avgHR = hrSamples.isNotEmpty ? totalHR / hrSamples.length : restingHR;
+
+    // Get manual activity load
+    final manualResult = await ManualLoadService.calculateForDate(
+      userEmail: userEmail,
+      date: date,
+    );
+
+    // Combine auto and manual load
+    final totalTrimp = autoTrimp + manualResult.totalLoad;
+    final totalMinutes = autoWorkoutMinutes + manualResult.totalMinutes;
 
     final load = TrainingLoad(
-      trimp: trimp,
-      workoutMinutes: workoutMinutes,
+      trimp: totalTrimp,
+      workoutMinutes: totalMinutes,
       averageHeartRate: avgHR,
       maxHeartRateUsed: maxHR,
       restingHeartRate: restingHR,
+      manualLoad: manualResult.totalLoad,
+      autoLoad: autoTrimp,
     );
 
     print('✅ Training load for $date: $load');
+    print('   Auto TRIMP: ${autoTrimp.toStringAsFixed(1)}, Manual load: ${manualResult.totalLoad.toStringAsFixed(1)}');
     return load;
   }
 

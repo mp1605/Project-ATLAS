@@ -14,6 +14,9 @@ class SleepScore {
   final double remMinutes;
   final double awakeMinutes;
   final DateTime sleepMidpoint;
+  
+  // Source of sleep data ('auto', 'manual', or 'none')
+  final String source;
 
   const SleepScore({
     required this.totalScore,
@@ -26,11 +29,15 @@ class SleepScore {
     required this.remMinutes,
     required this.awakeMinutes,
     required this.sleepMidpoint,
+    this.source = 'auto',
   });
+
+  /// Check if sleep data came from manual entry
+  bool get isManual => source == 'manual';
 
   @override
   String toString() {
-    return 'SleepScore(total=$totalScore, duration=$duration, '
-           'stages=$stages, frag=$fragmentation, reg=$regularity)';
+    return 'SleepScore(total=${totalScore.toStringAsFixed(1)}, source=$source, '
+           'duration=${duration.toStringAsFixed(0)}, stages=${stages.toStringAsFixed(0)})';
   }
 }

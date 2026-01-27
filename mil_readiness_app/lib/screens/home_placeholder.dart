@@ -7,6 +7,7 @@ import '../database/secure_database_manager.dart';
 import '../services/local_secure_store.dart';
 import '../services/live_sync_controller.dart';
 import '../services/last_sleep_service.dart';
+import '../services/sleep_source_resolver.dart';
 import '../adapters/health_adapter_factory.dart';
 import '../models/wearable_type.dart';
 import '../repositories/manual_activity_repository.dart';
@@ -49,6 +50,7 @@ class _HomePlaceholderState extends State<HomePlaceholder> {
     _initializeLiveSync();
   }
   
+  
   /// Request Health permissions automatically if not already granted
   Future<void> _requestHealthPermissionsIfNeeded() async {
     final email = widget.session.email;
@@ -57,26 +59,38 @@ class _HomePlaceholderState extends State<HomePlaceholder> {
       return;
     }
 
-    print('🔍 Starting permission check for $email...');
+    print('🔍 Checking Health permissions for $email...');
 
     try {
       final adapter = HealthAdapterFactory.createAdapter(WearableType.appleWatch);
       
-      // Check actual iOS permission status
-      print('  → Checking iOS permission status...');
-      final hasPerms = await adapter.hasPermissions();
-      print('  → iOS hasPermissions result: $hasPerms');
+      // iOS doesn't reliably tell us permission status via hasPermissions()
+      // Instead, try to actually READ data - if we get data, permissions are granted
+      print('  → Testing if we can read Health data...');
       
-      if (hasPerms) {
-        // We have permissions - update stored flag and continue
+      final testMetrics = await adapter.getMetrics(window: const Duration(hours: 24));
+      
+      if (testMetrics.isNotEmpty) {
+        // We successfully read data - permissions are working!
+        print('✅ Health permissions verified - got ${testMetrics.length} data points');
         await LocalSecureStore.instance.setHealthAuthorizedFor(email, true);
-        print('✅ Health permissions already granted by iOS');
+        return; // No need to prompt
+      }
+      
+      // No data returned - could be:
+      // 1. Permissions not granted
+      // 2. No data in HealthKit yet (new watch, no workouts)
+      // 
+      // Check if we've already prompted this user before
+      final alreadyAsked = await LocalSecureStore.instance.getHealthAuthorizedFor(email);
+      if (alreadyAsked) {
+        // User was already prompted - don't spam them
+        print('ℹ️ Already prompted for permissions before - not showing dialog again');
         return;
       }
-
-      // iOS doesn't have permissions - ALWAYS show dialog on fresh login
-      // (Don't check stored flag because it persists after app deletion)
-      print('🔐 iOS permissions NOT granted - showing permission dialog...');
+      
+      // First time - show permission dialog
+      print('🔐 First time user - showing Health permission dialog...');
       
       // Show explanation dialog with solid, readable styling
       if (mounted) {
@@ -247,8 +261,9 @@ class _HomePlaceholderState extends State<HomePlaceholder> {
         print('    Type: ${hrvResults.first['metric_type']}, Value: ${hrvResults.first['value']}');
       }
 
-      // Get LATEST SLEEP SESSION (not SUM!) using LastSleepService
-      final lastSleep = await LastSleepService.getLastSleep(widget.session.email!);
+      // Get LATEST SLEEP - uses SleepSourceResolver to pick best source (auto or manual)
+      final todayDate = SleepSourceResolver.getTodayWakeDate();
+      final resolvedSleep = await SleepSourceResolver.getSleepForDate(widget.session.email!, todayDate);
 
       if (mounted) {
         setState(() {
@@ -259,8 +274,8 @@ class _HomePlaceholderState extends State<HomePlaceholder> {
           if (hrvResults.isNotEmpty && hrvResults.first['value'] != null) {
             _hrv = hrvResults.first['value'].toString().split('.')[0];
           }
-          if (lastSleep != null) {
-            final hours = lastSleep.totalMinutes / 60.0;
+          if (!resolvedSleep.isMissing) {
+            final hours = resolvedSleep.minutes / 60.0;
             _sleep = hours.toStringAsFixed(1);
           }
         });
@@ -435,6 +450,11 @@ class _HomePlaceholderState extends State<HomePlaceholder> {
                       
                       // Sync Status Card
                       _buildSyncStatusCard(),
+
+                      const SizedBox(height: 24),
+                      
+                      // Privacy Summary Card
+                      _buildPrivacySummaryCard(),
 
                       const SizedBox(height: 20),
                       
@@ -760,5 +780,48 @@ class _HomePlaceholderState extends State<HomePlaceholder> {
     if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
     if (diff.inHours < 24) return '${diff.inHours}h ago';
     return '${diff.inDays}d ago';
+  }
+
+
+  Widget _buildPrivacySummaryCard() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: AppTheme.glassCard(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.shield_outlined, color: AppTheme.accentGreen, size: 24),
+              const SizedBox(width: 12),
+              Text('PRIVACY SUMMARY', style: AppTheme.titleStyle),
+            ],
+          ),
+          const Divider(height: 24, color: AppTheme.glassBorder),
+          _buildPrivacyItem(Icons.lock_person_outlined, 'Local Encryption', 'FIPS 140-2 compliant AES-256'),
+          const SizedBox(height: 12),
+          _buildPrivacyItem(Icons.cloud_off_outlined, 'Strictly Local', 'Raw metrics never leave this device'),
+          const SizedBox(height: 12),
+          _buildPrivacyItem(Icons.timer_outlined, 'Auto-Cleanup', 'Data expires after 30 days of inactivity'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPrivacyItem(IconData icon, String title, String subtitle) {
+    return Row(
+      children: [
+        Icon(icon, size: 20, color: AppTheme.textGray),
+        const SizedBox(width: 12),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+            Text(subtitle, style: AppTheme.captionStyle.copyWith(fontSize: 11)),
+          ],
+        ),
+      ],
+    );
   }
 }

@@ -16,10 +16,16 @@ class AppTheme {
   
   static const bgDark = Color(0xFF0F172A);
   static const bgDarker = Color(0xFF020617);
-  static const bgCard = Color(0x801E293B); // rgba(30, 41, 59, 0.7)
+  static const bgCard = Color(0x801E293B);
   
-  static const glassBg = Color(0x661E293B); // rgba(30, 41, 59, 0.4)
-  static const glassBorder = Color(0x14FFFFFF); // rgba(255, 255, 255, 0.08)
+  // Light Palette
+  static const bgLight = Color(0xFFF8FAFC); // Slate-50
+  static const bgLightSecondary = Color(0xFFF1F5F9); // Slate-100
+  static const textBlack = Color(0xFF0F172A);
+  static const textDarkGray = Color(0xFF475569);
+  
+  static const glassBg = Color(0x661E293B);
+  static const glassBorder = Color(0x14FFFFFF);
   
   // Gradients
   static const darkGradient = LinearGradient(
@@ -29,6 +35,16 @@ class AppTheme {
       Color(0xFF1E3A5F),
       Color(0xFF0F172A),
       Color(0xFF0A0E1A),
+    ],
+  );
+
+  static const lightGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [
+      Color(0xFFF1F5F9),
+      Color(0xFFF8FAFC),
+      Colors.white,
     ],
   );
   
@@ -43,24 +59,20 @@ class AppTheme {
     fontSize: 24,
     fontWeight: FontWeight.w700,
     letterSpacing: 1.5,
-    color: textWhite,
   );
   
   static TextStyle get titleStyle => GoogleFonts.oswald(
     fontSize: 16,
     fontWeight: FontWeight.w600,
     letterSpacing: 1.0,
-    color: textWhite,
   );
   
   static TextStyle get bodyStyle => GoogleFonts.roboto(
     fontSize: 14,
-    color: textLight,
   );
   
   static TextStyle get captionStyle => GoogleFonts.roboto(
     fontSize: 12,
-    color: textGray,
   );
   
   // Glass Card Decoration
@@ -105,7 +117,7 @@ class AppTheme {
     labelStyle: const TextStyle(color: textGray, fontSize: 14),
     hintStyle: const TextStyle(color: textGray, fontSize: 14),
     filled: true,
-    fillColor: const Color(0x990F172A), // rgba(15, 23, 42, 0.6)
+    fillColor: const Color(0x990F172A),
     border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(8),
       borderSide: const BorderSide(color: glassBorder),
@@ -124,54 +136,29 @@ class AppTheme {
     ),
   );
   
-  // Primary Button Style
-  static ButtonStyle primaryButtonStyle = ElevatedButton.styleFrom(
-    backgroundColor: Colors.transparent,
-    foregroundColor: textWhite,
-    padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-    elevation: 0,
-    textStyle: const TextStyle(
-      fontSize: 16,
-      fontWeight: FontWeight.w600,
-      letterSpacing: 0.5,
-    ),
-  );
-  
-  // Secondary Button Style
-  static ButtonStyle secondaryButtonStyle = ElevatedButton.styleFrom(
-    backgroundColor: glassBg,
-    foregroundColor: textWhite,
-    padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(8),
-      side: const BorderSide(color: glassBorder),
-    ),
-    elevation: 0,
-  );
-  
-  // Full Theme Data
-  static ThemeData get theme => ThemeData(
+  // Dark Theme Data
+  static ThemeData get darkTheme => ThemeData(
     brightness: Brightness.dark,
     primaryColor: primaryCyan,
     scaffoldBackgroundColor: bgDark,
     textTheme: GoogleFonts.robotoTextTheme(ThemeData.dark().textTheme).copyWith(
-      headlineLarge: headingStyle,
-      titleLarge: titleStyle,
-      bodyLarge: bodyStyle,
-      bodyMedium: captionStyle,
+      headlineLarge: headingStyle.copyWith(color: textWhite),
+      titleLarge: titleStyle.copyWith(color: textWhite),
+      bodyLarge: bodyStyle.copyWith(color: textLight),
+      bodyMedium: captionStyle.copyWith(color: textGray),
     ),
     colorScheme: const ColorScheme.dark(
       primary: primaryCyan,
       secondary: primaryBlue,
       surface: bgCard,
+      onSurface: textWhite,
       error: accentRed,
     ),
     appBarTheme: AppBarTheme(
       backgroundColor: Colors.transparent,
       elevation: 0,
       centerTitle: false,
-      titleTextStyle: titleStyle,
+      titleTextStyle: titleStyle.copyWith(color: textWhite),
       iconTheme: const IconThemeData(color: textWhite),
     ),
     cardTheme: CardThemeData(
@@ -182,18 +169,43 @@ class AppTheme {
         side: const BorderSide(color: glassBorder),
       ),
     ),
-    elevatedButtonTheme: ElevatedButtonThemeData(
-      style: primaryButtonStyle,
+  );
+
+  // Light Theme Data
+  static ThemeData get lightTheme => ThemeData(
+    brightness: Brightness.light,
+    primaryColor: primaryBlue,
+    scaffoldBackgroundColor: bgLight,
+    textTheme: GoogleFonts.robotoTextTheme(ThemeData.light().textTheme).copyWith(
+      headlineLarge: headingStyle.copyWith(color: textBlack),
+      titleLarge: titleStyle.copyWith(color: textBlack),
+      bodyLarge: bodyStyle.copyWith(color: textBlack),
+      bodyMedium: captionStyle.copyWith(color: textDarkGray),
     ),
-    inputDecorationTheme: InputDecorationTheme(
-      labelStyle: const TextStyle(color: textGray),
-      hintStyle: const TextStyle(color: textGray),
-      filled: true,
-      fillColor: const Color(0x990F172A),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: glassBorder),
+    colorScheme: const ColorScheme.light(
+      primary: primaryBlue,
+      secondary: primaryCyan,
+      surface: Colors.white,
+      onSurface: textBlack,
+      error: accentRed,
+    ),
+    appBarTheme: AppBarTheme(
+      backgroundColor: Colors.white,
+      elevation: 1,
+      centerTitle: false,
+      titleTextStyle: titleStyle.copyWith(color: textBlack),
+      iconTheme: const IconThemeData(color: textBlack),
+    ),
+    cardTheme: CardThemeData(
+      color: Colors.white,
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: textGray.withOpacity(0.1)),
       ),
     ),
   );
+
+  // Shorthand for backward compatibility (defaults to dark)
+  static ThemeData get theme => darkTheme;
 }
