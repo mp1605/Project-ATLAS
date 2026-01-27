@@ -201,8 +201,7 @@ class CognitiveAlertnessCalculator {
     final edaValue = await _getValue(userEmail, 'ELECTRODERMAL_ACTIVITY', date);
     
     // Mindfulness is a 24-hour total
-    final startSum = date.subtract(const Duration(hours: 24));
-    final mindfulness = await _getSum(userEmail, 'MINDFULNESS', startSum, date);
+    final mindfulness = await _getDailySum(userEmail, 'MINDFULNESS', date);
     
     final remScore = (100 * math.min(1.0, (remValue / (asleepValue + 0.001)) / 0.22)).clamp(0, 100);
     final fragment = (100 - 100 * math.min(1.0, (awakeValue / (asleepValue + 0.001) - 0.05) / 0.10)).clamp(0, 100);
@@ -247,6 +246,25 @@ class CognitiveAlertnessCalculator {
     final r = await db.query('health_metrics', where: 'user_email = ? AND metric_type = ? AND timestamp <= ?',
         whereArgs: [userEmail, type, date.millisecondsSinceEpoch], orderBy: 'timestamp DESC', limit: 1);
     return r.isEmpty ? 0.0 : (r.first['value'] as num).toDouble();
+  }
+
+  Future<double> _getDailySum(String userEmail, String type, DateTime date) async {
+    final startOfDay = DateTime(date.year, date.month, date.day);
+    final nextDay = startOfDay.add(const Duration(days: 1));
+    
+    final r = await db.rawQuery('''
+      SELECT SUM(value) as total 
+      FROM health_metrics 
+      WHERE user_email = ? AND metric_type = ? 
+      AND timestamp >= ? AND timestamp < ?
+    ''', [
+      userEmail, 
+      type, 
+      startOfDay.millisecondsSinceEpoch, 
+      nextDay.millisecondsSinceEpoch
+    ]);
+    
+    return (r.first['total'] as num?)?.toDouble() ?? 0.0;
   }
 }
 
@@ -309,13 +327,21 @@ class AllSpecialtyScoresCalculator {
   Future<ScoreResult> calculateAltitudeScore({required String userEmail, required DateTime date}) async {
     final calc = AltitudeScoreCalculator(db: db, baseline: baseline);
     final res = await calc.calculate(userEmail: userEmail, date: date);
-    return ScoreResult(score: res['score'], confidence: res['confidence'], components: res['components'] ?? {});
+    return ScoreResult(
+      score: (res['score'] as num).toDouble(), 
+      confidence: (res['confidence'] as String), 
+      components: (res['components'] as Map<String, dynamic>?) ?? {}
+    );
   }
   
   Future<ScoreResult> calculateCardiacSafetyPenalty({required String userEmail, required DateTime date}) async {
     final calc = CardiacSafetyCalculator(db: db, baseline: baseline);
     final res = await calc.calculate(userEmail: userEmail, date: date);
-    return ScoreResult(score: res['score'], confidence: res['confidence'], components: res['components'] ?? {});
+    return ScoreResult(
+      score: (res['score'] as num).toDouble(), 
+      confidence: (res['confidence'] as String), 
+      components: (res['components'] as Map<String, dynamic>?) ?? {}
+    );
   }
   
   Future<ScoreResult> calculateSleepDebt({
@@ -329,7 +355,11 @@ class AllSpecialtyScoresCalculator {
       date: date,
       targetSleep: profile.targetSleep, // Use minutes directly
     );
-    return ScoreResult(score: res['score'], confidence: res['confidence'], components: res['components'] ?? {});
+    return ScoreResult(
+      score: (res['score'] as num).toDouble(), 
+      confidence: (res['confidence'] as String), 
+      components: (res['components'] as Map<String, dynamic>?) ?? {}
+    );
   }
   
   Future<ScoreResult> calculateTrainingReadiness({
@@ -347,19 +377,31 @@ class AllSpecialtyScoresCalculator {
       fatigueScore: fatigueScore,
       injuryRisk: injuryRiskScore,
     );
-    return ScoreResult(score: res['score'], confidence: res['confidence'], components: res['components'] ?? {});
+    return ScoreResult(
+      score: (res['score'] as num).toDouble(), 
+      confidence: (res['confidence'] as String), 
+      components: (res['components'] as Map<String, dynamic>?) ?? {}
+    );
   }
   
   Future<ScoreResult> calculateCognitiveAlertness({required String userEmail, required DateTime date}) async {
     final calc = CognitiveAlertnessCalculator(db: db, baseline: baseline);
     final res = await calc.calculate(userEmail: userEmail, date: date);
-    return ScoreResult(score: res['score'], confidence: res['confidence'], components: res['components'] ?? {});
+    return ScoreResult(
+      score: (res['score'] as num).toDouble(), 
+      confidence: (res['confidence'] as String), 
+      components: (res['components'] as Map<String, dynamic>?) ?? {}
+    );
   }
   
   Future<ScoreResult> calculateThermoregulatoryAdaptation({required String userEmail, required DateTime date}) async {
     final calc = ThermoregulatoryAdaptationCalculator(db: db, baseline: baseline);
     final res = await calc.calculate(userEmail: userEmail, date: date);
-    return ScoreResult(score: res['score'], confidence: res['confidence'], components: res['components'] ?? {});
+    return ScoreResult(
+      score: (res['score'] as num).toDouble(), 
+      confidence: (res['confidence'] as String), 
+      components: (res['components'] as Map<String, dynamic>?) ?? {}
+    );
   }
 }
 

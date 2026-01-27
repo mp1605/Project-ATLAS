@@ -20,6 +20,7 @@ class LocalSecureStore {
   static const String _kActiveSessionEmail = "session.active.email";
   static const String _kRawShareConsent = "consent.raw.share"; // "1" or "0"
   static const String _kAuthorizeCompleted = "authorize.completed"; // "1" or "0"
+  static const String _kLastSuccessEmail = "auth.last_success_email";
 
   static String _userKey(String email) => "user.profile.${email.toLowerCase()}";
   static String _scoped(String email, String key) => "$key.${email.toLowerCase()}";
@@ -27,6 +28,10 @@ class LocalSecureStore {
   // Generic read/write for internal services (like DeviceAuth)
   Future<String?> read({required String key}) => _ss.read(key: key);
   Future<void> write({required String key, required String value}) => _ss.write(key: key, value: value);
+  
+  // Convenience methods for preferences
+  Future<String?> getString(String key) => _ss.read(key: key);
+  Future<void> setString(String key, String value) => _ss.write(key: key, value: value);
 
   // ---------- Helpers ----------
   String _randomSalt({int length = 16}) {
@@ -74,8 +79,13 @@ class LocalSecureStore {
 
     if (ok) {
       await _ss.write(key: _kActiveSessionEmail, value: normalized);
+      await _ss.write(key: _kLastSuccessEmail, value: normalized);
     }
     return ok;
+  }
+
+  Future<String?> getStoredUserEmail() async {
+    return _ss.read(key: _kLastSuccessEmail);
   }
 
   Future<String?> getActiveSessionEmail() async {
@@ -235,6 +245,18 @@ class LocalSecureStore {
   Future<DateTime?> getDashboardLastSyncFor(String email) async {
     final value = await _ss.read(key: 'dashboard_last_sync_$email');
     return value != null ? DateTime.tryParse(value) : null;
+  }
+
+  // ---------- Email Verification (Additive/Separate for Compatibility) ----------
+  static const String _kEmailVerified = 'email_verified_v1';
+
+  Future<void> setEmailVerifiedFor(String email, bool verified) async {
+    await _ss.write(key: _scoped(email, _kEmailVerified), value: verified ? "1" : "0");
+  }
+
+  Future<bool> isEmailVerifiedFor(String email) async {
+    final v = await _ss.read(key: _scoped(email, _kEmailVerified));
+    return v == "1";
   }
 
   /// ⚠️ DANGER: Clear ALL stored data (for testing/reset)

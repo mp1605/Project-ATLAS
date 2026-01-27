@@ -5,6 +5,7 @@ import 'fitness_calculator.dart';
 import 'illness_detector.dart';
 import 'banister_model.dart';
 import 'baseline_calculator.dart';
+import 'training_load_calculator.dart';
 import '../models/readiness/readiness_result.dart';
 
 /// Main readiness calculator - combines all components (F1-F2)
@@ -100,8 +101,21 @@ class ReadinessCalculator {
     );
 
     // 7. Calculate PHYSICAL score (F2)
-    // Activity capacity placeholder (could use steps/active energy if available)
-    final activityCapacity = 50.0; // Neutral default
+    // Get training load (includes both auto HR data and manual activity entries)
+    final trainingLoad = await TrainingLoadCalculator.calculate(
+      userEmail: userEmail,
+      date: date,
+      userAge: userAge,
+    );
+    
+    // Convert training load to activity capacity score (0-100)
+    // Higher load = higher activity = higher score (up to a point)
+    double activityCapacity = 50.0; // Default neutral
+    if (trainingLoad != null && trainingLoad.trimp > 0) {
+      // Scale: 0 TRIMP = 30, 50 TRIMP = 70, 100+ TRIMP = 90
+      activityCapacity = _clip(30 + (trainingLoad.trimp * 0.6), 20, 95);
+      print('   Activity load: ${trainingLoad.trimp.toStringAsFixed(1)} TRIMP → capacity: ${activityCapacity.toStringAsFixed(0)}');
+    }
     
     final physical = _clip(
       weightPhysicalReadiness * readiness +

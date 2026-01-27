@@ -30,6 +30,8 @@
 	<string>This app reads health data to compute on-device readiness metrics. Raw data stays on your device.</string>
 	<key>NSHealthUpdateUsageDescription</key>
 	<string>This app may write derived workout summaries if enabled. Raw data stays on your device.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Use Face ID to quickly and securely unlock the app and protect your readiness data.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>

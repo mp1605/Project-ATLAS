@@ -46,6 +46,7 @@ class _ManualSleepEntrySheetState extends State<ManualSleepEntrySheet> {
   final Set<String> _symptoms = {};
   
   bool _isOverride = false;
+  bool _isSaving = false;
 
   @override
   void initState() {
@@ -93,72 +94,88 @@ class _ManualSleepEntrySheetState extends State<ManualSleepEntrySheet> {
   }
 
   Future<void> _save() async {
-    // Validate required fields
-    if (_bedtime == null || _wakeTime == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('⚠️ Please select bedtime and wake time'),
-          backgroundColor: Colors.orange,
-        ),
+    // Prevent double submission
+    if (_isSaving) return;
+    
+    setState(() => _isSaving = true);
+    
+    try {
+      // Validate required fields
+      if (_bedtime == null || _wakeTime == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('⚠️ Please select bedtime and wake time'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+        return;
+      }
+
+      // Calculate sleep duration
+      final wakeDateParsed = DateTime.parse(widget.date);
+      
+      // Build full datetime objects
+      final wakeDateTime = DateTime(
+        wakeDateParsed.year,
+        wakeDateParsed.month,
+        wakeDateParsed.day,
+        _wakeTime!.hour,
+        _wakeTime!.minute,
       );
-      return;
-    }
-
-    // Calculate sleep duration
-    final wakeDateParsed = DateTime.parse(widget.date);
-    
-    // Build full datetime objects
-    final wakeDateTime = DateTime(
-      wakeDateParsed.year,
-      wakeDateParsed.month,
-      wakeDateParsed.day,
-      _wakeTime!.hour,
-      _wakeTime!.minute,
-    );
-    
-    var bedDateTime = DateTime(
-      wakeDateParsed.year,
-      wakeDateParsed.month,
-      wakeDateParsed.day,
-      _bedtime!.hour,
-      _bedtime!.minute,
-    );
-    
-    // If bedtime is "after" wake time, assume it was previous day
-    if (bedDateTime.isAfter(wakeDateTime)) {
-      bedDateTime = bedDateTime.subtract(const Duration(days: 1));
-    }
-    
-    final totalMinutes = wakeDateTime.difference(bedDateTime).inMinutes;
-
-    // Validate duration
-    if (totalMinutes < 60 || totalMinutes > 720) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('⚠️ Sleep duration seems unusual (${(totalMinutes/60).toStringAsFixed(1)}h). Please check times.'),
-          backgroundColor: Colors.orange,
-        ),
+      
+      var bedDateTime = DateTime(
+        wakeDateParsed.year,
+        wakeDateParsed.month,
+        wakeDateParsed.day,
+        _bedtime!.hour,
+        _bedtime!.minute,
       );
-      return;
-    }
+      
+      // If bedtime is "after" wake time, assume it was previous day
+      if (bedDateTime.isAfter(wakeDateTime)) {
+        bedDateTime = bedDateTime.subtract(const Duration(days: 1));
+      }
+      
+      final totalMinutes = wakeDateTime.difference(bedDateTime).inMinutes;
 
-    final entry = ManualSleepEntry.create(
-      userEmail: widget.userEmail,
-      date: widget.date,
-      totalSleepMinutes: totalMinutes,
-      sleepStart: bedDateTime,
-      sleepEnd: wakeDateTime,
-      sleepQuality1to5: _sleepQuality,
-      wakeFrequency: _wakeFrequency,
-      restedFeeling1to5: _restedFeeling,
-      physiologicalSymptoms: _symptoms.isEmpty ? null : _symptoms.toList(),
-      isUserOverride: _isOverride,
-    );
+      // Validate duration (0-18 hours)
+      if (totalMinutes < 0 || totalMinutes > 1080) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('⚠️ Sleep duration seems unusual (${(totalMinutes/60).toStringAsFixed(1)}h). Please check times.'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+        return;
+      }
 
-    await ManualSleepRepository.instance.upsertManualSleep(entry);
+      final entry = ManualSleepEntry.create(
+        userEmail: widget.userEmail,
+        date: widget.date,
+        totalSleepMinutes: totalMinutes,
+        sleepStart: bedDateTime,
+        sleepEnd: wakeDateTime,
+        sleepQuality1to5: _sleepQuality,
+        wakeFrequency: _wakeFrequency,
+        restedFeeling1to5: _restedFeeling,
+        physiologicalSymptoms: _symptoms.isEmpty ? null : _symptoms.toList(),
+        isUserOverride: _isOverride,
+      );
 
-    if (mounted) {
-      Navigator.of(context).pop(true);
+      await ManualSleepRepository.instance.upsertManualSleep(entry);
+
+      if (mounted) {
+        Navigator.of(context).pop(true);
+      }
+    } catch (e) {
+      print('❌ Error saving sleep entry: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
     }
   }
 

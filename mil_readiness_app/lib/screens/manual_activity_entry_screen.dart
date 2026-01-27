@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../models/manual_activity_entry.dart';
 import '../repositories/manual_activity_repository.dart';
 import '../services/local_secure_store.dart';
+import '../utils/validation_utils.dart';
 import '../theme/app_theme.dart';
 
 class ManualActivityEntryScreen extends StatefulWidget {
@@ -40,10 +41,33 @@ class _ManualActivityEntryScreenState extends State<ManualActivityEntryScreen> {
   HeatLevel? _heatLevel;
   final _notesController = TextEditingController();
 
+  // FocusNodes for blur validation
+  final _durationFocus = FocusNode();
+  final _distanceFocus = FocusNode();
+  final _loadFocus = FocusNode();
+
   bool _isSaving = false;
+
+   @override
+  void initState() {
+    super.initState();
+    _durationFocus.addListener(_onFocusChange);
+    _distanceFocus.addListener(_onFocusChange);
+    _loadFocus.addListener(_onFocusChange);
+  }
+
+  void _onFocusChange() {
+    if (!_durationFocus.hasFocus && !_distanceFocus.hasFocus && !_loadFocus.hasFocus) {
+       // Trigger validation when any field loses focus
+       _formKey.currentState?.validate();
+    }
+  }
 
   @override
   void dispose() {
+    _durationFocus.dispose();
+    _distanceFocus.dispose();
+    _loadFocus.dispose();
     _customNameController.dispose();
     _durationController.dispose();
     _painLocationController.dispose();
@@ -146,16 +170,12 @@ class _ManualActivityEntryScreenState extends State<ManualActivityEntryScreen> {
                           validator: (v) => v == null || v.isEmpty ? 'Required' : null,
                         ),
                       _buildDateTimePicker(),
-                      _buildTextField(
+                       _buildTextField(
                         controller: _durationController,
+                        focusNode: _durationFocus,
                         label: 'Duration (minutes)',
                         keyboardType: TextInputType.number,
-                        validator: (v) {
-                          if (v == null || v.isEmpty) return 'Required';
-                          final val = int.tryParse(v);
-                          if (val == null || val <= 0 || val > 600) return 'Val 1-600';
-                          return null;
-                        },
+                        validator: ValidationUtils.validateActivityDuration,
                       ),
                       _buildRpeSlider(),
                       _buildFeelSegmented(),
@@ -296,6 +316,7 @@ class _ManualActivityEntryScreenState extends State<ManualActivityEntryScreen> {
   Widget _buildTextField({
     required TextEditingController controller,
     required String label,
+    FocusNode? focusNode,
     String? hint,
     TextInputType? keyboardType,
     String? Function(String?)? validator,
@@ -306,6 +327,7 @@ class _ManualActivityEntryScreenState extends State<ManualActivityEntryScreen> {
       padding: const EdgeInsets.only(bottom: 16),
       child: TextFormField(
         controller: controller,
+        focusNode: focusNode,
         keyboardType: keyboardType,
         validator: validator,
         maxLines: maxLines,

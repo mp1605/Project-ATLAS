@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:sqflite_sqlcipher/sqflite.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:path/path.dart';
@@ -20,29 +21,62 @@ class SecureDatabaseManager {
   static final SecureDatabaseManager instance = SecureDatabaseManager._();
   
   static Database? _database;
+  static Completer<Database>? _initCompleter;
   static const String _dbName = 'health_data_secure.db';
   static const String _keyName = 'db_encryption_key_v1';
   
   // Secure storage for encryption key
   static final _secureStorage = FlutterSecureStorage(
-    iOptions: IOSOptions(
+    iOptions: const IOSOptions(
       // Only accessible when device unlocked
       // NOT backed up to iCloud
+      accessibility: KeychainAccessibility.first_unlock_this_device,
     ),
-    aOptions: AndroidOptions(
+    aOptions: const AndroidOptions(
       encryptedSharedPreferences: true,
-      // Uses Android Keystore
-      // Hardware-backed encryption (StrongBox on supported devices)
     ),
   );
 
   /// Get or create the encrypted database
   Future<Database> get database async {
+    // 1. Return already opened database
     if (_database != null && _database!.isOpen) {
       return _database!;
     }
     
-    return await _initDatabase();
+    // 2. If initialization is already in progress, wait for it
+    if (_initCompleter != null) {
+      return _initCompleter!.future;
+    }
+
+    // 3. Start initialization
+    _initCompleter = Completer<Database>();
+    try {
+      final db = await _initDatabase();
+      _initCompleter!.complete(db);
+      return db;
+    } catch (e) {
+      final completer = _initCompleter;
+      _initCompleter = null; // Allow retry on failure
+      
+      // If we got a memory/decryption error, we might need a nuclear reset
+      if (e.toString().contains('out of memory') || e.toString().contains('open_failed')) {
+        print('🚨 DB CRITICAL ERROR: Decryption failed or corrupted. Attempting recovery...');
+        try {
+          await deleteDatabase();
+          final db = await _initDatabase();
+          completer?.complete(db);
+          return db;
+        } catch (recoveryError) {
+          print('❌ DB RECOVERY FAILED: $recoveryError');
+          completer?.completeError(recoveryError);
+          rethrow;
+        }
+      }
+      
+      completer?.completeError(e);
+      rethrow;
+    }
   }
 
   /// ⚠️ DANGER: Delete the entire encrypted database
@@ -93,36 +127,28 @@ class SecureDatabaseManager {
     
     print('📁 Database path: $path');
 
-    // Open encrypted database
-    _database = await openDatabase(
-      path,
-      version: 4,  // Increment version to 4 for manual_activity_entries
-      onCreate: _onCreate,
-      onUpgrade: _onUpgrade,
-      password: encryptionKey,  // SQLCipher encryption password
-      singleInstance: true,
-      onConfigure: (db) async {
-        // Maximum security SQLCipher settings
-        print('⚙️ Configuring SQLCipher security settings...');
-        
-        // Page size: 4096 bytes (optimal for mobile)
-        await db.rawQuery('PRAGMA cipher_page_size = 4096');
-        
-        // Key derivation iterations: 256000 (high security, slower but more secure)
-        await db.rawQuery('PRAGMA kdf_iter = 256000');
-        
-        // Use strongest HMAC algorithm
-        await db.rawQuery('PRAGMA cipher_hmac_algorithm = HMAC_SHA512');
-        
-        // Use strongest KDF algorithm
-        await db.rawQuery('PRAGMA cipher_kdf_algorithm = PBKDF2_HMAC_SHA512');
-        
-        // Enable foreign keys for data integrity
-        await db.execute('PRAGMA foreign_keys = ON');
-        
-        print('✅ SQLCipher configured with military-grade settings');
-      },
-    );
+    // Open encrypted database with resilient configuration
+    try {
+      _database = await openDatabase(
+        path,
+        version: 7,
+        onCreate: _onCreate,
+        onUpgrade: _onUpgrade,
+        password: encryptionKey,
+        singleInstance: true,
+        onConfigure: (db) async {
+          // Essential settings for SQLCipher
+          await db.execute('PRAGMA foreign_keys = ON');
+          
+          // NOTE: We avoid changing cipher_page_size or kdf_iter here 
+          // if they weren't set consistently at creation time,
+          // as that is the #1 cause of 'out of memory' errors.
+        },
+      );
+    } catch (e) {
+      print('❌ Failed to open database: $e');
+      rethrow;
+    }
 
     // Prevent iCloud/Google backup
     await _preventCloudBackup(path);
@@ -271,6 +297,42 @@ class SecureDatabaseManager {
       ''');
       
       print('✅ Database upgraded to v4');
+    }
+
+    if (oldVersion < 5) {
+      print('📦 Creating day_tags table (v5)...');
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS day_tags (
+          user_email TEXT NOT NULL,
+          date INTEGER NOT NULL,
+          tag TEXT NOT NULL,
+          PRIMARY KEY (user_email, date, tag)
+        )
+      ''');
+      print('✅ Database upgraded to v5');
+    }
+
+    if (oldVersion < 6) {
+      print('📦 Adding coverage column to daily_readiness_scores (v6)...');
+      await db.execute('ALTER TABLE daily_readiness_scores ADD COLUMN coverage TEXT');
+      print('✅ Database upgraded to v6');
+    }
+
+    if (oldVersion < 7) {
+      print('📦 Creating manual_logs table (v7)...');
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS manual_logs (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          user_email TEXT NOT NULL,
+          log_type TEXT NOT NULL,
+          value REAL NOT NULL,
+          unit TEXT,
+          metadata TEXT,
+          logged_at INTEGER NOT NULL
+        )
+      ''');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_manual_logs_user_date ON manual_logs(user_email, logged_at DESC)');
+      print('✅ Database upgraded to v7');
     }
   }
 
@@ -484,6 +546,7 @@ class SecureDatabaseManager {
         -- Metadata
         calculated_at INTEGER NOT NULL,
         confidence TEXT DEFAULT 'medium',
+        coverage TEXT,
         data_points_count INTEGER DEFAULT 0,
         
         PRIMARY KEY (user_email, date),
@@ -527,6 +590,33 @@ class SecureDatabaseManager {
     await db.execute('''
       CREATE INDEX IF NOT EXISTS idx_manual_activity_user_time
       ON manual_activity_entries(user_email, start_time_utc DESC)
+    ''');
+
+    // Day tags table
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS day_tags (
+        user_email TEXT NOT NULL,
+        date INTEGER NOT NULL,
+        tag TEXT NOT NULL,
+        PRIMARY KEY (user_email, date, tag)
+      )
+    ''');
+    // Manual logs table
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS manual_logs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_email TEXT NOT NULL,
+        log_type TEXT NOT NULL,
+        value REAL NOT NULL,
+        unit TEXT,
+        metadata TEXT,
+        logged_at INTEGER NOT NULL
+      )
+    ''');
+
+    await db.execute('''
+      CREATE INDEX IF NOT EXISTS idx_manual_logs_user_date 
+      ON manual_logs(user_email, logged_at DESC)
     ''');
 
     print('✅ Database schema created');

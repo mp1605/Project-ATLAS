@@ -39,10 +39,16 @@ dependencies:
   google_fonts: ^7.0.2  # Professional typography
   http: ^1.2.0  # Dashboard API communication
   uuid: ^4.5.1  # Unique ID generation for manual sleep entries
+  dio: ^5.4.0  # Advanced HTTP client with security features
+  local_auth: ^2.3.0  # Biometric authentication (Face ID/Touch ID)
+  shared_preferences: ^2.2.2  # Regular storage that gets deleted with app uninstall
+  fl_chart: ^1.1.1  # Advanced correlation and trend charts
+  flutter_heatmap_calendar: ^1.0.5  # GitHub-style readiness heatmap
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+  table_calendar: ^3.2.0
 
 dev_dependencies:
   flutter_test:
