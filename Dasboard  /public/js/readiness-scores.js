@@ -1,6 +1,6 @@
 // Readiness Scores Integration with Backend API
 // API Base URL
-const API_BASE_URL = 'http://localhost:3000';
+const API_BASE_URL = 'http://192.168.0.108:3000';
 
 // Score metadata for display
 const scoreMetadata = [
@@ -60,8 +60,9 @@ async function loadReadinessScores() {
     loadingState.style.display = 'block';
 
     try {
-        // Get user ID from page (you can modify this logic)
-        const userId = 'device@test.com'; // This should match the user who submitted scores
+        // ✅ Get user ID from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get('email') || 'meghp169@gmail.com';
 
         // ✅ Fetch latest scores with Bearer token (NO HARDCODED TOKENS)
         const response = await authClient.fetchWithAuth(
@@ -76,9 +77,63 @@ async function loadReadinessScores() {
         const data = await response.json();
         console.log('✅ Loaded readiness scores:', data);
 
+        // Comprehensive mapping of all 18 readiness metrics
+        // Maps legacy or alternative keys to the standardized dashboard names
+        const keyMap = {
+            // Core Readiness (1-6)
+            'readiness': 'readiness',
+            'readiness_score': 'readiness',
+            'recovery': 'recovery',
+            'recovery_score': 'recovery',
+            'sleep_quality': 'sleep_quality',
+            'sleep': 'sleep_quality',
+            'sleep_index': 'sleep_quality',
+            'fatigue_index': 'fatigue_index',
+            'fatigue': 'fatigue_index',
+            'training_load': 'training_load',      // Endurance
+            'endurance': 'training_load',
+            'cardiovascular_strain': 'cardiovascular_strain', // Cardio Fitness
+            'cardio': 'cardiovascular_strain',
+
+            // Safety & Load (7-12)
+            'stress_load': 'stress_load',
+            'stress': 'stress_load',
+            'overtraining_risk': 'overtraining_risk', // Injury Risk
+            'injury': 'overtraining_risk',
+            'autonomic_balance': 'autonomic_balance', // Cardio Stability
+            'cardio_resp': 'autonomic_balance',
+            'illness_risk': 'illness_risk',
+            'illness': 'illness_risk',
+            'physical_status': 'physical_status',    // Daily Activity
+            'activity': 'physical_status',
+            'energy_availability': 'energy_availability', // Work Capacity
+            'capacity': 'energy_availability',
+
+            // Specialty Metrics (13-18)
+            'oxygen_stability': 'oxygen_stability',   // Altitude Score
+            'altitude': 'oxygen_stability',
+            'hrv_deviation': 'hrv_deviation',         // Cardiac Safety
+            'cardiac_safety': 'hrv_deviation',
+            'sleep_debt': 'sleep_debt',
+            'debt': 'sleep_debt',
+            'resting_hr_deviation': 'resting_hr_deviation', // Training Readiness
+            'training_readiness': 'resting_hr_deviation',
+            'respiratory_stability': 'respiratory_stability', // Cognitive Alert
+            'cognitive_alertness': 'respiratory_stability',
+            'acute_chronic_ratio': 'acute_chronic_ratio',  // Thermoregulatory
+            'thermo': 'acute_chronic_ratio'
+        };
+
+        // Normalize scores map
+        const normalizedScores = {};
+        Object.entries(data.scores || {}).forEach(([key, value]) => {
+            const standardKey = keyMap[key] || key;
+            normalizedScores[standardKey] = value;
+        });
+
         // Generate score cards
         const cardsHTML = scoreMetadata.map(meta =>
-            createScoreCard(data.scores, meta)
+            createScoreCard(normalizedScores, meta)
         ).join('');
 
         scoresGrid.innerHTML = cardsHTML;

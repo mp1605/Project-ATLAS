@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../theme/app_theme.dart';
 import '../routes.dart';
+import '../services/session_controller.dart';
 
 class OperationalBriefingScreen extends StatefulWidget {
   final SessionController session;

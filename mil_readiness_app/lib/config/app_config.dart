@@ -1,8 +1,9 @@
 import '../services/local_secure_store.dart';
 
 class AppConfig {
-  // Default base URL (production). Can be overridden by LocalSecureStore.
-  static String apiBaseUrl = 'https://atlas-backend-dx6g.onrender.com';
+  // Default base URL (Local Server). 
+  // This can be a local IP (192.168.x.x), a public IP, or a domain name (e.g., https://sync.auix.site)
+  static String apiBaseUrl = 'http://192.168.0.108:3000';
 
   /// Load custom URL from secure storage if present
   static Future<void> loadFromStore() async {

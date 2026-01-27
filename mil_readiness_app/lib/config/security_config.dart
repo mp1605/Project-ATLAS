@@ -41,7 +41,7 @@ class SecurityConfig {
   /// Production certificate pins (SHA-256 hashes of public keys)
   /// 
   /// To get the certificate pin for your server:
-  /// 1. openssl s_client -connect atlas-backend-dx6g.onrender.com:443 -servername atlas-backend-dx6g.onrender.com < /dev/null | openssl x509 -pubkey -noout | openssl pkey -pubin -outform der | openssl dgst -sha256 -binary | openssl enc -base64
+  /// 1. openssl s_client -connect your-local-ip:443 -servername your-server < /dev/null | openssl x509 -pubkey -noout | openssl pkey -pubin -outform der | openssl dgst -sha256 -binary | openssl enc -base64
   /// 2. Format as: sha256/BASE64_HASH
   /// 
   /// IMPORTANT: Always include at least 2 pins (current + backup) for rotation
@@ -184,16 +184,16 @@ const _devConfig = SecurityEnvironment(
 
 // Staging environment
 const _stagingConfig = SecurityEnvironment(
-  apiBaseUrl: 'https://staging-atlas-backend.onrender.com',
+  apiBaseUrl: 'http://localhost:3000',
   certificatePins: SecurityConfig.stagingCertificatePins,
-  strictPinning: true,
+  strictPinning: false,
 );
 
-// Production environment
+// Production environment (On-Premise Server)
 const _prodConfig = SecurityEnvironment(
-  apiBaseUrl: 'https://atlas-backend-dx6g.onrender.com',
+  apiBaseUrl: 'http://192.168.0.108:3000',
   certificatePins: SecurityConfig.productionCertificatePins,
-  strictPinning: true,
+  strictPinning: false, // Disabled for local IP (no HTTPS)
 );
 
 // ==============================================================================

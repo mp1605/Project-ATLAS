@@ -165,13 +165,4 @@ It is intended for **research, operational readiness assessment, and performance
 This project is part of an ongoing academic and applied research initiative focused on **6G-enabled smart systems, human performance analytics, and defense readiness monitoring**.
 
 For access or collaboration inquiries, contact the project owner.
-
-
-
-
-
-
-Backend Render Link
-
-https://atlas-backend-dx6g.onrender.com
-
+For access or collaboration inquiries, contact the project owner.

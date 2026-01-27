@@ -268,6 +268,19 @@ class LocalSecureStore {
     await _ss.delete(key: 'config_api_base_url');
   }
 
+  // ===== EMAIL VERIFICATION METHODS =====
+
+  /// Check if email is verified for a user
+  Future<bool> isEmailVerifiedFor(String email) async {
+    final value = await _ss.read(key: _scoped(email, 'email_verified'));
+    return value == '1' || value == 'true';
+  }
+
+  /// Set email verification status for a user
+  Future<void> setEmailVerifiedFor(String email, bool verified) async {
+    await _ss.write(key: _scoped(email, 'email_verified'), value: verified ? '1' : '0');
+  }
+
   /// ⚠️ DANGER: Clear ALL stored data (for testing/reset)
   /// This will delete all users, sessions, and settings
   Future<void> clearAllData() async {

@@ -3,6 +3,7 @@ import '../services/sleep_source_resolver.dart';
 import '../repositories/manual_sleep_repository.dart';
 import '../models/manual_sleep_entry.dart';
 import '../screens/manual_sleep_entry_sheet.dart';
+import '../theme/app_theme.dart';
 
 /// Sleep status card for home screen
 /// 
@@ -122,23 +123,18 @@ class _SleepStatusCardState extends State<SleepStatusCard> {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Colors.grey[900]!.withOpacity(0.5),
-            Colors.grey[850]!.withOpacity(0.3),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
-      ),
-      child: const Row(
+      decoration: AppTheme.glassCard(),
+      child: Row(
         children: [
-          Icon(Icons.bedtime, color: Colors.white54, size: 24),
-          SizedBox(width: 16),
+          const SizedBox(
+            width: 20,
+            height: 20,
+            child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation(AppTheme.primaryCyan)),
+          ),
+          const SizedBox(width: 16),
           Text(
-            'Loading sleep...',
-            style: TextStyle(color: Colors.white70, fontSize: 16),
+            'LOADING SLEEP DATA...',
+            style: AppTheme.titleStyle.copyWith(color: AppTheme.textGray, fontSize: 13),
           ),
         ],
       ),
@@ -149,41 +145,40 @@ class _SleepStatusCardState extends State<SleepStatusCard> {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Colors.orange[900]!.withOpacity(0.3),
-            Colors.orange[800]!.withOpacity(0.2),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.orange.withOpacity(0.3)),
-      ),
+      decoration: AppTheme.glassCard(color: AppTheme.accentOrange.withOpacity(0.1)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(Icons.bedtime, color: Colors.orange[300], size: 24),
-              const SizedBox(width: 12),
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: AppTheme.accentOrange.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.bedtime, color: AppTheme.accentOrange, size: 24),
+              ),
+              const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Sleep Missing',
-                      style: TextStyle(
-                        color: Colors.orange[200],
+                      'SLEEP MISSING',
+                      style: AppTheme.titleStyle.copyWith(
+                        color: AppTheme.accentOrange,
                         fontSize: 18,
-                        fontWeight: FontWeight.w600,
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Help us compute readiness',
+                    const SizedBox(height: 2),
+                    const Text(
+                      'LOG DATA TO SYNC READINESS',
                       style: TextStyle(
-                        color: Colors.orange[100],
-                        fontSize: 14,
+                        color: AppTheme.textGray,
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.5,
                       ),
                     ),
                   ],
@@ -191,19 +186,25 @@ class _SleepStatusCardState extends State<SleepStatusCard> {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
               onPressed: _handleEdit,
-              icon: const Icon(Icons.add, size: 20),
-              label: const Text('Log sleep (15 sec)'),
+              icon: const Icon(Icons.add, size: 18),
+              label: const Text('LOG SLEEP DATA'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange[700],
-                foregroundColor: Colors.white,
+                backgroundColor: AppTheme.accentOrange,
+                foregroundColor: AppTheme.bgDarker,
+                elevation: 0,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
+                ),
+                textStyle: AppTheme.titleStyle.copyWith(
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.0,
+                  fontSize: 14,
                 ),
               ),
             ),
@@ -215,33 +216,25 @@ class _SleepStatusCardState extends State<SleepStatusCard> {
 
   Widget _buildAutoCard() {
     final sleep = _resolvedSleep!;
-    final shouldShowPrompt = Future.value().then((_) => 
-      ManualSleepRepository.instance.shouldShowConfirmPrompt(
-        widget.userEmail,
-        isLowConfidence: sleep.isLowConfidence,
-      ),
-    );
-
+    
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Colors.blue[900]!.withOpacity(0.3),
-            Colors.blue[800]!.withOpacity(0.2),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.blue.withOpacity(0.2)),
-      ),
+      decoration: AppTheme.glassCard(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(Icons.nightlight_round, color: Colors.blue[300], size: 24),
-              const SizedBox(width: 12),
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryCyan.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.nightlight_round, color: AppTheme.primaryCyan, size: 24),
+              ),
+              const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -249,27 +242,27 @@ class _SleepStatusCardState extends State<SleepStatusCard> {
                     Row(
                       children: [
                         Text(
-                          'Sleep (Auto)',
-                          style: TextStyle(
-                            color: Colors.blue[100],
+                          'SLEEP (AUTO)',
+                          style: AppTheme.titleStyle.copyWith(
+                            color: AppTheme.textWhite,
                             fontSize: 18,
-                            fontWeight: FontWeight.w600,
                           ),
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: 10),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                           decoration: BoxDecoration(
-                            color: Colors.green.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.green.withOpacity(0.3)),
+                            color: AppTheme.accentGreen.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(color: AppTheme.accentGreen.withOpacity(0.3)),
                           ),
                           child: const Text(
-                            'Detected',
+                            'DETECTED',
                             style: TextStyle(
-                              color: Colors.greenAccent,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
+                              color: AppTheme.accentGreen,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.5,
                             ),
                           ),
                         ),
@@ -277,11 +270,12 @@ class _SleepStatusCardState extends State<SleepStatusCard> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '${(sleep.minutes / 60).floor()}h ${sleep.minutes % 60}m',
-                      style: TextStyle(
-                        color: Colors.blue[200],
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
+                      '${(sleep.minutes / 60).floor()}H ${sleep.minutes % 60}M TOTAL',
+                      style: const TextStyle(
+                        color: AppTheme.primaryCyan,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.5,
                       ),
                     ),
                   ],
@@ -291,28 +285,30 @@ class _SleepStatusCardState extends State<SleepStatusCard> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: _getConfidenceColor(sleep.confidence).withOpacity(0.2),
+                  color: _getConfidenceColor(sleep.confidence).withOpacity(0.15),
                   shape: BoxShape.circle,
+                  border: Border.all(color: _getConfidenceColor(sleep.confidence).withOpacity(0.3)),
                 ),
                 child: Icon(
                   _getConfidenceIcon(sleep.confidence),
                   color: _getConfidenceColor(sleep.confidence),
-                  size: 20,
+                  size: 18,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           if (!_shouldShowPrompt)
             // Just show Edit button
             Align(
               alignment: Alignment.centerRight,
               child: TextButton.icon(
                 onPressed: _handleEdit,
-                icon: const Icon(Icons.edit, size: 16),
-                label: const Text('Edit'),
+                icon: const Icon(Icons.edit, size: 16, color: AppTheme.primaryCyan),
+                label: const Text('EDIT'),
                 style: TextButton.styleFrom(
-                  foregroundColor: Colors.blue[200],
+                  foregroundColor: AppTheme.primaryCyan,
+                  textStyle: AppTheme.titleStyle.copyWith(fontSize: 12, letterSpacing: 1.0),
                 ),
               ),
             )
@@ -325,14 +321,16 @@ class _SleepStatusCardState extends State<SleepStatusCard> {
                   child: ElevatedButton.icon(
                     onPressed: _handleConfirm,
                     icon: const Icon(Icons.check, size: 18),
-                    label: const Text('Confirm'),
+                    label: const Text('CONFIRM'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue[700],
-                      foregroundColor: Colors.white,
+                      backgroundColor: AppTheme.primaryCyan,
+                      foregroundColor: AppTheme.bgDarker,
+                      elevation: 0,
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(10),
                       ),
+                      textStyle: AppTheme.titleStyle.copyWith(fontWeight: FontWeight.bold, fontSize: 13),
                     ),
                   ),
                 ),
@@ -341,14 +339,15 @@ class _SleepStatusCardState extends State<SleepStatusCard> {
                   child: OutlinedButton.icon(
                     onPressed: _handleEdit,
                     icon: const Icon(Icons.edit, size: 16),
-                    label: const Text('Edit'),
+                    label: const Text('EDIT'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.blue[200],
-                      side: BorderSide(color: Colors.blue[700]!),
+                      foregroundColor: AppTheme.textWhite,
+                      side: const BorderSide(color: AppTheme.glassBorder),
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(10),
                       ),
+                      textStyle: AppTheme.titleStyle.copyWith(fontSize: 13),
                     ),
                   ),
                 ),
@@ -361,50 +360,56 @@ class _SleepStatusCardState extends State<SleepStatusCard> {
 
   Widget _buildManualCard() {
     final sleep = _resolvedSleep!;
+    final isOverride = sleep.isOverride;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Colors.purple[900]!.withOpacity(0.3),
-            Colors.purple[800]!.withOpacity(0.2),
-          ],
+      decoration: AppTheme.glassCard(
+        color: isOverride ? AppTheme.accentOrange.withOpacity(0.1) : AppTheme.primaryBlue.withOpacity(0.1),
+      ).copyWith(
+        border: Border.all(
+          color: isOverride ? AppTheme.accentOrange.withOpacity(0.5) : AppTheme.primaryBlue.withOpacity(0.5),
+          width: 1.5,
         ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.purple.withOpacity(0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(Icons.edit_note, color: Colors.purple[300], size: 24),
-              const SizedBox(width: 12),
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: (isOverride ? AppTheme.accentOrange : AppTheme.primaryBlue).withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  isOverride ? Icons.emergency_share : Icons.edit_note,
+                  color: isOverride ? AppTheme.accentOrange : AppTheme.primaryBlue,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        Text(
-                          sleep.isOverride ? 'Sleep (Manual Override)' : 'Sleep (Manual)',
-                          style: TextStyle(
-                            color: Colors.purple[100],
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
+                    Text(
+                      isOverride ? 'MANUAL OVERRIDE' : 'MANUAL LOG',
+                      style: AppTheme.titleStyle.copyWith(
+                        color: AppTheme.textWhite,
+                        fontSize: 18,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '${(sleep.minutes / 60).floor()}h ${sleep.minutes % 60}m',
+                      '${(sleep.minutes / 60).floor()}H ${sleep.minutes % 60}M TOTAL',
                       style: TextStyle(
-                        color: Colors.purple[200],
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
+                        color: isOverride ? AppTheme.accentOrange : AppTheme.primaryBlue,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.5,
                       ),
                     ),
                   ],
@@ -412,15 +417,20 @@ class _SleepStatusCardState extends State<SleepStatusCard> {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           Align(
             alignment: Alignment.centerRight,
             child: TextButton.icon(
               onPressed: _handleEdit,
-              icon: const Icon(Icons.edit, size: 16),
-              label: const Text('Edit'),
+              icon: Icon(
+                Icons.edit,
+                size: 16,
+                color: isOverride ? AppTheme.accentOrange : AppTheme.primaryBlue,
+              ),
+              label: const Text('EDIT'),
               style: TextButton.styleFrom(
-                foregroundColor: Colors.purple[200],
+                foregroundColor: isOverride ? AppTheme.accentOrange : AppTheme.primaryBlue,
+                textStyle: AppTheme.titleStyle.copyWith(fontSize: 12, letterSpacing: 1.0),
               ),
             ),
           ),

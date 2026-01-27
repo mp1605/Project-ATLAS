@@ -10,6 +10,7 @@ import '../models/user_profile.dart';
 import '../models/comprehensive_readiness_result.dart';
 import '../services/backend_sync_service.dart';
 import '../routes.dart';
+import '../services/session_controller.dart';
 import '../widgets/sleep_status_card.dart';
 import '../services/sleep_source_resolver.dart';
 import '../config/app_config.dart';
@@ -68,6 +69,13 @@ class _DataMonitorScreenState extends State<DataMonitorScreen> with SingleTicker
   Future<void> _loadLatestMetrics() async {
     setState(() => _loadingMetrics = true);
     
+    // TRIGGER HEALTH SYNC FIRST
+    final liveSync = widget.session.liveSync;
+    if (liveSync != null) {
+      print('🔄 DataMonitor: Triggering manual HealthKit sync...');
+      await liveSync.syncNow();
+    }
+
     try {
       final db = await SecureDatabaseManager.instance.database;
       final email = widget.session.email;

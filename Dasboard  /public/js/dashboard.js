@@ -1,5 +1,5 @@
 // Uses window.API_URL from auth.js
-const API_URL = window.API_URL || 'http://localhost:3000/api/v1';
+const API_URL = window.API_URL || 'http://192.168.0.108:3000/api/v1';
 
 // Get token
 function getToken() {

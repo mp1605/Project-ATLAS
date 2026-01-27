@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
 import 'screens/raw_data_consent_screen.dart';
+import 'screens/manual_sleep_entry_sheet.dart';
 import 'screens/home_placeholder.dart';
 import 'screens/authorize_screen.dart';
 import 'screens/wearable_selection_screen.dart';
@@ -22,50 +23,12 @@ import 'screens/analytics_screen.dart';
 import 'widgets/privacy_widgets.dart';
 import 'widgets/main_scaffold.dart';
 import 'services/local_secure_store.dart';
+import 'services/session_controller.dart';
+import 'theme/app_theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/forgot_password_screen.dart';
 import 'screens/main_navigation_screen.dart';
 
-
-class SessionController extends ChangeNotifier {
-  bool _ready = false;
-  bool _signedIn = false;
-  bool _briefingCompleted = false;
-  String? _email;
-  ThemeMode _themeMode = ThemeMode.system;
-
-  bool get ready => _ready;
-  bool get signedIn => _signedIn;
-  bool get briefingCompleted => _briefingCompleted;
-  String? get email => _email;
-  ThemeMode get themeMode => _themeMode;
-
-  void setBriefingCompleted(bool v) {
-    _briefingCompleted = v;
-    notifyListeners();
-  }
-
-  void setReady(bool v) {
-    _ready = v;
-    notifyListeners();
-  }
-
-  void setSignedIn(bool v, {String? email}) {
-    _signedIn = v;
-    _email = email;
-    notifyListeners();
-  }
-
-  void setThemeMode(ThemeMode mode) {
-    _themeMode = mode;
-    notifyListeners();
-  }
-
-  Future<void> signOut() async {
-    await LocalSecureStore.instance.clearSession();
-    setSignedIn(false, email: null);
-  }
-}
 
 GoRouter buildRouter(SessionController session) {
   return GoRouter(
@@ -192,6 +155,26 @@ GoRouter buildRouter(SessionController session) {
       ),
       GoRoute(
         path: '/log-activity/add',
+        builder: (context, state) => const ManualActivityEntryScreen(),
+      ),
+      GoRoute(
+        path: '/manual-sleep-entry',
+        builder: (context, state) {
+          final email = state.uri.queryParameters['email'] ?? '';
+          final date = state.uri.queryParameters['date'] ?? '';
+          return Scaffold(
+            backgroundColor: AppTheme.bgDarker,
+            body: SafeArea(
+              child: ManualSleepEntrySheet(
+                userEmail: email,
+                date: date,
+              ),
+            ),
+          );
+        },
+      ),
+      GoRoute(
+        path: '/manual-activity-entry',
         builder: (context, state) => const ManualActivityEntryScreen(),
       ),
     ],

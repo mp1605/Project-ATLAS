@@ -5,6 +5,7 @@ import '../services/local_secure_store.dart';
 import '../services/biometric_auth_service.dart';
 import '../services/haptic_service.dart';
 import '../routes.dart';
+import '../services/session_controller.dart';
 import 'package:intl/intl.dart';
 
 /// User-friendly Settings screen

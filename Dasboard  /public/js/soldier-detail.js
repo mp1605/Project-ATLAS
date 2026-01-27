@@ -115,12 +115,51 @@ async function loadSoldierData(userEmail) {
         const data = await response.json();
         update18ScoreGrid(data.scores);
 
-        // Update header info
-        const nameEl = document.querySelector('.soldier-name h1');
-        if (nameEl) nameEl.textContent = userEmail.split('@')[0].toUpperCase();
+        // Update header info dynamically from database
+        const nameEl = document.querySelector('.profile-details-integrated h1');
+        if (nameEl && data.name) nameEl.textContent = data.name;
+
+        const metaEl = document.querySelector('.profile-meta-integrated');
+        if (metaEl && data.rank) {
+            metaEl.innerHTML = `
+                <span class="meta-item">ID: ${data.id || '---'}</span>
+                <span class="meta-divider">•</span>
+                <span class="meta-item">${data.rank}</span>
+                <span class="meta-divider">•</span>
+                <span class="meta-item">Personnel</span>
+                <span class="meta-divider">•</span>
+                <span class="meta-item">${data.unit || 'AUIX Unit'}</span>
+            `;
+        }
+
+        // Update sync time
+        const syncText = document.querySelector('.sync-text-compact');
+        if (syncText && data.timestamp) {
+            const lastSync = new Date(data.timestamp);
+            const now = new Date();
+            const diffMin = Math.floor((now - lastSync) / 60000);
+            syncText.textContent = diffMin < 60 ? `Last sync: ${diffMin}m ago` : `Last sync: ${Math.floor(diffMin / 60)}h ago`;
+        }
 
     } catch (error) {
         console.error('Error loading soldier data:', error);
+    }
+}
+
+// Helper: Fetch historical data for a specific metric
+async function fetchHistoricalData(userEmail, type, days = 7) {
+    try {
+        const token = localStorage.getItem('auth_token');
+        const baseUrl = window.API_URL || 'http://localhost:3000/api/v1';
+        const response = await fetch(`${baseUrl}/readiness/${userEmail}/history?type=${type}&days=${days}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!response.ok) return [];
+        const result = await response.json();
+        return result.data || [];
+    } catch (e) {
+        console.error(`Error fetching history for ${type}:`, e);
+        return [];
     }
 }
 
@@ -128,25 +167,97 @@ async function loadSoldierData(userEmail) {
 function update18ScoreGrid(scores) {
     if (!scores) return;
 
-    for (const [key, value] of Object.entries(scores)) {
+    console.log('Syncing 18 scores to UI cards...');
+
+    // Comprehensive mapping of all 18 readiness metrics
+    // Maps legacy or alternative keys to the standardized HTML IDs
+    const keyMap = {
+        // Core Readiness (1-6)
+        'readiness': 'readiness',
+        'readiness_score': 'readiness',
+        'recovery': 'recovery',
+        'recovery_score': 'recovery',
+        'sleep_quality': 'sleep_quality',
+        'sleep': 'sleep_quality',
+        'sleep_index': 'sleep_quality',
+        'fatigue_index': 'fatigue_index',
+        'fatigue': 'fatigue_index',
+        'training_load': 'training_load',      // Endurance
+        'endurance': 'training_load',
+        'cardiovascular_strain': 'cardiovascular_strain', // Cardio Fitness
+        'cardio': 'cardiovascular_strain',
+
+        // Safety & Load (7-12)
+        'stress_load': 'stress_load',
+        'stress': 'stress_load',
+        'overtraining_risk': 'overtraining_risk', // Injury Risk
+        'injury': 'overtraining_risk',
+        'autonomic_balance': 'autonomic_balance', // Cardio Stability
+        'cardio_resp': 'autonomic_balance',
+        'illness_risk': 'illness_risk',
+        'illness': 'illness_risk',
+        'physical_status': 'physical_status',    // Daily Activity
+        'activity': 'physical_status',
+        'energy_availability': 'energy_availability', // Work Capacity
+        'capacity': 'energy_availability',
+
+        // Specialty Metrics (13-18)
+        'oxygen_stability': 'oxygen_stability',   // Altitude Score
+        'altitude': 'oxygen_stability',
+        'hrv_deviation': 'hrv_deviation',         // Cardiac Safety
+        'cardiac_safety': 'hrv_deviation',
+        'sleep_debt': 'sleep_debt',
+        'debt': 'sleep_debt',
+        'resting_hr_deviation': 'resting_hr_deviation', // Training Readiness
+        'training_readiness': 'resting_hr_deviation',
+        'respiratory_stability': 'respiratory_stability', // Cognitive Alert
+        'cognitive_alertness': 'respiratory_stability',
+        'acute_chronic_ratio': 'acute_chronic_ratio',  // Thermoregulatory
+        'thermo': 'acute_chronic_ratio'
+    };
+
+    // First, normalize the scores map using the keyMap
+    const normalizedData = {};
+    Object.entries(scores).forEach(([key, value]) => {
+        const standardKey = keyMap[key] || key;
+        normalizedData[standardKey] = value;
+    });
+
+    // Handle special case: the database sometimes stores 'readiness' but the card ID is 'card-readiness'
+    // This loop covers all 18 possible cards
+    const allExpectedKeys = [
+        'readiness', 'recovery', 'sleep_quality', 'fatigue_index', 'training_load', 'cardiovascular_strain',
+        'stress_load', 'overtraining_risk', 'autonomic_balance', 'illness_risk', 'physical_status', 'energy_availability',
+        'oxygen_stability', 'hrv_deviation', 'sleep_debt', 'resting_hr_deviation', 'respiratory_stability', 'acute_chronic_ratio'
+    ];
+
+    allExpectedKeys.forEach(key => {
         const card = document.getElementById(`card-${key}`);
         if (card) {
+            const value = normalizedData[key];
             const valueEl = card.querySelector('.score-value');
             const statusEl = card.querySelector('.score-status');
 
-            const numericValue = parseFloat(value);
-            valueEl.textContent = numericValue.toFixed(1);
+            if (value !== undefined && value !== null) {
+                const numericValue = parseFloat(value);
+                valueEl.textContent = numericValue.toFixed(1);
 
-            // Apply Status Class
-            let status = 'go';
-            if (numericValue < 40) status = 'stop';
-            else if (numericValue < 60) status = 'limited';
-            else if (numericValue < 75) status = 'caution';
+                // Apply Status Class
+                let status = 'go';
+                if (numericValue < 40) status = 'stop';
+                else if (numericValue < 60) status = 'limited';
+                else if (numericValue < 75) status = 'caution';
 
-            statusEl.textContent = status.toUpperCase();
-            statusEl.className = `score-status status-${status}`;
+                statusEl.textContent = status.toUpperCase();
+                statusEl.className = `score-status status-${status}`;
+            } else {
+                // If no data, keep it as Pending
+                valueEl.textContent = '--';
+                statusEl.textContent = 'PENDING';
+                statusEl.className = 'score-status';
+            }
         }
-    }
+    });
 }
 
 // ===== OVERVIEW TAB CHARTS =====
@@ -155,18 +266,36 @@ function initOverviewCharts() {
 }
 
 // ===== TRENDS TAB CHARTS =====
-function initTrendsCharts() {
+async function initTrendsCharts() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const userEmail = urlParams.get('email') || 'soldier_1@example.com';
+
+    // Fetch real readiness trend data
+    const trendData = await fetchHistoricalData(userEmail, 'readiness', 30);
+    const labels = trendData.length > 0 ? trendData.map(d => new Date(d.recorded_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })) : Array.from({ length: 30 }, (_, i) => `Day ${i + 1}`);
+    const values = trendData.length > 0 ? trendData.map(d => d.value) : Array(30).fill(0);
+
+    // Calculate moving average
+    const calculateMA = (data, p) => {
+        return data.map((val, i) => {
+            if (i < p - 1) return null;
+            const sub = data.slice(i - p + 1, i + 1);
+            return sub.reduce((a, b) => a + b) / p;
+        });
+    };
+    const maValues = trendData.length >= 7 ? calculateMA(values, 7) : Array(values.length).fill(null);
+
     // Main Readiness Trend
     const readinessTrendCtx = document.getElementById('readinessTrendChart');
     if (readinessTrendCtx) {
         new Chart(readinessTrendCtx, {
             type: 'line',
             data: {
-                labels: Array.from({ length: 30 }, (_, i) => `Day ${i + 1}`),
+                labels: labels,
                 datasets: [
                     {
                         label: 'Daily Readiness',
-                        data: [68, 72, 71, 75, 78, 76, 74, 72, 70, 68, 65, 70, 73, 75, 78, 80, 82, 81, 79, 77, 75, 73, 70, 68, 65, 67, 69, 70, 68, 67],
+                        data: values,
                         borderColor: '#3b82f6',
                         backgroundColor: 'rgba(59, 130, 246, 0.1)',
                         borderWidth: 3,
@@ -177,7 +306,7 @@ function initTrendsCharts() {
                     },
                     {
                         label: '7-day Moving Average',
-                        data: [null, null, null, 72, 73, 74, 74, 73, 72, 70, 68, 69, 71, 73, 75, 77, 79, 80, 79, 78, 76, 74, 72, 70, 68, 68, 68, 68, 68, 68],
+                        data: maValues,
                         borderColor: '#f59e0b',
                         borderWidth: 2,
                         borderDash: [5, 5],
@@ -198,8 +327,8 @@ function initTrendsCharts() {
                 },
                 scales: {
                     y: {
-                        beginAtZero: false,
-                        min: 50,
+                        beginAtZero: true,
+                        min: 0,
                         max: 100,
                         grid: { color: 'rgba(255, 255, 255, 0.1)' },
                         ticks: { color: '#9ca3af' }
@@ -216,102 +345,47 @@ function initTrendsCharts() {
         });
     }
 
-    // 4 Mini Trend Charts
-    const miniChartOptions = {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-            x: { display: false },
-            y: { display: false }
-        }
+    // Mini charts helper
+    const initMiniChart = async (canvasId, metricType, color) => {
+        const ctx = document.getElementById(canvasId);
+        if (!ctx) return;
+
+        const data = await fetchHistoricalData(userEmail, metricType, 30);
+        const vals = data.length > 0 ? data.map(d => d.value) : Array(30).fill(0);
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: Array.from({ length: vals.length }, (_, i) => i),
+                datasets: [{
+                    data: vals,
+                    borderColor: color,
+                    backgroundColor: `${color}33`,
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { display: false },
+                    y: { display: false }
+                }
+            }
+        });
     };
 
-    // Sleep Mini
-    const sleepMiniCtx = document.getElementById('sleepMiniChart');
-    if (sleepMiniCtx) {
-        new Chart(sleepMiniCtx, {
-            type: 'line',
-            data: {
-                labels: Array.from({ length: 30 }, (_, i) => i),
-                datasets: [{
-                    data: [7.2, 6.8, 7.0, 6.5, 6.2, 5.8, 6.1, 6.4, 6.7, 6.3, 5.9, 6.2, 6.5, 6.8, 7.1, 7.4, 7.2, 6.9, 6.5, 6.2, 5.8, 6.0, 6.3, 6.6, 6.4, 6.1, 5.9, 6.2, 6.3, 6.2],
-                    borderColor: '#8b5cf6',
-                    backgroundColor: 'rgba(139, 92, 246, 0.2)',
-                    borderWidth: 2,
-                    fill: true,
-                    tension: 0.4,
-                    pointRadius: 0
-                }]
-            },
-            options: miniChartOptions
-        });
-    }
+    // 4 Mini Trend Charts
+    await initMiniChart('sleepMiniChart', 'sleep_hours', '#8b5cf6');
+    await initMiniChart('hrvMiniChart', 'hrv_deviation', '#10b981');
+    await initMiniChart('fatigueMiniChart', 'fatigue_index', '#ef4444');
+    await initMiniChart('recoveryMiniChart', 'recovery', '#06b6d4');
 
-    // HRV Mini
-    const hrvMiniCtx = document.getElementById('hrvMiniChart');
-    if (hrvMiniCtx) {
-        new Chart(hrvMiniCtx, {
-            type: 'line',
-            data: {
-                labels: Array.from({ length: 30 }, (_, i) => i),
-                datasets: [{
-                    data: [65, 64, 63, 62, 61, 60, 59, 58, 57, 58, 59, 60, 61, 62, 63, 64, 63, 62, 61, 60, 59, 58, 57, 56, 57, 58, 59, 58, 57, 58],
-                    borderColor: '#10b981',
-                    backgroundColor: 'rgba(16, 185, 129, 0.2)',
-                    borderWidth: 2,
-                    fill: true,
-                    tension: 0.4,
-                    pointRadius: 0
-                }]
-            },
-            options: miniChartOptions
-        });
-    }
-
-    // Fatigue Mini
-    const fatigueMiniCtx = document.getElementById('fatigueMiniChart');
-    if (fatigueMiniCtx) {
-        new Chart(fatigueMiniCtx, {
-            type: 'line',
-            data: {
-                labels: Array.from({ length: 30 }, (_, i) => i),
-                datasets: [{
-                    data: [30, 32, 35, 38, 40, 42, 44, 45, 46, 44, 42, 40, 38, 36, 34, 32, 34, 36, 38, 40, 42, 44, 45, 46, 47, 46, 45, 44, 45, 45],
-                    borderColor: '#ef4444',
-                    backgroundColor: 'rgba(239, 68, 68, 0.2)',
-                    borderWidth: 2,
-                    fill: true,
-                    tension: 0.4,
-                    pointRadius: 0
-                }]
-            },
-            options: miniChartOptions
-        });
-    }
-
-    // Recovery Mini
-    const recoveryMiniCtx = document.getElementById('recoveryMiniChart');
-    if (recoveryMiniCtx) {
-        new Chart(recoveryMiniCtx, {
-            type: 'line',
-            data: {
-                labels: Array.from({ length: 30 }, (_, i) => i),
-                datasets: [{
-                    data: [75, 76, 78, 80, 82, 84, 83, 81, 79, 77, 75, 73, 75, 77, 79, 81, 83, 85, 84, 82, 80, 78, 76, 78, 80, 82, 84, 83, 82, 82],
-                    borderColor: '#06b6d4',
-                    backgroundColor: 'rgba(6, 182, 212, 0.2)',
-                    borderWidth: 2,
-                    fill: true,
-                    tension: 0.4,
-                    pointRadius: 0
-                }]
-            },
-            options: miniChartOptions
-        });
-    }
-
-    // Distribution Chart
+    // Distribution Chart (Keep static for now or fetch if needed)
     const distributionCtx = document.getElementById('distributionChart');
     if (distributionCtx) {
         new Chart(distributionCtx, {
@@ -339,18 +413,26 @@ function initTrendsCharts() {
 }
 
 // ===== SLEEP & RECOVERY TAB CHARTS =====
-function initSleepCharts() {
+async function initSleepCharts() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const userEmail = urlParams.get('email') || 'soldier_1@example.com';
+
+    // Fetch real sleep duration data
+    const sleepData = await fetchHistoricalData(userEmail, 'sleep_hours', 7);
+    const labels = sleepData.length > 0 ? sleepData.map(d => new Date(d.recorded_at).toLocaleDateString('en-US', { weekday: 'short' })) : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const values = sleepData.length > 0 ? sleepData.map(d => d.value) : [0, 0, 0, 0, 0, 0, 0];
+
     // Sleep Hours Trend
     const sleepHoursCtx = document.getElementById('sleepHoursChart');
     if (sleepHoursCtx) {
         new Chart(sleepHoursCtx, {
             type: 'line',
             data: {
-                labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7'],
+                labels: labels,
                 datasets: [
                     {
-                        label: 'Actual Sleep',
-                        data: [6.2, 5.8, 6.4, 6.1, 5.9, 6.3, 6.2],
+                        label: 'Actual Sleep (hrs)',
+                        data: values,
                         borderColor: '#8b5cf6',
                         backgroundColor: 'rgba(139, 92, 246, 0.2)',
                         borderWidth: 3,
@@ -359,7 +441,7 @@ function initSleepCharts() {
                     },
                     {
                         label: 'Target (8 hrs)',
-                        data: [8, 8, 8, 8, 8, 8, 8],
+                        data: Array(labels.length).fill(8),
                         borderColor: '#10b981',
                         borderWidth: 2,
                         borderDash: [5, 5],
@@ -379,9 +461,9 @@ function initSleepCharts() {
                 },
                 scales: {
                     y: {
-                        beginAtZero: false,
+                        beginAtZero: true,
                         min: 0,
-                        max: 10,
+                        max: 12,
                         grid: { color: 'rgba(255, 255, 255, 0.1)' },
                         ticks: { color: '#9ca3af' }
                     },
@@ -394,16 +476,21 @@ function initSleepCharts() {
         });
     }
 
+    // Fetch real sleep quality data
+    const qualityData = await fetchHistoricalData(userEmail, 'sleep_quality', 7);
+    const qLabels = qualityData.length > 0 ? qualityData.map(d => new Date(d.recorded_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })) : labels;
+    const qValues = qualityData.length > 0 ? qualityData.map(d => d.value) : [0, 0, 0, 0, 0, 0, 0];
+
     // Sleep Quality
     const sleepQualityCtx = document.getElementById('sleepQualityChart');
     if (sleepQualityCtx) {
         new Chart(sleepQualityCtx, {
             type: 'line',
             data: {
-                labels: ['Day 1', 'Day 3', 'Day 5', 'Day 7', 'Day 10', 'Day 14'],
+                labels: qLabels,
                 datasets: [{
                     label: 'Quality Score',
-                    data: [78, 72, 75, 68, 70, 74],
+                    data: qValues,
                     borderColor: '#06b6d4',
                     backgroundColor: 'rgba(6, 182, 212, 0.2)',
                     borderWidth: 3,
@@ -417,8 +504,8 @@ function initSleepCharts() {
                 plugins: { legend: { display: false } },
                 scales: {
                     y: {
-                        beginAtZero: false,
-                        min: 50,
+                        beginAtZero: true,
+                        min: 0,
                         max: 100,
                         grid: { color: 'rgba(255, 255, 255, 0.1)' },
                         ticks: { color: '#9ca3af' }
@@ -468,18 +555,25 @@ function initSleepCharts() {
 }
 
 // ===== PHYSIOLOGY TAB CHARTS =====
-function initPhysiologyCharts() {
+async function initPhysiologyCharts() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const userEmail = urlParams.get('email') || 'soldier_1@example.com';
+
     // Resting HR
     const restingHrCtx = document.getElementById('restingHrChart');
     if (restingHrCtx) {
+        const hrData = await fetchHistoricalData(userEmail, 'resting_hr_deviation', 30);
+        const labels = hrData.length > 0 ? hrData.map(d => new Date(d.recorded_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })) : Array.from({ length: 30 }, (_, i) => `Day ${i + 1}`);
+        const values = hrData.length > 0 ? hrData.map(d => d.value) : Array(30).fill(60);
+
         new Chart(restingHrCtx, {
             type: 'line',
             data: {
-                labels: Array.from({ length: 30 }, (_, i) => `Day ${i + 1}`),
+                labels: labels,
                 datasets: [
                     {
                         label: 'Resting HR',
-                        data: [55, 56, 57, 58, 59, 60, 61, 60, 59, 58, 57, 58, 59, 60, 61, 62, 61, 60, 59, 58, 59, 60, 61, 62, 61, 60, 59, 60, 61, 60],
+                        data: values,
                         borderColor: '#ef4444',
                         backgroundColor: 'rgba(239, 68, 68, 0.1)',
                         borderWidth: 3,
@@ -487,8 +581,8 @@ function initPhysiologyCharts() {
                         tension: 0.4
                     },
                     {
-                        label: 'Baseline (55 bpm)',
-                        data: Array(30).fill(55),
+                        label: 'Baseline (60 bpm)',
+                        data: Array(labels.length).fill(60),
                         borderColor: '#6b7280',
                         borderWidth: 2,
                         borderDash: [5, 5],
@@ -509,8 +603,8 @@ function initPhysiologyCharts() {
                 scales: {
                     y: {
                         beginAtZero: false,
-                        min: 50,
-                        max: 70,
+                        min: 40,
+                        max: 100,
                         grid: { color: 'rgba(255, 255, 255, 0.1)' },
                         ticks: { color: '#9ca3af' }
                     },
@@ -529,14 +623,18 @@ function initPhysiologyCharts() {
     // HRV Chart
     const hrvCtx = document.getElementById('hrvChart');
     if (hrvCtx) {
+        const hrvData = await fetchHistoricalData(userEmail, 'hrv_deviation', 30);
+        const labels = hrvData.length > 0 ? hrvData.map(d => new Date(d.recorded_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })) : Array.from({ length: 30 }, (_, i) => `Day ${i + 1}`);
+        const values = hrvData.length > 0 ? hrvData.map(d => d.value) : Array(30).fill(65);
+
         new Chart(hrvCtx, {
             type: 'line',
             data: {
-                labels: Array.from({ length: 30 }, (_, i) => `Day ${i + 1}`),
+                labels: labels,
                 datasets: [
                     {
                         label: 'HRV',
-                        data: [65, 64, 63, 62, 61, 60, 59, 58, 57, 58, 59, 60, 61, 62, 63, 64, 63, 62, 61, 60, 59, 58, 57, 56, 57, 58, 59, 58, 57, 58],
+                        data: values,
                         borderColor: '#10b981',
                         backgroundColor: 'rgba(16, 185, 129, 0.1)',
                         borderWidth: 3,
@@ -545,7 +643,7 @@ function initPhysiologyCharts() {
                     },
                     {
                         label: 'Baseline (65 ms)',
-                        data: Array(30).fill(65),
+                        data: Array(labels.length).fill(65),
                         borderColor: '#6b7280',
                         borderWidth: 2,
                         borderDash: [5, 5],
@@ -566,8 +664,8 @@ function initPhysiologyCharts() {
                 scales: {
                     y: {
                         beginAtZero: false,
-                        min: 50,
-                        max: 70,
+                        min: 20,
+                        max: 120,
                         grid: { color: 'rgba(255, 255, 255, 0.1)' },
                         ticks: { color: '#9ca3af' }
                     },
@@ -641,67 +739,25 @@ function initPhysiologyCharts() {
 }
 
 // ===== ACTIVITY TAB CHARTS =====
-function initActivityCharts() {
-    // Weekly Load (Stacked - inspired by reference Steps chart)
-    const weeklyLoadCtx = document.getElementById('weeklyLoadChart');
-    if (weeklyLoadCtx) {
-        new Chart(weeklyLoadCtx, {
-            type: 'bar',
-            data: {
-                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-                datasets: [
-                    {
-                        label: 'Light',
-                        data: [120, 150, 100, 80, 130, 140, 110],
-                        backgroundColor: '#fef08a'
-                    },
-                    {
-                        label: 'Moderate',
-                        data: [80, 100, 120, 90, 100, 110, 90],
-                        backgroundColor: '#fb923c'
-                    },
-                    {
-                        label: 'Intense',
-                        data: [40, 30, 50, 60, 40, 30, 50],
-                        backgroundColor: '#ef4444'
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                        labels: { color: '#9ca3af' }
-                    }
-                },
-                scales: {
-                    y: {
-                        stacked: true,
-                        grid: { color: 'rgba(255, 255, 255, 0.1)' },
-                        ticks: { color: '#9ca3af' }
-                    },
-                    x: {
-                        stacked: true,
-                        grid: { display: false },
-                        ticks: { color: '#9ca3af' }
-                    }
-                }
-            }
-        });
-    }
+async function initActivityCharts() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const userEmail = urlParams.get('email') || 'soldier_1@example.com';
 
     // Steps Chart
     const stepsCtx = document.getElementById('stepsChart');
     if (stepsCtx) {
+        const stepsData = await fetchHistoricalData(userEmail, 'physical_status', 30);
+        const labels = stepsData.length > 0 ? stepsData.map(d => new Date(d.recorded_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })) : Array.from({ length: 30 }, (_, i) => `Day ${i + 1}`);
+        // Scale physical_status (0-100) to typical step counts for visualization if needed, or just show the index
+        const values = stepsData.length > 0 ? stepsData.map(d => d.value) : Array(30).fill(0);
+
         new Chart(stepsCtx, {
             type: 'line',
             data: {
-                labels: Array.from({ length: 30 }, (_, i) => `Day ${i + 1}`),
+                labels: labels,
                 datasets: [{
-                    label: 'Daily Steps',
-                    data: [8500, 9200, 7800, 8100, 9500, 10200, 8900, 8700, 9100, 8300, 7900, 8500, 9000, 9400, 10100, 9800, 9200, 8800, 8400, 9000, 9300, 8700, 8100, 8900, 9500, 10000, 9600, 9100, 8700, 9200],
+                    label: 'Activity Index',
+                    data: values,
                     borderColor: '#f59e0b',
                     backgroundColor: 'rgba(245, 158, 11, 0.2)',
                     borderWidth: 3,
@@ -715,9 +771,9 @@ function initActivityCharts() {
                 plugins: { legend: { display: false } },
                 scales: {
                     y: {
-                        beginAtZero: false,
-                        min: 7000,
-                        max: 11000,
+                        beginAtZero: true,
+                        min: 0,
+                        max: 100,
                         grid: { color: 'rgba(255, 255, 255, 0.1)' },
                         ticks: { color: '#9ca3af' }
                     },

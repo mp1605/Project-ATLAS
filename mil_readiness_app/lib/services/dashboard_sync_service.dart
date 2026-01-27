@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/comprehensive_readiness_result.dart';
 import 'local_secure_store.dart';
+import 'device_auth_service.dart';
 
 /// Service to sync calculated readiness scores to dashboard
 /// 
@@ -14,6 +15,16 @@ class DashboardSyncService {
     required this.baseUrl,
     http.Client? client,
   }) : client = client ?? http.Client();
+
+  String? _authToken;
+
+  /// Ensure we have a valid auth token (Auto-Login)
+  Future<void> _ensureAuth({String? userEmail}) async {
+    if (_authToken == null) {
+      print('🔄 DashboardSync: Token missing, attempting device auto-login...');
+      _authToken = await DeviceAuthService.instance.authenticateDevice(userEmail: userEmail);
+    }
+  }
   
   /// Sync calculated scores to dashboard
   /// Returns true if successful, false otherwise
@@ -22,8 +33,12 @@ class DashboardSyncService {
     required ComprehensiveReadinessResult scores,
   }) async {
     try {
-      // Get auth token
-      final token = await LocalSecureStore.instance.getJWTToken();
+      // 1. Ensure authentication
+      await _ensureAuth(userEmail: userEmail);
+      
+      // 2. Get auth token
+      final token = _authToken ?? await LocalSecureStore.instance.getJWTToken();
+      
       if (token == null || token.isEmpty) {
         print('❌ DashboardSync: No auth token found');
         return false;
@@ -36,8 +51,9 @@ class DashboardSyncService {
       _validatePayload(payload);
       
       // Send to backend
+      final targetUrl = '$baseUrl/api/v1/readiness';
       final response = await client.post(
-        Uri.parse('$baseUrl/api/v1/readiness'),
+        Uri.parse(targetUrl),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -76,7 +92,7 @@ class DashboardSyncService {
         'recovery': scores.recoveryScore,
         'sleep_quality': scores.sleepIndex,
         'sleep_debt': scores.sleepDebt,
-        'autonomic_balance': scores.cardioRespStability, // Derived
+        'autonomic_balance': scores.cardioRespStability,
         'hrv_deviation': _extractHRVDeviation(scores),
         'resting_hr_deviation': _extractHRDeviation(scores),
         'respiratory_stability': _extractRespiratoryStability(scores),
@@ -89,6 +105,7 @@ class DashboardSyncService {
         'overtraining_risk': scores.injuryRisk,
         'energy_availability': scores.workCapacity,
         'physical_status': scores.dailyActivity,
+        'sleep_hours': _extractSleepHours(scores),
       },
       'category': scores.category,
       'confidence': scores.overallConfidence,
@@ -145,6 +162,15 @@ class DashboardSyncService {
     }
     // Fallback: reasonable default
     return 1.0;
+  }
+
+  /// Extract sleep hours from component breakdown
+  double _extractSleepHours(ComprehensiveReadinessResult scores) {
+    final breakdown = scores.componentBreakdown['Sleep Index'];
+    if (breakdown != null && breakdown.containsKey('asleep_min')) {
+      return (breakdown['asleep_min'] as double) / 60.0;
+    }
+    return 0.0;
   }
   
   /// Calculate data completeness percentage

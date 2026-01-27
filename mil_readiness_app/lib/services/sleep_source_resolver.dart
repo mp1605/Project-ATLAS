@@ -60,8 +60,8 @@ class SleepSourceResolver {
     // Fetch manual sleep from repository
     final manualSleep = await ManualSleepRepository.instance.getManualSleep(userEmail, date);
 
-    // Fetch auto sleep directly from database (AVOID calling LastSleepService to prevent circular dependency)
-    final autoSleepMinutes = await _getAutoSleepMinutes(userEmail);
+    // Fetch auto sleep directly from database
+    final autoSleepMinutes = await _getAutoSleepMinutes(userEmail, date);
     
     // Create simplified auto sleep representation
     final bool hasAutoSleep = autoSleepMinutes > 0;
@@ -124,20 +124,33 @@ class SleepSourceResolver {
     );
   }
 
-  /// Get auto sleep minutes directly from database (avoids calling LastSleepService)
-  static Future<int> _getAutoSleepMinutes(String userEmail) async {
+  /// Get auto sleep minutes directly from database for a specific date
+  static Future<int> _getAutoSleepMinutes(String userEmail, String? targetDate) async {
     try {
       final db = await SecureDatabaseManager.instance.database;
       
-      // Get latest sleep session total minutes
+      // If targetDate is provided, only look for sleep that ended on that date
+      // targetDate format: YYYY-MM-DD
+      String dateFilter = '';
+      List<dynamic> args = [userEmail];
+      
+      if (targetDate != null) {
+        // Find sleep segments that END on this date (wake up day)
+        // We use date(timestamp/1000, 'unixepoch') if stored as ms, 
+        // but here we have date_to as ISO string in the repository metadata
+        dateFilter = " AND date_to LIKE '$targetDate%'";
+      }
+
+      // Get latest sleep session total minutes for this date
       final result = await db.rawQuery('''
         SELECT value FROM health_metrics
         WHERE user_email = ?
           AND metric_type IN ('SLEEP_ASLEEP', 'SLEEP_SESSION')
           AND is_interval = 1
+          $dateFilter
         ORDER BY date_to DESC
         LIMIT 1
-      ''', [userEmail]);
+      ''', args);
       
       if (result.isEmpty) return 0;
       return (result.first['value'] as num).toInt();

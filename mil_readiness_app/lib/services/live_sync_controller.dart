@@ -127,14 +127,19 @@ class LiveSyncController {
         print('   Reason: ${prevSyncAt == null ? "First Sync" : "Repairing Corrupt Keys"}');
       } else {
         // Step 0: Incremental sync - bridge the gap since last success
+        // ALWAYS add a safety overlap of 15 minutes to catch delayed watch syncs
         final gap = now.difference(prevSyncAt);
+        const safetyOverlap = Duration(minutes: 15);
+        
         if (gap > window) {
           // Cap at 30 days to avoid performance issues
           final cappedGap = gap.inDays > 30 ? const Duration(days: 30) : gap;
-          windowToUse = cappedGap + const Duration(minutes: 5); // Add buffer
+          windowToUse = cappedGap + safetyOverlap; 
           print('📏 GAP SYNC: Expanding window to ${windowToUse.inMinutes} mins to bridge since $prevSyncAt');
         } else {
-          print('⏱️ NORMAL SYNC: Using default ${window.inMinutes} min window');
+          // Even in normal sync, use a generous window + overlap
+          windowToUse = window + safetyOverlap;
+          print('⏱️ NORMAL SYNC: Using ${windowToUse.inMinutes} min window (inc. safety overlap)');
         }
       }
 

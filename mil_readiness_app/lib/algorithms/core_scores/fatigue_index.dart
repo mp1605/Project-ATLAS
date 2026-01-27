@@ -1,6 +1,8 @@
 import 'dart:math' as math;
 import 'package:sqflite_sqlcipher/sqflite.dart';
 import '../../models/user_profile.dart';
+import '../../models/manual_activity_entry.dart';
+import '../../repositories/manual_activity_repository.dart';
 import '../foundation/baseline_calculator_v2.dart';
 import '../foundation/ewma_calculator.dart';
 import '../foundation/acwr_calculator.dart';
@@ -182,5 +184,72 @@ class FatigueIndexCalculator {
     
     if (result.isEmpty) return 0.0;
     return (result.first['value'] as num).toDouble();
+  }
+  
+  /// Calculate TRIMP from manual activity using RPE
+  /// 
+  /// Simplified TRIMP estimation:
+  /// TRIMP_manual = duration_minutes * (RPE / 10) * 0.64
+  /// 
+  /// This approximates the Banister TRIMP using RPE as a proxy for heart rate intensity
+  double _calculateManualTRIMP(ManualActivityEntry activity) {
+    // RPE (1-10) maps to intensity (0.1-1.0)
+    final intensity = activity.rpe / 10.0;
+    
+    // Simplified TRIMP: duration × intensity × base factor
+    // Base factor 0.64 is the same as used in Banister TRIMP for males
+    final trimp = activity.durationMinutes * intensity * 0.64;
+    
+    print('📝 Manual activity TRIMP: ${activity.activityType.name} (${activity.durationMinutes}min, RPE=${activity.rpe}) → TRIMP=$trimp');
+    
+    return trimp;
+  }
+  
+  /// Get manual activities for a date and calculate their total TRIMP
+  Future<double> _getManualActivitiesTRIMP(
+    String userEmail,
+    DateTime date,
+  ) async {
+    final repo = ManualActivityRepository();
+    final activities = await repo.listForDay(
+      userEmail: userEmail,
+      dayLocal: date,
+    );
+    
+    if (activities.isEmpty) {
+      return 0.0;
+    }
+    
+    double totalTRIMP = 0.0;
+    for (final activity in activities) {
+      totalTRIMP += _calculateManualTRIMP(activity);
+    }
+    
+    print('📝 Total manual activity TRIMP for $date: $totalTRIMP (${activities.length} activities)');
+    return totalTRIMP;
+  }
+  
+  /// Process manual activity and update EWMA
+  Future<void> processManualActivity({
+    required String userEmail,
+    required ManualActivityEntry activity,
+  }) async {
+    final trimpValue = _calculateManualTRIMP(activity);
+    
+    // Update 7-day EWMA (acute)
+    await ewma.update7d(
+      userEmail: userEmail,
+      metricName: 'trimp',
+      value: trimpValue,
+    );
+    
+    // Update 28-day EWMA (chronic)
+    await ewma.update28d(
+      userEmail: userEmail,
+      metricName: 'trimp',
+      value: trimpValue,
+    );
+    
+    print('✅ Processed manual activity: ${activity.activityType.name} → TRIMP=$trimpValue');
   }
 }

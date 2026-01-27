@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/manual_sleep_entry.dart';
 import '../repositories/manual_sleep_repository.dart';
+import '../theme/app_theme.dart';
 
 /// Enhanced manual sleep entry with validated sleep quality metrics
 /// 
@@ -211,16 +212,9 @@ class _ManualSleepEntrySheetState extends State<ManualSleepEntrySheet> {
     }
 
     return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Colors.grey[900]!,
-            Colors.black,
-          ],
-        ),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: const BoxDecoration(
+        gradient: AppTheme.darkGradient,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: SafeArea(
         child: Padding(
@@ -276,28 +270,36 @@ class _ManualSleepEntrySheetState extends State<ManualSleepEntrySheet> {
               borderRadius: BorderRadius.circular(2),
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           Row(
             children: [
-              Icon(Icons.bedtime, color: Colors.blue[300], size: 28),
-              const SizedBox(width: 12),
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryCyan.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.bedtime, color: AppTheme.primaryCyan, size: 28),
+              ),
+              const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Sleep Assessment',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 22,
-                        fontWeight: FontWeight.w600,
+                    Text(
+                      'SLEEP ASSESSMENT',
+                      style: AppTheme.headingStyle.copyWith(
+                        fontSize: 20,
+                        color: AppTheme.textWhite,
                       ),
                     ),
                     Text(
-                      _formatDate(widget.date),
-                      style: const TextStyle(
-                        color: Colors.white54,
-                        fontSize: 14,
+                      _formatDate(widget.date).toUpperCase(),
+                      style: AppTheme.bodyStyle.copyWith(
+                        color: AppTheme.primaryCyan.withOpacity(0.7),
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.2,
+                        fontSize: 12,
                       ),
                     ),
                   ],
@@ -305,7 +307,7 @@ class _ManualSleepEntrySheetState extends State<ManualSleepEntrySheet> {
               ),
               IconButton(
                 onPressed: () => Navigator.of(context).pop(),
-                icon: const Icon(Icons.close, color: Colors.white54),
+                icon: const Icon(Icons.close, color: AppTheme.textGray),
               ),
             ],
           ),
@@ -316,128 +318,68 @@ class _ManualSleepEntrySheetState extends State<ManualSleepEntrySheet> {
 
   Widget _buildSleepTimingSection(String durationText) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
-      ),
+      decoration: AppTheme.glassCard(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Sleep Timing',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-            ),
+          Text(
+            'SLEEP TIMING',
+            style: AppTheme.titleStyle.copyWith(color: AppTheme.primaryCyan),
           ),
           const SizedBox(height: 4),
-          Text(
-            'What time did you go to bed and wake up?',
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.6),
-              fontSize: 13,
-            ),
+          const Text(
+            'Record bedtime and wake up time.',
+            style: TextStyle(color: AppTheme.textGray, fontSize: 13),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           
-          // Bedtime
-          InkWell(
-            onTap: () => _selectTime(context, true),
-            borderRadius: BorderRadius.circular(12),
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.05),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: _bedtime != null ? Colors.blue.withOpacity(0.5) : Colors.white.withOpacity(0.1),
+          Row(
+            children: [
+              Expanded(
+                child: _buildTimeSelector(
+                  label: 'BEDTIME',
+                  time: _bedtime,
+                  icon: Icons.nightlight_round,
+                  color: AppTheme.primaryBlue,
+                  onTap: () => _selectTime(context, true),
                 ),
               ),
-              child: Row(
-                children: [
-                  Icon(Icons.nightlight_round, color: Colors.blue[300], size: 20),
-                  const SizedBox(width: 12),
-                  const Text(
-                    'Bedtime',
-                    style: TextStyle(color: Colors.white70, fontSize: 14),
-                  ),
-                  const Spacer(),
-                  Text(
-                    _bedtime?.format(context) ?? 'Select',
-                    style: TextStyle(
-                      color: _bedtime != null ? Colors.blue[300] : Colors.white38,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          
-          const SizedBox(height: 12),
-          
-          // Wake Time
-          InkWell(
-            onTap: () => _selectTime(context, false),
-            borderRadius: BorderRadius.circular(12),
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.05),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: _wakeTime != null ? Colors.orange.withOpacity(0.5) : Colors.white.withOpacity(0.1),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildTimeSelector(
+                  label: 'WAKE TIME',
+                  time: _wakeTime,
+                  icon: Icons.wb_sunny,
+                  color: AppTheme.accentOrange,
+                  onTap: () => _selectTime(context, false),
                 ),
               ),
-              child: Row(
-                children: [
-                  Icon(Icons.wb_sunny, color: Colors.orange[300], size: 20),
-                  const SizedBox(width: 12),
-                  const Text(
-                    'Wake Time',
-                    style: TextStyle(color: Colors.white70, fontSize: 14),
-                  ),
-                  const Spacer(),
-                  Text(
-                    _wakeTime?.format(context) ?? 'Select',
-                    style: TextStyle(
-                      color: _wakeTime != null ? Colors.orange[300] : Colors.white38,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            ],
           ),
           
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           
           // Duration display
           Center(
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               decoration: BoxDecoration(
-                color: Colors.blue.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.blue.withOpacity(0.3)),
+                color: AppTheme.primaryCyan.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(30),
+                border: Border.all(color: AppTheme.primaryCyan.withOpacity(0.3)),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.timelapse, color: Colors.blueAccent, size: 16),
-                  const SizedBox(width: 8),
+                  const Icon(Icons.timelapse, color: AppTheme.primaryCyan, size: 18),
+                  const SizedBox(width: 10),
                   Text(
-                    'Duration: $durationText',
-                    style: const TextStyle(
-                      color: Colors.blueAccent,
+                    'TOTAL SLEEP: $durationText',
+                    style: AppTheme.titleStyle.copyWith(
+                      color: AppTheme.primaryCyan,
                       fontSize: 14,
-                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],
@@ -449,44 +391,86 @@ class _ManualSleepEntrySheetState extends State<ManualSleepEntrySheet> {
     );
   }
 
+  Widget _buildTimeSelector({
+    required String label,
+    required TimeOfDay? time,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppTheme.bgDark.withOpacity(0.4),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: time != null ? color.withOpacity(0.5) : AppTheme.glassBorder,
+            width: time != null ? 1.5 : 1,
+          ),
+        ),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, color: color, size: 16),
+                const SizedBox(width: 8),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    color: AppTheme.textGray,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.0,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              time?.format(context) ?? '--:--',
+              style: TextStyle(
+                color: time != null ? AppTheme.textWhite : AppTheme.textGray.withOpacity(0.5),
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildSleepQualitySection() {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
-      ),
+      decoration: AppTheme.glassCard(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Sleep Quality',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-            ),
+          Text(
+            'SLEEP QUALITY',
+            style: AppTheme.titleStyle.copyWith(color: AppTheme.primaryCyan),
           ),
           const SizedBox(height: 4),
-          Text(
+          const Text(
             'Overall, how was your sleep?',
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.6),
-              fontSize: 13,
-            ),
+            style: TextStyle(color: AppTheme.textGray, fontSize: 13),
           ),
           const SizedBox(height: 16),
           
           // 1-5 scale with anchors
           Column(
             children: [
-              _buildQualityOption(1, 'Very Poor', 'Frequent waking, unrested', Colors.red),
-              _buildQualityOption(2, 'Poor', 'Restless sleep', Colors.orange),
-              _buildQualityOption(3, 'Fair', 'Average sleep',Colors.yellow),
-              _buildQualityOption(4, 'Good', 'Slept well', Colors.lightGreen),
-              _buildQualityOption(5, 'Excellent', 'Deep, uninterrupted sleep', Colors.green),
+              _buildQualityOption(1, 'VERY POOR', 'Frequent waking, unrested', AppTheme.accentRed),
+              _buildQualityOption(2, 'POOR', 'Restless sleep', AppTheme.accentOrange),
+              _buildQualityOption(3, 'FAIR', 'Average sleep', Colors.yellow[600]!),
+              _buildQualityOption(4, 'GOOD', 'Slept well', Colors.lightGreenAccent),
+              _buildQualityOption(5, 'EXCELLENT', 'Deep, uninterrupted sleep', AppTheme.accentGreen),
             ],
           ),
         ],
@@ -504,50 +488,50 @@ class _ManualSleepEntrySheetState extends State<ManualSleepEntrySheet> {
         child: Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: selected ? color.withOpacity(0.2) : Colors.white.withOpacity(0.03),
+            color: selected ? color.withOpacity(0.15) : AppTheme.bgDark.withOpacity(0.4),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: selected ? color : Colors.white.withOpacity(0.1),
-              width: selected ? 2 : 1,
+              color: selected ? color : AppTheme.glassBorder,
+              width: selected ? 1.5 : 1,
             ),
           ),
           child: Row(
             children: [
               Container(
-                width: 28,
-                height: 28,
+                width: 32,
+                height: 32,
                 decoration: BoxDecoration(
-                  color: selected ? color : Colors.white.withOpacity(0.1),
-                  shape: BoxShape.circle,
+                  color: selected ? color : AppTheme.textGray.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
                 ),
                 child: Center(
                   child: Text(
                     '$value',
                     style: TextStyle(
-                      color: selected ? Colors.white : Colors.white54,
+                      color: selected ? AppTheme.bgDarker : AppTheme.textGray,
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       label,
-                      style: TextStyle(
-                        color: selected ? Colors.white : Colors.white70,
-                        fontSize: 14,
-                        fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
+                      style: AppTheme.titleStyle.copyWith(
+                        color: selected ? AppTheme.textWhite : AppTheme.textGray,
+                        fontSize: 13,
+                        letterSpacing: 0.5,
                       ),
                     ),
                     Text(
                       sublabel,
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.4),
+                        color: AppTheme.textGray.withOpacity(0.6),
                         fontSize: 11,
                       ),
                     ),
@@ -565,43 +549,32 @@ class _ManualSleepEntrySheetState extends State<ManualSleepEntrySheet> {
 
   Widget _buildWakeFrequencySection() {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
-      ),
+      decoration: AppTheme.glassCard(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Sleep Continuity',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-            ),
+          Text(
+            'SLEEP CONTINUITY',
+            style: AppTheme.titleStyle.copyWith(color: AppTheme.primaryCyan),
           ),
           const SizedBox(height: 4),
-          Text(
+          const Text(
             'How often did you wake up?',
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.6),
-              fontSize: 13,
-            ),
+            style: TextStyle(color: AppTheme.textGray, fontSize: 13),
           ),
           const SizedBox(height: 16),
           
           Row(
             children: [
-              _buildWakeChip('Not at all', 0),
-              const SizedBox(width: 8),
-              _buildWakeChip('Once', 1),
-              const SizedBox(width: 8),
-              _buildWakeChip('2-3 times', 2),
-              const SizedBox(width: 8),
-              _buildWakeChip('Many', 3),
+              _buildWakeChip('NONE', 0),
+              const SizedBox(width: 6),
+              _buildWakeChip('ONCE', 1),
+              const SizedBox(width: 6),
+              _buildWakeChip('2-3X', 2),
+              const SizedBox(width: 6),
+              _buildWakeChip('MANY', 3),
             ],
           ),
         ],
@@ -614,22 +587,25 @@ class _ManualSleepEntrySheetState extends State<ManualSleepEntrySheet> {
     return Expanded(
       child: InkWell(
         onTap: () => setState(() => _wakeFrequency = value),
+        borderRadius: BorderRadius.circular(10),
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
-            color: selected ? Colors.purple.withOpacity(0.3) : Colors.white.withOpacity(0.05),
+            color: selected ? Colors.purple.withOpacity(0.2) : AppTheme.bgDark.withOpacity(0.4),
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
-              color: selected ? Colors.purple : Colors.white.withOpacity(0.1),
+              color: selected ? Colors.purpleAccent.withOpacity(0.5) : AppTheme.glassBorder,
+              width: selected ? 1.5 : 1,
             ),
           ),
           child: Center(
             child: Text(
               label,
               style: TextStyle(
-                color: selected ? Colors.purpleAccent : Colors.white54,
-                fontSize: 12,
-                fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
+                color: selected ? Colors.purpleAccent : AppTheme.textGray,
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 0.5,
               ),
             ),
           ),
@@ -640,47 +616,36 @@ class _ManualSleepEntrySheetState extends State<ManualSleepEntrySheet> {
 
   Widget _buildRestedFeelingSection() {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
-      ),
+      decoration: AppTheme.glassCard(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Morning Recovery',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-            ),
+          Text(
+            'MORNING RECOVERY',
+            style: AppTheme.titleStyle.copyWith(color: AppTheme.primaryCyan),
           ),
           const SizedBox(height: 4),
-          Text(
+          const Text(
             'Right now, how rested do you feel?',
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.6),
-              fontSize: 13,
-            ),
+            style: TextStyle(color: AppTheme.textGray, fontSize: 13),
           ),
           const SizedBox(height: 16),
           
-          // Horizontal slider with labels
           Column(
             children: List.generate(5, (index) {
               final value = index + 1;
               final selected = _restedFeeling == value;
               String label;
+              IconData icon;
               switch (value) {
-                case 1: label = 'Exhausted'; break;
-                case 2: label = 'Very Tired'; break;
-                case 3: label = 'Neutral'; break;
-                case 4: label = 'Rested'; break;
-                case 5: label = 'Fully Recovered'; break;
-                default: label = '';
+                case 1: label = 'EXHAUSTED'; icon = Icons.battery_0_bar; break;
+                case 2: label = 'VERY TIRED'; icon = Icons.battery_2_bar; break;
+                case 3: label = 'NEUTRAL'; icon = Icons.battery_4_bar; break;
+                case 4: label = 'RESTED'; icon = Icons.battery_6_bar; break;
+                case 5: label = 'FULLY RECOVERED'; icon = Icons.battery_full; break;
+                default: label = ''; icon = Icons.battery_unknown;
               }
               
               return Padding(
@@ -691,45 +656,28 @@ class _ManualSleepEntrySheetState extends State<ManualSleepEntrySheet> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
                     decoration: BoxDecoration(
-                      color: selected ? Colors.teal.withOpacity(0.25) : Colors.white.withOpacity(0.03),
+                      color: selected ? Colors.teal.withOpacity(0.15) : AppTheme.bgDark.withOpacity(0.4),
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
-                        color: selected ? Colors.teal : Colors.white.withOpacity(0.1),
-                        width: selected ? 2 : 1,
+                        color: selected ? Colors.tealAccent : AppTheme.glassBorder,
+                        width: selected ? 1.5 : 1,
                       ),
                     ),
                     child: Row(
                       children: [
-                        Container(
-                          width: 24,
-                          height: 24,
-                          decoration: BoxDecoration(
-                            color: selected ? Colors.teal : Colors.white.withOpacity(0.1),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Center(
-                            child: Text(
-                              '$value',
-                              style: TextStyle(
-                                color: selected ? Colors.white : Colors.white54,
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
+                        Icon(icon, color: selected ? Colors.tealAccent : AppTheme.textGray, size: 20),
+                        const SizedBox(width: 14),
                         Text(
                           label,
-                          style: TextStyle(
-                            color: selected ? Colors.tealAccent : Colors.white70,
-                            fontSize: 14,
-                            fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
+                          style: AppTheme.titleStyle.copyWith(
+                            color: selected ? AppTheme.textWhite : AppTheme.textGray,
+                            fontSize: 12,
+                            letterSpacing: 0.5,
                           ),
                         ),
                         const Spacer(),
                         if (selected)
-                          const Icon(Icons.check, color: Colors.tealAccent, size: 18),
+                          const Icon(Icons.bolt, color: Colors.tealAccent, size: 18),
                       ],
                     ),
                   ),
@@ -744,39 +692,28 @@ class _ManualSleepEntrySheetState extends State<ManualSleepEntrySheet> {
 
   Widget _buildSymptomsSection() {
     final symptoms = [
-      {'id': 'muscle_soreness', 'label': 'Muscle Soreness', 'icon': Icons.fitness_center},
-      {'id': 'joint_pain', 'label': 'Joint Pain', 'icon': Icons.accessibility_new},
-      {'id': 'headache', 'label': 'Headache', 'icon': Icons.psychology},
-      {'id': 'illness', 'label': 'Illness Symptoms', 'icon': Icons.sick},
-      {'id': 'none', 'label': 'None', 'icon': Icons.check_circle_outline},
+      {'id': 'muscle_soreness', 'label': 'MUSCLE SORENESS', 'icon': Icons.fitness_center},
+      {'id': 'joint_pain', 'label': 'JOINT PAIN', 'icon': Icons.accessibility_new},
+      {'id': 'headache', 'label': 'HEADACHE', 'icon': Icons.psychology},
+      {'id': 'illness', 'label': 'ILLNESS', 'icon': Icons.sick},
+      {'id': 'none', 'label': 'NONE', 'icon': Icons.check_circle_outline},
     ];
     
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
-      ),
+      decoration: AppTheme.glassCard(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Physiological Context',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-            ),
+          Text(
+            'PHYSIOLOGICAL CONTEXT',
+            style: AppTheme.titleStyle.copyWith(color: AppTheme.primaryCyan),
           ),
           const SizedBox(height: 4),
-          Text(
+          const Text(
             'Any of the following? (Select all that apply)',
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.6),
-              fontSize: 13,
-            ),
+            style: TextStyle(color: AppTheme.textGray, fontSize: 13),
           ),
           const SizedBox(height: 16),
           
@@ -789,8 +726,6 @@ class _ManualSleepEntrySheetState extends State<ManualSleepEntrySheet> {
               final icon = symptom['icon'] as IconData;
               final selected = _symptoms.contains(id);
               
-              // If "None" is selected, deselect others
-              // If others are selected, deselect "None"
               return InkWell(
                 onTap: () {
                   setState(() {
@@ -807,18 +742,19 @@ class _ManualSleepEntrySheetState extends State<ManualSleepEntrySheet> {
                     }
                   });
                 },
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(10),
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   decoration: BoxDecoration(
                     color: selected 
-                      ? (id == 'none' ? Colors.green.withOpacity(0.25) : Colors.red.withOpacity(0.25))
-                      : Colors.white.withOpacity(0.05),
-                    borderRadius: BorderRadius.circular(20),
+                      ? (id == 'none' ? AppTheme.accentGreen.withOpacity(0.15) : AppTheme.accentOrange.withOpacity(0.15))
+                      : AppTheme.bgDark.withOpacity(0.4),
+                    borderRadius: BorderRadius.circular(10),
                     border: Border.all(
                       color: selected 
-                        ? (id == 'none' ? Colors.green : Colors.red)
-                        : Colors.white.withOpacity(0.2),
+                        ? (id == 'none' ? AppTheme.accentGreen : AppTheme.accentOrange)
+                        : AppTheme.glassBorder,
+                      width: selected ? 1.5 : 1,
                     ),
                   ),
                   child: Row(
@@ -828,18 +764,17 @@ class _ManualSleepEntrySheetState extends State<ManualSleepEntrySheet> {
                         icon,
                         size: 16,
                         color: selected 
-                          ? (id == 'none' ? Colors.greenAccent : Colors.redAccent)
-                          : Colors.white54,
+                          ? (id == 'none' ? AppTheme.accentGreen : AppTheme.accentOrange)
+                          : AppTheme.textGray,
                       ),
-                      const SizedBox(width: 6),
+                      const SizedBox(width: 8),
                       Text(
                         label,
                         style: TextStyle(
-                          color: selected 
-                            ? (id == 'none' ? Colors.greenAccent : Colors.redAccent)
-                            : Colors.white70,
-                          fontSize: 13,
-                          fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
+                          color: selected ? AppTheme.textWhite : AppTheme.textGray,
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.5,
                         ),
                       ),
                     ],
@@ -854,35 +789,39 @@ class _ManualSleepEntrySheetState extends State<ManualSleepEntrySheet> {
   }
 
   Widget _buildOverrideToggle() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      child: InkWell(
-        onTap: () => setState(() => _isOverride = !_isOverride),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.orange.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.orange.withOpacity(0.3)),
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: _isOverride ? AppTheme.accentOrange.withOpacity(0.1) : AppTheme.bgDark.withOpacity(0.4),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: _isOverride ? AppTheme.accentOrange.withOpacity(0.5) : AppTheme.glassBorder,
+          width: 1.5,
+        ),
+      ),
+      child: SwitchListTile(
+        value: _isOverride,
+        onChanged: (val) => setState(() => _isOverride = val),
+        title: Text(
+          'MANUAL OVERRIDE',
+          style: AppTheme.titleStyle.copyWith(
+            color: _isOverride ? AppTheme.accentOrange : AppTheme.textWhite,
+            fontSize: 14,
           ),
-          child: Row(
-            children: [
-              Checkbox(
-                value: _isOverride,
-                onChanged: (val) => setState(() => _isOverride = val ?? false),
-                activeColor: Colors.orange,
-              ),
-              const Expanded(
-                child: Text(
-                  'Override auto sleep with this entry',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 14,
-                  ),
-                ),
-              ),
-            ],
+        ),
+        subtitle: Text(
+          'Bypass wearable data for this date',
+          style: TextStyle(
+            color: _isOverride ? AppTheme.accentOrange.withOpacity(0.7) : AppTheme.textGray,
+            fontSize: 11,
           ),
+        ),
+        activeColor: AppTheme.accentOrange,
+        activeTrackColor: AppTheme.accentOrange.withOpacity(0.3),
+        secondary: Icon(
+          Icons.emergency_share,
+          color: _isOverride ? AppTheme.accentOrange : AppTheme.textGray,
         ),
       ),
     );
@@ -890,25 +829,47 @@ class _ManualSleepEntrySheetState extends State<ManualSleepEntrySheet> {
 
   Widget _buildSaveButton() {
     return Padding(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       child: SizedBox(
         width: double.infinity,
-        child: ElevatedButton(
-          onPressed: _save,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.blue[700],
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
+        height: 56,
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: AppTheme.primaryCyan.withOpacity(0.3),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-          child: const Text(
-            'Save Sleep Assessment',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
+          child: ElevatedButton(
+            onPressed: _isSaving ? null : _save,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.primaryCyan,
+              foregroundColor: AppTheme.bgDarker,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
+            child: _isSaving
+                ? const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(AppTheme.bgDarker),
+                    ),
+                  )
+                : Text(
+                    'SAVE ASSESSMENT',
+                    style: AppTheme.titleStyle.copyWith(
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.5,
+                    ),
+                  ),
           ),
         ),
       ),

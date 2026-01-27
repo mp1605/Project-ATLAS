@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../routes.dart';
+import '../services/session_controller.dart';
 import '../services/local_secure_store.dart';
 import '../services/biometric_auth_service.dart';
 import '../config/app_config.dart' as import_config;
@@ -272,7 +273,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ),
-x                  const SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   TextButton.icon(
                     onPressed: _showServerSettings,
                     icon: const Icon(Icons.settings, size: 16),
@@ -288,7 +289,9 @@ x                  const SizedBox(height: 20),
           ),
         ),
       ),
-    );
+    ),
+  ),
+);
   }
 
   void _showServerSettings() {

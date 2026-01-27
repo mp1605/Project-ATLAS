@@ -75,11 +75,9 @@ class DeviceAuthService {
     }
   }
   
-  // Helper to store device ID using the store instance (requires generic access or extension)
-  // Since we can't easily change LocalSecureStore interface right now without seeing it fully again,
-  // we'll assume we might need to add this method to LocalSecureStore.
+  // Helper to store device ID using the store instance
   Future<void> _storeDeviceId(String id) async {
-     // TODO: Add setDeviceId to LocalSecureStore
-     // For now, we will use a workaround or assume the method exists after we update the store.
+     await LocalSecureStore.instance.write(key: _kDeviceIdKey, value: id);
+     print('📱 DeviceAuth: Device ID $id persisted.');
   }
 }

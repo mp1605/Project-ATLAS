@@ -33,6 +33,7 @@ function initDatabase() {
       CREATE TABLE IF NOT EXISTS soldiers (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
+        email TEXT UNIQUE,
         rank TEXT NOT NULL,
         unit TEXT,
         readiness_score INTEGER DEFAULT 0,
@@ -86,19 +87,19 @@ function seedDatabase() {
     // Only seed if table is empty
     if (row.count === 0) {
       console.log('Seeding sample soldiers...');
-      
+
       const soldiers = [
-        ['SGT. Boris Activin R.', 'Sergeant', 'Alpha Company', 62, 70, 72, 85, '2024-06-01', 'active', 'https://i.pravatar.cc/150?img=11'],
-        ['SGT. Boric Activin Re.', 'Sergeant', 'Bravo Company', 62, 65, 78, 82, '2024-05-20', 'active', 'https://i.pravatar.cc/150?img=3'],
-        ['SGT. Boris Activin M.', 'Sergeant', 'Charlie Company', 65, 72, 70, 88, '2024-06-10', 'active', 'https://i.pravatar.cc/150?img=59'],
-        ['SGT. Deck Activin N.', 'Sergeant', 'Delta Company', 71, 80, 68, 90, '2024-05-15', 'active', 'https://i.pravatar.cc/150?img=12'],
-        ['CPL. James Miller', 'Corporal', 'Alpha Company', 68, 75, 75, 86, '2024-06-05', 'active', 'https://i.pravatar.cc/150?img=33'],
-        ['CPL. Sarah Johnson', 'Corporal', 'Bravo Company', 73, 82, 65, 92, '2024-05-25', 'active', 'https://i.pravatar.cc/150?img=45']
+        ['SGT. Boris Activin R.', 'meghp169@gmail.com', 'Sergeant', 'Alpha Company', 62, 70, 72, 85, '2024-06-01', 'active', 'https://i.pravatar.cc/150?img=11'],
+        ['SGT. Boric Activin Re.', 'boris.re@example.com', 'Sergeant', 'Bravo Company', 62, 65, 78, 82, '2024-05-20', 'active', 'https://i.pravatar.cc/150?img=3'],
+        ['SGT. Boris Activin M.', 'boris.m@example.com', 'Sergeant', 'Charlie Company', 65, 72, 70, 88, '2024-06-10', 'active', 'https://i.pravatar.cc/150?img=59'],
+        ['SGT. Deck Activin N.', 'deck.n@example.com', 'Sergeant', 'Delta Company', 71, 80, 68, 90, '2024-05-15', 'active', 'https://i.pravatar.cc/150?img=12'],
+        ['CPL. James Miller', 'james.m@example.com', 'Corporal', 'Alpha Company', 68, 75, 75, 86, '2024-06-05', 'active', 'https://i.pravatar.cc/150?img=33'],
+        ['CPL. Sarah Johnson', 'sarah.j@example.com', 'Corporal', 'Bravo Company', 73, 82, 65, 92, '2024-05-25', 'active', 'https://i.pravatar.cc/150?img=45']
       ];
 
       const stmt = db.prepare(`
-        INSERT INTO soldiers (name, rank, unit, readiness_score, training_completion, heart_rate, recovery_score, last_assessment, status, avatar_url)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO soldiers (name, email, rank, unit, readiness_score, training_completion, heart_rate, recovery_score, last_assessment, status, avatar_url)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `);
 
       soldiers.forEach(soldier => {

@@ -138,4 +138,4 @@ class AuthClient {
 }
 
 // Export for use in other scripts
-const authClient = new AuthClient('http://localhost:3000'); // TODO: Update for production
+const authClient = new AuthClient('http://192.168.0.108:3000'); // Local Backend

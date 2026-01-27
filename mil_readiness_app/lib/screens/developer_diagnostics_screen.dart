@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../theme/app_theme.dart';
 import '../services/local_secure_store.dart';
 import '../routes.dart';
+import '../services/session_controller.dart';
 
 /// Developer/Diagnostics screen containing all technical settings
 /// 

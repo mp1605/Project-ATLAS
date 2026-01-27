@@ -67,25 +67,25 @@ class BackendSyncService {
         'timestamp': date.toUtc().toIso8601String(),
         'overall_score': result.overallReadiness, // Added to match backend schema
         'scores': {
-          // Backend expects these exact field names (from validation.ts)
           'readiness': result.overallReadiness,
           'fatigue_index': result.fatigueIndex,
           'recovery': result.recoveryScore,
           'sleep_quality': result.sleepIndex,
           'sleep_debt': result.sleepDebt,
           'autonomic_balance': result.cardioRespStability,
-          'hrv_deviation': 100 - result.cardioRespStability, // Derived
-          'resting_hr_deviation': 100 - result.cardioRespStability, // Derived
-          'respiratory_stability': result.cardioRespStability,
-          'oxygen_stability': result.cardioRespStability,
+          'hrv_deviation': _extractHRVDeviation(result),
+          'resting_hr_deviation': _extractHRDeviation(result),
+          'respiratory_stability': _extractRespiratoryStability(result),
+          'oxygen_stability': _extractOxygenStability(result),
           'training_load': result.trainingReadiness,
-          'acute_chronic_ratio': 1.0, // Default ACWR value
+          'acute_chronic_ratio': _extractACWR(result),
           'cardiovascular_strain': result.cardiovascularFitness,
           'stress_load': result.stressLoad,
           'illness_risk': result.illnessRisk,
           'overtraining_risk': result.injuryRisk,
           'energy_availability': result.workCapacity,
           'physical_status': result.dailyActivity,
+          'sleep_hours': _extractSleepHours(result),
         },
         'category': result.category,
         'confidence': result.overallConfidence,
@@ -164,7 +164,7 @@ class BackendSyncService {
   
   /// Test connection to backend
   Future<bool> testConnection() async {
-    final testUrl = '${AppConfig.apiBaseUrl}/health';
+    final testUrl = '${AppConfig.apiBaseUrl}/api/health';
     try {
       print('📡 Testing connection to: $testUrl');
       final response = await http.get(
@@ -185,6 +185,60 @@ class BackendSyncService {
     }
   }
   
+  /// Extract HRV deviation from component breakdown
+  double _extractHRVDeviation(ComprehensiveReadinessResult scores) {
+    final breakdown = scores.componentBreakdown['Cardio-Resp Stability'];
+    if (breakdown != null && breakdown.containsKey('hrv_deviation')) {
+      return breakdown['hrv_deviation'] as double;
+    }
+    return 100.0 - scores.cardioRespStability;
+  }
+  
+  /// Extract HR deviation from component breakdown
+  double _extractHRDeviation(ComprehensiveReadinessResult scores) {
+    final breakdown = scores.componentBreakdown['Cardio-Resp Stability'];
+    if (breakdown != null && breakdown.containsKey('hr_deviation')) {
+      return breakdown['hr_deviation'] as double;
+    }
+    return 100.0 - scores.cardioRespStability;
+  }
+  
+  /// Extract respiratory stability from component breakdown
+  double _extractRespiratoryStability(ComprehensiveReadinessResult scores) {
+    final breakdown = scores.componentBreakdown['Cardio-Resp Stability'];
+    if (breakdown != null && breakdown.containsKey('respiratory_stability')) {
+      return breakdown['respiratory_stability'] as double;
+    }
+    return scores.cardioRespStability;
+  }
+  
+  /// Extract oxygen saturation stability from component breakdown
+  double _extractOxygenStability(ComprehensiveReadinessResult scores) {
+    final breakdown = scores.componentBreakdown['Cardio-Resp Stability'];
+    if (breakdown != null && breakdown.containsKey('oxygen_stability')) {
+      return breakdown['oxygen_stability'] as double;
+    }
+    return scores.cardioRespStability;
+  }
+  
+  /// Extract Acute/Chronic Workload Ratio from component breakdown
+  double _extractACWR(ComprehensiveReadinessResult scores) {
+    final breakdown = scores.componentBreakdown['Fatigue Index'];
+    if (breakdown != null && breakdown.containsKey('acwr')) {
+      return breakdown['acwr'] as double;
+    }
+    return 1.0;
+  }
+
+  /// Extract sleep hours from component breakdown
+  double _extractSleepHours(ComprehensiveReadinessResult scores) {
+    final breakdown = scores.componentBreakdown['Sleep Index'];
+    if (breakdown != null && breakdown.containsKey('asleep_min')) {
+      return (breakdown['asleep_min'] as double) / 60.0;
+    }
+    return 0.0;
+  }
+
   /// Format date as YYYY-MM-DD
   String _formatDate(DateTime date) {
     return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';

@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'dart:async';
 import '../theme/app_theme.dart';
 import '../routes.dart';
+import '../services/session_controller.dart';
 import '../database/secure_database_manager.dart';
 import '../services/local_secure_store.dart';
 import '../services/live_sync_controller.dart';

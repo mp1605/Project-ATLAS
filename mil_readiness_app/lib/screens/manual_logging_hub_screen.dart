@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../routes.dart';
 import '../theme/app_theme.dart';
+import '../widgets/logging_dialogs.dart';
+import '../services/session_controller.dart';
 
 /// Manual Logging Hub - Central place for all manual data entry
 /// Links to existing manual entry screens (sleep, activity)
@@ -60,7 +61,40 @@ class ManualLoggingHubScreen extends StatelessWidget {
               title: 'Log Activity',
               subtitle: 'Record workout or physical activity',
               color: AppTheme.accentOrange,
-              onTap: () => context.push('/manual-activity-entry?email=$email'),
+              onTap: () => context.push('/manual-activity-entry'),
+            ),
+            
+            const SizedBox(height: 12),
+
+            _buildLogCard(
+              context,
+              icon: Icons.water_drop_outlined,
+              title: 'Log Hydration',
+              subtitle: 'Record daily water intake',
+              color: AppTheme.primaryCyan,
+              onTap: () => LoggingDialogs.showHydrationDialog(context, email),
+            ),
+            
+            const SizedBox(height: 12),
+
+            _buildLogCard(
+              context,
+              icon: Icons.restaurant_outlined,
+              title: 'Log Nutrition',
+              subtitle: 'Assess nutrition quality',
+              color: AppTheme.accentGreen,
+              onTap: () => LoggingDialogs.showNutritionDialog(context, email),
+            ),
+            
+            const SizedBox(height: 12),
+
+            _buildLogCard(
+              context,
+              icon: Icons.psychology_outlined,
+              title: 'Log Stress',
+              subtitle: 'Record perceived stress level',
+              color: AppTheme.accentOrange,
+              onTap: () => LoggingDialogs.showStressDialog(context, email),
             ),
             
             const SizedBox(height: 32),

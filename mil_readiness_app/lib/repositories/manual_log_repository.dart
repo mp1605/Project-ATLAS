@@ -48,6 +48,24 @@ class ManualLogRepository {
     return results.map((m) => ManualLog.fromMap(m)).toList();
   }
 
+  /// Get logs for a specific date
+  static Future<List<ManualLog>> getLogsForDate({
+    required String userEmail,
+    required DateTime date,
+    String? logType,
+  }) async {
+    // Get start and end of the day in local time
+    final startOfDay = DateTime(date.year, date.month, date.day);
+    final endOfDay = startOfDay.add(const Duration(days: 1)).subtract(const Duration(seconds: 1));
+    
+    return getLogs(
+      userEmail: userEmail,
+      startDate: startOfDay,
+      endDate: endOfDay,
+      logType: logType,
+    );
+  }
+
   static Future<void> deleteLog(int id) async {
     final db = await SecureDatabaseManager.instance.database;
     await db.delete(

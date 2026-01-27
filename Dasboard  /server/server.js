@@ -8,6 +8,7 @@ const authRoutes = require('./routes/auth');
 const soldierRoutes = require('./routes/soldiers');
 const metricsRoutes = require('./routes/metrics');
 const eventsRoutes = require('./routes/events');
+const readinessRoutes = require('./routes/readiness');
 
 // Import database (this will initialize it)
 require('./database');
@@ -20,10 +21,23 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// Simple request logger
+app.use((req, res, next) => {
+    console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+    next();
+});
+
 // Serve static files from parent directory
 app.use(express.static(path.join(__dirname, '..')));
 
 // API Routes
+app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/soldiers', soldierRoutes);
+app.use('/api/v1/metrics', metricsRoutes);
+app.use('/api/v1/events', eventsRoutes);
+app.use('/api/v1/readiness', readinessRoutes);
+
+// Compatibility aliases (if needed)
 app.use('/api/auth', authRoutes);
 app.use('/api/soldiers', soldierRoutes);
 app.use('/api/metrics', metricsRoutes);
@@ -37,6 +51,11 @@ app.get('/', (req, res) => {
 // Health check
 app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', message: 'Server is running' });
+});
+
+// Alias for root health check
+app.get('/health', (req, res) => {
+    res.json({ status: 'ok', message: 'Server is running (root)' });
 });
 
 // 404 handler

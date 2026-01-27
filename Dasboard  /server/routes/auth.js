@@ -102,6 +102,36 @@ router.post('/login', (req, res) => {
     );
 });
 
+// Device Login (for app persistent sync)
+router.post('/device-login', (req, res) => {
+    const { device_id, email, full_name } = req.body;
+
+    if (!device_id) {
+        return res.status(400).json({ error: 'device_id is required' });
+    }
+
+    // Since this is a local/trusted environment for now, 
+    // we allow device-based login if an email is provided.
+    // In production, this would involve device verification.
+
+    const loginEmail = email || 'anonymous_device@auix.local';
+
+    // Generate a long-lived token for the device
+    const token = jwt.sign(
+        { device_id, email: loginEmail, role: 'soldier' },
+        JWT_SECRET,
+        { expiresIn: '365d' } // Devices stay logged in for a long time
+    );
+
+    console.log(`📱 Device login: ${device_id} linked to ${loginEmail}`);
+
+    res.json({
+        message: 'Device authenticated successfully',
+        access_token: token,
+        expires_in: 31536000 // 1 year
+    });
+});
+
 // Verify token (optional endpoint to check if token is valid)
 router.get('/verify', require('../middleware/auth').authenticateToken, (req, res) => {
     res.json({ valid: true, user: req.user });

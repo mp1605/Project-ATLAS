@@ -3,6 +3,8 @@ import 'package:sqflite_sqlcipher/sqflite.dart';
 import '../../services/last_sleep_service.dart';
 import '../../services/sleep_source_resolver.dart';
 import '../../models/user_profile.dart';
+import '../../models/manual_log.dart';
+import '../../repositories/manual_log_repository.dart';
 import '../foundation/baseline_calculator_v2.dart';
 import '../foundation/data_sufficiency_checker.dart';
 
@@ -112,23 +114,39 @@ class RecoveryScoreCalculator {
         ? 10 * math.min(1.0, sleepDeep / (0.18 * sleepAsleep + 0.001))
         : 0.0;
     
+    // Component 6: Hydration Score (from manual logs)
+    final hydrationScore = await _getHydrationScore(userEmail, date);
+    
+    // Component 7: Nutrition Score (from manual logs)
+    final nutritionScore = await _getNutritionScore(userEmail, date);
+    
+    // Component 8: Manual Stress Score (from manual logs, inverted)
+    final manualStressScore = await _getManualStressScore(userEmail, date);
+    
     // Check if EDA is available
     final hasEDA = edaValue > 0;
     
-    // Final recovery score
+    // Final recovery score with manual log integration
     double recoveryScore;
     if (hasEDA) {
-      recoveryScore = 0.35 * hrvScore + 
-                     0.25 * rhrScore + 
-                     0.20 * tempScore + 
-                     0.10 * stressScore + 
-                     0.10 * (50 + sleepBoost);
+      // With EDA: integrate all components
+      recoveryScore = 0.25 * hrvScore +          // HRV (reduced from 35%)
+                     0.20 * rhrScore +           // RHR (reduced from 25%)
+                     0.15 * tempScore +          // Temp (reduced from 20%)
+                     0.08 * stressScore +        // EDA stress (reduced from 10%)
+                     0.08 * (50 + sleepBoost) +  // Sleep (reduced from 10%)
+                     0.10 * hydrationScore +     // Hydration (new)
+                     0.07 * nutritionScore +     // Nutrition (new)
+                     0.07 * manualStressScore;   // Manual stress (new)
     } else {
-      // Redistribute EDA weight to HRV
-      recoveryScore = 0.45 * hrvScore + 
-                     0.25 * rhrScore + 
-                     0.20 * tempScore + 
-                     0.10 * (50 + sleepBoost);
+      // Without EDA: redistribute weight
+      recoveryScore = 0.30 * hrvScore +          // HRV
+                     0.20 * rhrScore +           // RHR
+                     0.15 * tempScore +          // Temp
+                     0.10 * (50 + sleepBoost) +  // Sleep
+                     0.10 * hydrationScore +     // Hydration
+                     0.08 * nutritionScore +     // Nutrition
+                     0.07 * manualStressScore;   // Manual stress
     }
     
     recoveryScore = recoveryScore.clamp(0, 100);
@@ -140,6 +158,9 @@ class RecoveryScoreCalculator {
       'temperature': tempScore.toDouble(),
       'stress': stressScore.toDouble(),
       'sleep_boost': sleepBoost.toDouble(),
+      'hydration': hydrationScore.toDouble(),
+      'nutrition': nutritionScore.toDouble(),
+      'manual_stress': manualStressScore.toDouble(),
     };
     
     // Identify top contributors
@@ -187,5 +208,86 @@ class RecoveryScoreCalculator {
       ..sort((a, b) => b.value.compareTo(a.value));
     
     return sorted.take(3).map((e) => e.key).toList();
+  }
+  
+  /// Get hydration score from manual logs
+  /// Target: 8 glasses per day
+  Future<double> _getHydrationScore(String userEmail, DateTime date) async {
+    final logs = await ManualLogRepository.getLogsForDate(
+      userEmail: userEmail,
+      date: date,
+      logType: 'hydration',
+    );
+    
+    if (logs.isEmpty) {
+      return 50.0; // Neutral score if no data
+    }
+    
+    // Sum all hydration entries for the day
+    double totalGlasses = 0.0;
+    for (final log in logs) {
+      totalGlasses += log.value;
+    }
+    
+    // Target: 8 glasses, score 0-100
+    // 8+ glasses = 100, 0 glasses = 0
+    final score = (totalGlasses / 8.0 * 100).clamp(0, 100);
+    
+    print('💧 Hydration score: $totalGlasses glasses → $score');
+    return score.toDouble();
+  }
+  
+  /// Get nutrition score from manual logs
+  /// Quality rating: 1-5 scale
+  Future<double> _getNutritionScore(String userEmail, DateTime date) async {
+    final logs = await ManualLogRepository.getLogsForDate(
+      userEmail: userEmail,
+      date: date,
+      logType: 'nutrition',
+    );
+    
+    if (logs.isEmpty) {
+      return 50.0; // Neutral score if no data
+    }
+    
+    // Average nutrition quality for the day
+    double totalQuality = 0.0;
+    for (final log in logs) {
+      totalQuality += log.value;
+    }
+    final avgQuality = totalQuality / logs.length;
+    
+    // Map 1-5 scale to 0-100
+    final score = ((avgQuality - 1) / 4.0 * 100).clamp(0, 100);
+    
+    print('🍎 Nutrition score: avg quality $avgQuality → $score');
+    return score.toDouble();
+  }
+  
+  /// Get manual stress score from manual logs
+  /// Stress rating: 1-5 scale (inverted - higher stress = lower score)
+  Future<double> _getManualStressScore(String userEmail, DateTime date) async {
+    final logs = await ManualLogRepository.getLogsForDate(
+      userEmail: userEmail,
+      date: date,
+      logType: 'stress',
+    );
+    
+    if (logs.isEmpty) {
+      return 50.0; // Neutral score if no data
+    }
+    
+    // Average stress for the day
+    double totalStress = 0.0;
+    for (final log in logs) {
+      totalStress += log.value;
+    }
+    final avgStress = totalStress / logs.length;
+    
+    // Invert: 1 (low stress) = 100, 5 (high stress) = 0
+    final score = (1 - (avgStress - 1) / 4.0) * 100;
+    
+    print('😰 Manual stress score: avg stress $avgStress → $score');
+    return score.clamp(0, 100).toDouble();
   }
 }

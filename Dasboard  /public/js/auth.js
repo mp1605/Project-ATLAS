@@ -2,11 +2,11 @@
 const getAPIUrl = () => {
     const hostname = window.location.hostname;
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
-        return 'http://localhost:3000/api/v1';
+        return 'http://192.168.0.108:3000/api/v1'; // Force local IP even on localhost for consistency
     }
     if (!hostname || hostname === '') {
-        // Handle file:// URLs or empty hostnames by defaulting to localhost
-        return 'http://localhost:3000/api/v1';
+        // Default to local server IP
+        return 'http://192.168.0.108:3000/api/v1';
     }
     return `http://${hostname}:3000/api/v1`;
 };

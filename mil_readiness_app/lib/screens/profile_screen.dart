@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../routes.dart';
+import '../services/session_controller.dart';
 import '../theme/app_theme.dart';
 import '../widgets/local_goal_card.dart';
 import '../services/local_secure_store.dart';

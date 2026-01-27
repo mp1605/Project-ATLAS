@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../routes.dart';
+import '../services/session_controller.dart';
 import '../services/local_secure_store.dart';
 import '../adapters/health_adapter_factory.dart';
 import '../models/wearable_type.dart';

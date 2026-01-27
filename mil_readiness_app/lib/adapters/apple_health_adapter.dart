@@ -199,7 +199,8 @@ class AppleHealthAdapter implements HealthDataAdapter {
       HealthDataType.SLEEP_SESSION,
       HealthDataType.SLEEP_UNKNOWN, // NEW in v13.2.1
       
-      // Cardiovascular metrics (calculated once daily)
+      // Cardiovascular metrics (calculated once daily or frequent)
+      HealthDataType.HEART_RATE,           // Added to daily to ensure robustness
       HealthDataType.RESTING_HEART_RATE,  // Morning calculation
       HealthDataType.WALKING_HEART_RATE,   // Daily average
       HealthDataType.HEART_RATE_VARIABILITY_SDNN,  // Overnight
@@ -214,7 +215,7 @@ class AppleHealthAdapter implements HealthDataAdapter {
       HealthDataType.BLOOD_OXYGEN,
       
       // Activity metrics (accumulated over 24h)
-      HealthDataType.STEPS,
+      HealthDataType.STEPS,                // Added to daily to ensure robustness
       HealthDataType.DISTANCE_WALKING_RUNNING,
       HealthDataType.DISTANCE_CYCLING,
       HealthDataType.DISTANCE_SWIMMING,

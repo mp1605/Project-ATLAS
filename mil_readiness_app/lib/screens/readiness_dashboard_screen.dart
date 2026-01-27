@@ -24,10 +24,14 @@ import '../services/data_trust_service.dart';
 import '../widgets/email_verification_widgets.dart';
 import '../widgets/data_trust_widgets.dart';
 import '../widgets/privacy_widgets.dart';
+import '../routes.dart';
+import '../services/session_controller.dart';
+import '../services/live_sync_controller.dart';
 
 /// Elevated Readiness Dashboard with professional insights and micro-interactions
 class ReadinessDashboardScreen extends StatefulWidget {
-  const ReadinessDashboardScreen({super.key});
+  final SessionController? session;
+  const ReadinessDashboardScreen({super.key, this.session});
 
   @override
   State<ReadinessDashboardScreen> createState() => _ReadinessDashboardScreenState();
@@ -120,6 +124,14 @@ class _ReadinessDashboardScreenState extends State<ReadinessDashboardScreen> wit
     setState(() => _loading = true);
     try {
       if (_email == null || _profile == null) return;
+      
+      // TRIGGER HEALTH SYNC FIRST
+      final liveSync = widget.session?.liveSync;
+      if (liveSync != null) {
+        print('🔄 Dashboard: Triggering HealthKit sync before calculation...');
+        await liveSync.syncNow();
+      }
+
       final db = await SecureDatabaseManager.instance.database;
       final calculator = AllScoresCalculator(db: SecureDatabaseManager.instance);
       final result = await calculator.calculateAll(userEmail: _email!, date: _selectedDate, profile: _profile!);

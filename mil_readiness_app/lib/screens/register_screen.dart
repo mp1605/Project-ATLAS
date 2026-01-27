@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../models/user_profile.dart';
 import '../routes.dart';
+import '../services/session_controller.dart';
 import '../utils/validation_utils.dart';
 import '../services/local_secure_store.dart';
 import '../models/wearable_type.dart';
