@@ -3,6 +3,7 @@ import 'app.dart';
 import 'routes.dart';
 import 'services/local_secure_store.dart';
 import 'services/daily_readiness_service.dart';
+import 'config/app_config.dart';
 import 'theme/app_theme.dart';  // Professional theme
 import 'widgets/app_lock_wrapper.dart'; // Biometric lock wrapper
 
@@ -10,6 +11,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Load custom server URL if set
+  await AppConfig.loadFromStore();
 
   // Initialize daily readiness scoring
   // TODO: Re-enable after iOS workmanager configuration

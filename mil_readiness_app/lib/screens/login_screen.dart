@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../routes.dart';
 import '../services/local_secure_store.dart';
 import '../services/biometric_auth_service.dart';
+import '../config/app_config.dart' as import_config;
 
 class LoginScreen extends StatefulWidget {
   final SessionController session;
@@ -271,13 +272,64 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ),
-                    ],
+x                  const SizedBox(height: 20),
+                  TextButton.icon(
+                    onPressed: _showServerSettings,
+                    icon: const Icon(Icons.settings, size: 16),
+                    label: const Text("Server Settings"),
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.grey,
+                      textStyle: const TextStyle(fontSize: 12),
+                    ),
                   ),
-                ),
+                ],
               ),
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  void _showServerSettings() {
+    final controller = TextEditingController(text: import_config.AppConfig.apiBaseUrl);
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text("Server Configuration"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text("Enter the address of your AUiX ATLAS Server:"),
+            const SizedBox(height: 10),
+            TextField(
+              controller: controller,
+              decoration: const InputDecoration(
+                labelText: "Server URL",
+                hintText: "http://192.168.1.50:8000",
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text("Cancel"),
+          ),
+          FilledButton(
+            onPressed: () async {
+              await import_config.AppConfig.setApiUrl(controller.text.trim());
+              if (ctx.mounted) {
+                Navigator.pop(ctx);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text("Server URL updated to: ${import_config.AppConfig.apiBaseUrl}")),
+                );
+              }
+            },
+            child: const Text("Save"),
+          ),
+        ],
       ),
     );
   }

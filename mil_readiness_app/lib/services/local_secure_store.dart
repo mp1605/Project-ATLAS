@@ -247,16 +247,25 @@ class LocalSecureStore {
     return value != null ? DateTime.tryParse(value) : null;
   }
 
-  // ---------- Email Verification (Additive/Separate for Compatibility) ----------
-  static const String _kEmailVerified = 'email_verified_v1';
+  // ===== CONFIGURATION METHODS =====
 
-  Future<void> setEmailVerifiedFor(String email, bool verified) async {
-    await _ss.write(key: _scoped(email, _kEmailVerified), value: verified ? "1" : "0");
+  /// Store custom API Base URL
+  Future<void> setApiBaseUrl(String url) async {
+    // Remove trailing slash if present
+    if (url.endsWith('/')) {
+      url = url.substring(0, url.length - 1);
+    }
+    await _ss.write(key: 'config_api_base_url', value: url);
   }
 
-  Future<bool> isEmailVerifiedFor(String email) async {
-    final v = await _ss.read(key: _scoped(email, _kEmailVerified));
-    return v == "1";
+  /// Get stored API Base URL
+  Future<String?> getApiBaseUrl() async {
+    return await _ss.read(key: 'config_api_base_url');
+  }
+
+  /// Clear stored API Base URL (revert to default)
+  Future<void> clearApiBaseUrl() async {
+    await _ss.delete(key: 'config_api_base_url');
   }
 
   /// ⚠️ DANGER: Clear ALL stored data (for testing/reset)
