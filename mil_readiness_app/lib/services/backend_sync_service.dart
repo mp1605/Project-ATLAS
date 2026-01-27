@@ -10,7 +10,8 @@ import '../config/app_config.dart';
 /// Service for syncing calculated readiness scores to backend dashboard
 class BackendSyncService {
   // Configured Base URL
-  static const String baseUrl = '${AppConfig.apiBaseUrl}/api/v1';
+  // Configured Base URL
+  static String get baseUrl => '${AppConfig.apiBaseUrl}/api/v1';
   
   String? _authToken;
   int? _soldierId;

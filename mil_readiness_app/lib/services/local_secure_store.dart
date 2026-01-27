@@ -237,6 +237,27 @@ class LocalSecureStore {
     return value != null ? DateTime.tryParse(value) : null;
   }
 
+  // ===== CONFIGURATION METHODS =====
+
+  /// Store custom API Base URL
+  Future<void> setApiBaseUrl(String url) async {
+    // Remove trailing slash if present
+    if (url.endsWith('/')) {
+      url = url.substring(0, url.length - 1);
+    }
+    await _ss.write(key: 'config_api_base_url', value: url);
+  }
+
+  /// Get stored API Base URL
+  Future<String?> getApiBaseUrl() async {
+    return await _ss.read(key: 'config_api_base_url');
+  }
+
+  /// Clear stored API Base URL (revert to default)
+  Future<void> clearApiBaseUrl() async {
+    await _ss.delete(key: 'config_api_base_url');
+  }
+
   /// ⚠️ DANGER: Clear ALL stored data (for testing/reset)
   /// This will delete all users, sessions, and settings
   Future<void> clearAllData() async {

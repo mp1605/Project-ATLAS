@@ -25,11 +25,27 @@ app.add_middleware(AuditMiddleware)
 
 # Mount Dashboard Static Files
 import os
-dashboard_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "dashboard")
-if os.path.exists(dashboard_path):
+# Try multiple possible paths to find the 'dashboard' folder
+possible_paths = [
+    os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "dashboard"), # If in backend/app/
+    os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "dashboard"), # If in backend/
+    os.path.join(os.getcwd(), "dashboard"), # If running from root
+    "../dashboard" # Relative fallback
+]
+
+dashboard_path = None
+for path in possible_paths:
+    if os.path.exists(path) and os.path.exists(os.path.join(path, "login.html")):
+        dashboard_path = path
+        print(f"✅ Dashboard found at: {dashboard_path}")
+        break
+
+if dashboard_path:
     app.mount("/dashboard", StaticFiles(directory=dashboard_path, html=True), name="dashboard")
 else:
-    print(f"Warning: Dashboard path not found: {dashboard_path}")
+    print(f"❌ Warning: Dashboard path not found. Checked: {possible_paths}")
+    # Print current working directory for debugging
+    print(f"   Current CWD: {os.getcwd()}")
 
 @app.get("/")
 def read_root():
