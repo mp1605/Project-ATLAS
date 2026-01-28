@@ -1,14 +1,15 @@
-// API Base URL - Use computer's IP if not on localhost
+// API Base URL - Use current hostname
 const getAPIUrl = () => {
     const hostname = window.location.hostname;
+    const port = '3000';
+
+    // If accessing via localhost or 127.0.0.1, use localhost
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
-        return 'http://192.168.0.108:3000/api/v1'; // Force local IP even on localhost for consistency
+        return `http://localhost:${port}/api/v1`;
     }
-    if (!hostname || hostname === '') {
-        // Default to local server IP
-        return 'http://192.168.0.108:3000/api/v1';
-    }
-    return `http://${hostname}:3000/api/v1`;
+
+    // Otherwise use the current hostname (could be IP or domain)
+    return `http://${hostname}:${port}/api/v1`;
 };
 
 const API_URL = getAPIUrl();

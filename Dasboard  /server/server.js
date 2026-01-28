@@ -9,6 +9,7 @@ const soldierRoutes = require('./routes/soldiers');
 const metricsRoutes = require('./routes/metrics');
 const eventsRoutes = require('./routes/events');
 const readinessRoutes = require('./routes/readiness');
+const settingsRoutes = require('./routes/settings');
 
 // Import database (this will initialize it)
 require('./database');
@@ -30,12 +31,20 @@ app.use((req, res, next) => {
 // Serve static files from parent directory
 app.use(express.static(path.join(__dirname, '..')));
 
+// Create uploads directory if it doesn't exist
+const fs = require('fs');
+const uploadsDir = path.join(__dirname, '../uploads/profiles');
+if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
 // API Routes
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/soldiers', soldierRoutes);
 app.use('/api/v1/metrics', metricsRoutes);
 app.use('/api/v1/events', eventsRoutes);
 app.use('/api/v1/readiness', readinessRoutes);
+app.use('/api/v1/settings', settingsRoutes);
 
 // Compatibility aliases (if needed)
 app.use('/api/auth', authRoutes);
@@ -69,14 +78,15 @@ app.use((err, req, res, next) => {
     res.status(500).json({ error: 'Something went wrong!' });
 });
 
-// Start server
-app.listen(PORT, () => {
+// Start server - bind to 0.0.0.0 to accept connections from network
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`
 ╔════════════════════════════════════════╗
 ║   AUIX Readiness Management System    ║
 ╠════════════════════════════════════════╣
 ║  Server running on port ${PORT}          ║
 ║  http://localhost:${PORT}                 ║
+║  http://192.168.0.108:${PORT}             ║
 ╚════════════════════════════════════════╝
   `);
 });

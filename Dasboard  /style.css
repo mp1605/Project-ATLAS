@@ -34,7 +34,7 @@ body {
     color: var(--text-white);
     height: 100vh;
     display: flex;
-    overflow: hidden;
+    overflow-x: hidden;
 }
 
 /* Scrollbar */

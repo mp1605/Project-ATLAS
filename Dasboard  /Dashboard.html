@@ -11,9 +11,13 @@
         href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Roboto:wght@400;500;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="public/css/glassmorphism.css">
+    <link rel="stylesheet" href="public/css/animations.css">
     <link rel="stylesheet" href="public/css/modals.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="public/js/auth.js" defer></script>
+    <script src="public/js/radial-progress.js" defer></script>
+    <script src="public/js/score-cards.js" defer></script>
     <script src="public/js/dashboard.js" defer></script>
     <script src="public/js/dashboard-enhancements.js" defer></script>
     <script src="public/js/charts.js" defer></script>
@@ -68,7 +72,7 @@
 
         <div class="sidebar-footer">
             <div class="footer-icons">
-                <a href="#" class="nav-item">
+                <a href="settings.html" class="nav-item">
                     <svg class="nav-icon" viewBox="0 0 24 24">
                         <path
                             d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.58 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z" />
@@ -151,54 +155,54 @@
         <div class="dashboard-grid-2x2">
 
             <!-- Widget 1: Quick Stats Overview -->
-            <div class="widget widget-stats">
+            <div class="widget widget-stats glass-depth-2 glass-hover-lift">
                 <div class="widget-header">Quick Stats Overview</div>
-                <div class="quick-stats-grid">
-                    <div class="stat-card stat-card-blue">
-                        <div class="stat-icon">
+                <div class="quick-stats-grid" data-animated-stats>
+                    <div class="stat-card stat-card-blue glass-depth-1 transition-smooth" data-score-card>
+                        <div class="stat-icon" data-pulse-icon data-pulse-color="#3b82f6">
                             <svg viewBox="0 0 24 24" width="32" height="32">
                                 <path fill="currentColor"
                                     d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
                             </svg>
                         </div>
                         <div class="stat-content">
-                            <div class="stat-value" id="totalPersonnel">183</div>
+                            <div class="stat-value" id="totalPersonnel" data-count="183" data-duration="1500">0</div>
                             <div class="stat-label">Total Personnel</div>
                         </div>
                     </div>
-                    <div class="stat-card stat-card-green">
-                        <div class="stat-icon">
+                    <div class="stat-card stat-card-green glass-depth-1 transition-smooth" data-score-card>
+                        <div class="stat-icon" data-pulse-icon data-pulse-color="#10b981">
                             <svg viewBox="0 0 24 24" width="32" height="32">
                                 <path fill="currentColor"
                                     d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
                             </svg>
                         </div>
                         <div class="stat-content">
-                            <div class="stat-value" id="readyDeployment">120</div>
+                            <div class="stat-value" id="readyDeployment" data-count="120" data-duration="1500">0</div>
                             <div class="stat-label">Ready for Deployment</div>
                         </div>
                     </div>
-                    <div class="stat-card stat-card-orange">
-                        <div class="stat-icon">
+                    <div class="stat-card stat-card-orange glass-depth-1 transition-smooth" data-score-card>
+                        <div class="stat-icon" data-pulse-icon data-pulse-color="#f59e0b">
                             <svg viewBox="0 0 24 24" width="32" height="32">
                                 <path fill="currentColor"
                                     d="M20 6h-2.18c.11-.31.18-.65.18-1a2.996 2.996 0 0 0-5.5-1.65l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-5-2c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM9 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm11 15H4v-2h16v2zm0-5H4V8h5.08L7 10.83 8.62 12 11 8.76l1-1.36 1 1.36L15.38 12 17 10.83 14.92 8H20v6z" />
                             </svg>
                         </div>
                         <div class="stat-content">
-                            <div class="stat-value" id="medicalIssues">26</div>
+                            <div class="stat-value" id="medicalIssues" data-count="26" data-duration="1500">0</div>
                             <div class="stat-label">Medical Issues</div>
                         </div>
                     </div>
-                    <div class="stat-card stat-card-red">
-                        <div class="stat-icon">
+                    <div class="stat-card stat-card-red glass-depth-1 transition-smooth" data-score-card>
+                        <div class="stat-icon" data-pulse-icon data-pulse-color="#ef4444">
                             <svg viewBox="0 0 24 24" width="32" height="32">
                                 <path fill="currentColor"
                                     d="M11 15h2v2h-2zm0-8h2v6h-2zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z" />
                             </svg>
                         </div>
                         <div class="stat-content">
-                            <div class="stat-value" id="sleepDebtDays">8</div>
+                            <div class="stat-value" id="sleepDebtDays" data-count="8" data-duration="1500">0</div>
                             <div class="stat-label">Sleep Debt Days</div>
                         </div>
                     </div>
@@ -206,22 +210,14 @@
             </div>
 
             <!-- Widget 2: Combined Readiness Dashboard -->
-            <div class="widget widget-readiness">
+            <div class="widget widget-readiness glass-depth-2 glass-hover-lift">
                 <div class="widget-header">Unit Readiness Status</div>
                 <div class="readiness-combined">
-                    <!-- Overall Readiness Gauge -->
+                    <!-- Overall Readiness Gauge - Animated Radial Progress -->
                     <div class="readiness-gauge-section">
-                        <div class="readiness-gauge-container">
-                            <svg width="180" height="180" viewBox="0 0 200 200" class="gauge-svg">
-                                <circle cx="100" cy="100" r="90" class="gauge-bg" stroke-dasharray="565"
-                                    stroke-dashoffset="141" transform="rotate(135, 100, 100)" />
-                                <circle cx="100" cy="100" r="90" class="gauge-progress" stroke-dasharray="565"
-                                    stroke-dashoffset="230" transform="rotate(135, 100, 100)" />
-                            </svg>
-                            <div class="gauge-center-text">
-                                <span class="gauge-value">62</span>
-                                <span class="gauge-label">Overall<br>Readiness</span>
-                            </div>
+                        <div class="readiness-gauge-container animate-fadeInScale" data-radial-progress data-value="62"
+                            data-label="Overall Readiness" data-size="220">
+                            <!-- Radial progress will be injected here -->
                         </div>
                     </div>
 
@@ -229,36 +225,39 @@
                     <div class="deployment-breakdown">
                         <h4>Deployment Status</h4>
                         <div class="status-bars">
-                            <div class="status-bar-item">
+                            <div class="status-bar-item stagger-item">
                                 <div class="status-bar-label">
-                                    <span class="status-dot status-dot-green"></span>
+                                    <span class="status-dot status-dot-green animate-pulseRing"></span>
                                     <span>Ready</span>
                                     <span class="status-count">120</span>
                                 </div>
                                 <div class="status-bar-bg">
-                                    <div class="status-bar-fill status-bar-green" style="width: 65%;"></div>
+                                    <div class="status-bar-fill status-bar-green"
+                                        style="width: 0%; transition: width 1s ease-out 0.3s;" data-width="65"></div>
                                 </div>
                                 <span class="status-percent">65%</span>
                             </div>
-                            <div class="status-bar-item">
+                            <div class="status-bar-item stagger-item">
                                 <div class="status-bar-label">
-                                    <span class="status-dot status-dot-orange"></span>
+                                    <span class="status-dot status-dot-orange animate-pulseRing"></span>
                                     <span>At Risk</span>
                                     <span class="status-count">45</span>
                                 </div>
                                 <div class="status-bar-bg">
-                                    <div class="status-bar-fill status-bar-orange" style="width: 25%;"></div>
+                                    <div class="status-bar-fill status-bar-orange"
+                                        style="width: 0%; transition: width 1s ease-out 0.5s;" data-width="25"></div>
                                 </div>
                                 <span class="status-percent">25%</span>
                             </div>
-                            <div class="status-bar-item">
+                            <div class="status-bar-item stagger-item">
                                 <div class="status-bar-label">
-                                    <span class="status-dot status-dot-red"></span>
+                                    <span class="status-dot status-dot-red animate-pulseRing"></span>
                                     <span>Not Ready</span>
                                     <span class="status-count">18</span>
                                 </div>
                                 <div class="status-bar-bg">
-                                    <div class="status-bar-fill status-bar-red" style="width: 10%;"></div>
+                                    <div class="status-bar-fill status-bar-red"
+                                        style="width: 0%; transition: width 1s ease-out 0.7s;" data-width="10"></div>
                                 </div>
                                 <span class="status-percent">10%</span>
                             </div>

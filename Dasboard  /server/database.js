@@ -110,6 +110,65 @@ function seedDatabase() {
       console.log('Sample soldiers added');
     }
   });
+
+  // User Settings table
+  db.run(`
+    CREATE TABLE IF NOT EXISTS user_settings (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      notification_email BOOLEAN DEFAULT 1,
+      threshold_critical INTEGER DEFAULT 40,
+      threshold_warning INTEGER DEFAULT 60,
+      sleep_debt_threshold INTEGER DEFAULT 12,
+      notification_frequency TEXT DEFAULT 'immediate',
+      theme TEXT DEFAULT 'dark',
+      default_view TEXT DEFAULT 'dashboard',
+      timezone TEXT DEFAULT 'America/Chicago',
+      date_format TEXT DEFAULT 'MM/DD/YYYY',
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    )
+  `, (err) => {
+    if (err) {
+      console.error('Error creating user_settings table:', err);
+    } else {
+      console.log('User settings table initialized');
+    }
+  });
+
+  // Add missing columns to users table if needed
+  db.run(`
+    ALTER TABLE users ADD COLUMN role TEXT DEFAULT 'user'
+  `, (err) => {
+    if (err && !err.message.includes('duplicate column')) {
+      console.error('Error adding role column:', err);
+    }
+  });
+
+  db.run(`
+    ALTER TABLE users ADD COLUMN username TEXT
+  `, (err) => {
+    if (err && !err.message.includes('duplicate column')) {
+      console.error('Error adding username column:', err);
+    }
+  });
+
+  db.run(`
+    ALTER TABLE users ADD COLUMN photo TEXT
+  `, (err) => {
+    if (err && !err.message.includes('duplicate column')) {
+      console.error('Error adding photo column:', err);
+    }
+  });
+
+  db.run(`
+    ALTER TABLE users ADD COLUMN last_login TIMESTAMP
+  `, (err) => {
+    if (err && !err.message.includes('duplicate column')) {
+      console.error('Error adding last_login column:', err);
+    }
+  });
 }
 
 module.exports = db;
