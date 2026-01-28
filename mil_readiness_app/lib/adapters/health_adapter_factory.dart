@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'health_data_adapter.dart';
 import 'apple_health_adapter.dart';
+import 'health_connect_adapter.dart';  // Phase 1: Health Connect support
 import '../models/wearable_type.dart';
 
 /// Factory to create the appropriate health data adapter
@@ -38,11 +39,11 @@ class HealthAdapterFactory {
       
       case WearableType.samsung:
       case WearableType.pixelWatch:
-        throw UnimplementedError(
-          'Health Connect adapter not yet implemented. '
-          'Integration: Android Health Connect API. '
-          'Coming in Phase 5.'
-        );
+        if (!Platform.isAndroid) {
+          throw UnsupportedError('Health Connect requires Android');
+        }
+        print('✅ Creating Health Connect adapter (Phase 1: Core Metrics)');
+        return HealthConnectAdapter();
       
       case WearableType.fitbit:
         throw UnimplementedError(
@@ -108,12 +109,16 @@ class HealthAdapterFactory {
   /// Get list of implemented adapters (currently available)
   static List<WearableType> getImplementedAdapters() {
     return [
-      WearableType.appleWatch, // Currently the only one implemented
+      WearableType.appleWatch,    // iOS - Apple Health/HealthKit
+      WearableType.samsung,       // Android - Health Connect (Phase 1)
+      WearableType.pixelWatch,    // Android - Health Connect (Phase 1)
     ];
   }
 
   /// Check if adapter is implemented
   static bool isImplemented(WearableType type) {
-    return type == WearableType.appleWatch;
+    return type == WearableType.appleWatch || 
+           type == WearableType.samsung || 
+           type == WearableType.pixelWatch;
   }
 }

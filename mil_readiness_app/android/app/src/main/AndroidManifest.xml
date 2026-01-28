@@ -1,4 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Health Connect Phase 1: Core Permissions (Steps, Heart Rate, Sleep) -->
+    <uses-permission android:name="android.permission.health.READ_STEPS"/>
+    <uses-permission android:name="android.permission.health.READ_HEART_RATE"/>
+    <uses-permission android:name="android.permission.health.READ_SLEEP"/>
+    
     <application
         android:label="mil_readiness_app"
         android:name="${applicationName}"
@@ -41,5 +46,7 @@
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
         </intent>
+        <!-- Health Connect availability check -->
+        <package android:name="com.google.android.apps.healthdata"/>
     </queries>
 </manifest>
