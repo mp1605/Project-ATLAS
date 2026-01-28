@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:developer' as developer;
 import 'health_data_adapter.dart';
 import 'apple_health_adapter.dart';
 import 'health_connect_adapter.dart';  // Phase 1: Health Connect support
@@ -42,7 +43,7 @@ class HealthAdapterFactory {
         if (!Platform.isAndroid) {
           throw UnsupportedError('Health Connect requires Android');
         }
-        print('✅ Creating Health Connect adapter (Phase 1: Core Metrics)');
+        developer.log('Creating Health Connect adapter', name: 'HealthAdapterFactory');
         return HealthConnectAdapter();
       
       case WearableType.fitbit:

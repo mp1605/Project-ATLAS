@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:developer' as developer;
 import 'package:health/health.dart';
 import 'health_data_adapter.dart';
 import '../database/health_data_repository.dart';
@@ -42,7 +43,7 @@ class HealthConnectAdapter implements HealthDataAdapter {
   @override
   Future<void> initialize() async {
     // No initialization needed for Health Connect
-    print('✅ HealthConnectAdapter initialized (Phase 1: Core Metrics)');
+    developer.log('HealthConnectAdapter initialized (Phase 1: Core Metrics)', name: 'HealthConnect');
   }
 
   @override
@@ -66,14 +67,10 @@ class HealthConnectAdapter implements HealthDataAdapter {
         startTime: DateTime.now().subtract(const Duration(minutes: 1)),
         endTime: DateTime.now(),
       );
-      print('✅ Health Connect is available');
+      developer.log('Health Connect is available', name: 'HealthConnect');
       return true;
     } catch (e) {
-      print('⚠️ Health Connect not available: $e');
-      print('   Possible causes:');
-      print('   1. Health Connect app not installed (requires Android 14+)');
-      print('   2. Samsung Health not synced to Health Connect');
-      print('   3. Device does not support Health Connect');
+      developer.log('Health Connect not available', name: 'HealthConnect', error: e);
       return false;
     }
   }
@@ -86,27 +83,26 @@ class HealthConnectAdapter implements HealthDataAdapter {
       // Create READ permissions for core metric types only
       final permissions = List.filled(_coreMetrics.length, HealthDataAccess.READ);
       
-      print('🔐 Requesting Health Connect permissions for ${_coreMetrics.length} core metrics...');
-      print('   📊 Metrics: Steps, Heart Rate, Sleep Sessions');
+      developer.log(
+        'Requesting Health Connect permissions',
+        name: 'HealthConnect',
+        error: null,
+      );
       
       final result = await _health.requestAuthorization(_coreMetrics, permissions: permissions);
       
-      print('📋 Health Connect authorization result: $result');
-      if (result) {
-        print('✅ Health Connect permissions granted!');
-        print('   ℹ️ Data will sync from: Samsung Health, Google Fit, or other provider apps');
-      } else {
-        print('❌ Health Connect permissions denied or partially granted');
-        print('   💡 User can grant permissions later in Health Connect app');
-      }
+      developer.log(
+        'Health Connect authorization: ${result ? "granted" : "denied"}',
+        name: 'HealthConnect',
+      );
       
       return result;
     } catch (e) {
-      print('❌ Health Connect permission request failed: $e');
-      print('   Common causes:');
-      print('   1. Health Connect app not installed');
-      print('   2. Incompatible Android version');
-      print('   3. Samsung Health not configured');
+      developer.log(
+        'Health Connect permission request failed',
+        name: 'HealthConnect',
+        error: e,
+      );
       return false;
     }
   }
@@ -121,10 +117,13 @@ class HealthConnectAdapter implements HealthDataAdapter {
       
       final hasPerms = await _health.hasPermissions(_coreMetrics, permissions: permissions);
       
-      print('🔍 Health Connect permissions check: ${hasPerms ?? false}');
+      developer.log(
+        'Permission check: ${hasPerms ?? false}',
+        name: 'HealthConnect',
+      );
       return hasPerms ?? false;
     } catch (e) {
-      print('⚠️ Health Connect permission check failed: $e');
+      developer.log('Permission check failed', name: 'HealthConnect', error: e);
       return false;
     }
   }
@@ -134,9 +133,10 @@ class HealthConnectAdapter implements HealthDataAdapter {
     final end = DateTime.now();
     final start = end.subtract(window);
     
-    print('📊 HealthConnectAdapter: Querying Health Connect data');
-    print('   Time window: ${window.inMinutes} min (${start.toLocal()} to ${end.toLocal()})');
-    print('   Core metrics: Steps, Heart Rate, Sleep');
+    developer.log(
+      'Querying Health Connect (window: ${window.inMinutes}min)',
+      name: 'HealthConnect',
+    );
 
     final allMetrics = <HealthMetric>[];
     int successfulTypes = 0;
@@ -155,7 +155,6 @@ class HealthConnectAdapter implements HealthDataAdapter {
         if (points.isNotEmpty) {
           successfulTypes++;
           statusReport[type.name] = 'OK - ${points.length} points';
-          print('  ✅ ${type.name}: ${points.length} points');
           
           // Convert to HealthMetric format
           for (var point in points) {
@@ -169,10 +168,6 @@ class HealthConnectAdapter implements HealthDataAdapter {
               // value = duration in minutes
               final duration = point.dateTo.difference(point.dateFrom).inMinutes;
               value = duration.toDouble().clamp(0.0, double.infinity);
-              
-              if (duration > 0) {
-                print('    📏 ${metricTypeName}: ${duration}min (${point.dateFrom.toLocal()} → ${point.dateTo.toLocal()})');
-              }
             } else {
               // For point metrics (steps, heart rate):
               // value = numeric sample
@@ -184,7 +179,7 @@ class HealthConnectAdapter implements HealthDataAdapter {
                 try {
                   value = double.parse(point.value.toString());
                 } catch (e) {
-                  print('    ⚠️ Could not parse value: ${point.value}');
+                  developer.log('Could not parse value', name: 'HealthConnect', error: e);
                   value = 0.0;
                 }
               }
@@ -208,31 +203,20 @@ class HealthConnectAdapter implements HealthDataAdapter {
         } else {
           failedTypes++;
           statusReport[type.name] = 'No data';
-          print('  ⚠️ ${type.name}: No data in time window');
-          print('     Possible causes:');
-          print('     - Samsung Health not synced to Health Connect');
-          print('     - No data recorded by wearable device');
-          print('     - Sync delay (Health Connect can take 5-15 minutes)');
         }
       } catch (e) {
         failedTypes++;
         statusReport[type.name] = 'Error: $e';
-        print('  ❌ ${type.name}: Error - $e');
-        print('     Possible causes:');
-        print('     - Permission denied for this specific metric');
-        print('     - Health Connect not properly configured');
-        print('     - Provider app (Samsung Health) not sharing data');
+        developer.log('Metric query failed: ${type.name}', name: 'HealthConnect', error: e);
       }
     }
 
-    print('📊 Health Connect Query Summary:');
-    print('   ✅ Successful: $successfulTypes metrics');
-    print('   ⚠️ No data: $failedTypes metrics');
-    print('   📈 Total data points: ${allMetrics.length}');
-    
-    // Calculate data completeness for confidence scoring
+    // Calculate data completeness for confidence annotation
     final completeness = ((successfulTypes / _coreMetrics.length) * 100).round();
-    print('   📊 Data completeness: $completeness%');
+    developer.log(
+      'Sync complete: $successfulTypes/$_coreMetrics.length metrics, coverage: $completeness%',
+      name: 'HealthConnect',
+    );
 
     // Deduplicate based on type + timestamp
     final seen = <String>{};
@@ -245,24 +229,11 @@ class HealthConnectAdapter implements HealthDataAdapter {
       return true;
     }).toList();
 
-    print('📊 After deduplication: ${deduplicated.length} metrics');
-    
     if (deduplicated.isEmpty) {
-      print('⚠️ No data retrieved from Health Connect');
-      print('   🔍 Troubleshooting steps:');
-      print('   1. Open Samsung Health app and ensure data is syncing');
-      print('   2. Open Health Connect app and verify Samsung Health is connected');
-      print('   3. Wait 5-15 minutes for Health Connect to sync');
-      print('   4. Ensure Samsung Gear S3 is paired and syncing to Samsung Health');
-      print('   5. Check that permissions were granted in Health Connect');
-      print('');
-      print('   📊 Status Report:');
-      statusReport.forEach((metric, status) {
-        print('      ${metric}: $status');
-      });
-    } else {
-      print('✅ Health Connect data successfully retrieved');
-      print('   Data completeness: $completeness% ($successfulTypes/${_coreMetrics.length} metrics)');
+      developer.log(
+        'No data retrieved from Health Connect',
+        name: 'HealthConnect',
+      );
     }
 
     return deduplicated;
