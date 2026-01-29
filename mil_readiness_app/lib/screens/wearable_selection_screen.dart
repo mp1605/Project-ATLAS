@@ -207,21 +207,22 @@ class _WearableSelectionScreenState extends State<WearableSelectionScreen> {
     required bool isSelected,
   }) {
     final gradient = _getDeviceGradient(device);
+    final isDisabled = device.isTemporarilyDisabled;
 
     return GestureDetector(
-      onTap: () => setState(() => _selectedDevice = device),
+      onTap: isDisabled ? null : () => setState(() => _selectedDevice = device),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         decoration: BoxDecoration(
           gradient: isSelected ? gradient : null,
-          color: isSelected ? null : Colors.white,
+          color: isSelected ? null : (isDisabled ? Colors.grey[200] : Colors.white),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? Colors.transparent : Colors.grey[300]!,
+            color: isSelected ? Colors.transparent : (isDisabled ? Colors.grey[300]! : Colors.grey[300]!),
             width: 2,
           ),
           boxShadow: [
-            if (isSelected)
+            if (isSelected && !isDisabled)
               BoxShadow(
                 color: gradient.colors.first.withOpacity(0.3),
                 blurRadius: 12,
@@ -229,7 +230,9 @@ class _WearableSelectionScreenState extends State<WearableSelectionScreen> {
               ),
           ],
         ),
-        child: ClipRRect(
+        child: Opacity(
+          opacity: isDisabled ? 0.5 : 1.0,
+          child: ClipRRect(
           borderRadius: BorderRadius.circular(14),
           child: Stack(
             children: [
@@ -270,20 +273,39 @@ class _WearableSelectionScreenState extends State<WearableSelectionScreen> {
                       decoration: BoxDecoration(
                         color: isSelected
                             ? Colors.white.withOpacity(0.2)
-                            : (isImplemented ? Colors.green[50] : Colors.orange[50]),
+                            : (isDisabled ? Colors.grey[100] : (isImplemented ? Colors.green[50] : Colors.orange[50])),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
-                        isImplemented ? '✅ Available' : '🚧 Coming Soon',
+                        isDisabled 
+                            ? '⏳ Coming Soon' 
+                            : (isImplemented ? '✅ Available' : '🚧 Coming Soon'),
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
                           color: isSelected
                               ? Colors.white
-                              : (isImplemented ? Colors.green[700] : Colors.orange[700]),
+                              : (isDisabled ? Colors.grey[600] : (isImplemented ? Colors.green[700] : Colors.orange[700])),
                         ),
                       ),
                     ),
+
+                    // Hardware requirement message for disabled devices
+                    if (isDisabled && device.hardwareRequirement != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Text(
+                          device.hardwareRequirement!,
+                          style: TextStyle(
+                            fontSize: 9,
+                            color: isSelected ? Colors.white70 : Colors.grey[600],
+                            fontStyle: FontStyle.italic,
+                          ),
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -306,9 +328,11 @@ class _WearableSelectionScreenState extends State<WearableSelectionScreen> {
                     ),
                   ),
                 ),
+              ),
             ],
           ),
         ),
+      ),
       ),
     );
   }

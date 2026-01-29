@@ -143,5 +143,21 @@ enum WearableType {
         return 'N/A';
     }
   }
+
+  /// Check if device requires specific hardware to function
+  /// Returns null if no special requirement, otherwise returns requirement message
+  String? get hardwareRequirement {
+    switch (this) {
+      case WearableType.samsung:
+        return 'Requires Samsung Galaxy phone for full compatibility';
+      default:
+        return null;
+    }
+  }
+
+  /// Check if device is temporarily disabled due to hardware constraints
+  bool get isTemporarilyDisabled {
+    return this == WearableType.samsung; // Disabled until Samsung Galaxy phone available
+  }
 }
 
