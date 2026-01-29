@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:developer' as developer;
+import 'package:flutter/foundation.dart';
 import 'package:health/health.dart';
 import 'health_data_adapter.dart';
 import '../database/health_data_repository.dart';
@@ -13,6 +14,14 @@ import '../database/health_data_repository.dart';
 /// Phase 1: Core metrics only (steps, heart rate, sleep sessions)
 class HealthConnectAdapter implements HealthDataAdapter {
   final Health _health = Health();
+  
+  /// Controlled logging - disabled in release builds
+  /// Never logs: timestamps, sources, raw values, or per-point details
+  void _log(String message, {Object? error}) {
+    if (!kReleaseMode) {
+      developer.log(message, name: 'HealthConnect', error: error);
+    }
+  }
   
   /// Phase 1: Core metrics for baseline readiness
   /// Strictly limited to avoid permission fatigue
@@ -43,7 +52,7 @@ class HealthConnectAdapter implements HealthDataAdapter {
   @override
   Future<void> initialize() async {
     // No initialization needed for Health Connect
-    developer.log('HealthConnectAdapter initialized (Phase 1: Core Metrics)', name: 'HealthConnect');
+    _log('HealthConnectAdapter initialized');
   }
 
   @override
@@ -58,21 +67,9 @@ class HealthConnectAdapter implements HealthDataAdapter {
 
   @override
   Future<bool> isAvailable() async {
-    if (!Platform.isAndroid) return false;
-    
-    try {
-      // Test if we can access Health Connect by trying to query steps
-      await _health.getHealthDataFromTypes(
-        types: [HealthDataType.STEPS],
-        startTime: DateTime.now().subtract(const Duration(minutes: 1)),
-        endTime: DateTime.now(),
-      );
-      developer.log('Health Connect is available', name: 'HealthConnect');
-      return true;
-    } catch (e) {
-      developer.log('Health Connect not available', name: 'HealthConnect', error: e);
-      return false;
-    }
+    // Phase 1: Conservative check - availability handled via permission flow + error messages
+    // Attempting data reads here causes false negatives (permissions, no data, provider not connected)
+    return Platform.isAndroid;
   }
 
   @override
@@ -83,26 +80,15 @@ class HealthConnectAdapter implements HealthDataAdapter {
       // Create READ permissions for core metric types only
       final permissions = List.filled(_coreMetrics.length, HealthDataAccess.READ);
       
-      developer.log(
-        'Requesting Health Connect permissions',
-        name: 'HealthConnect',
-        error: null,
-      );
+      _log('Requesting permissions');
       
       final result = await _health.requestAuthorization(_coreMetrics, permissions: permissions);
       
-      developer.log(
-        'Health Connect authorization: ${result ? "granted" : "denied"}',
-        name: 'HealthConnect',
-      );
+      _log('Authorization: ${result ? "granted" : "denied"}');
       
       return result;
     } catch (e) {
-      developer.log(
-        'Health Connect permission request failed',
-        name: 'HealthConnect',
-        error: e,
-      );
+      _log('Permission request failed', error: e);
       return false;
     }
   }
@@ -117,13 +103,10 @@ class HealthConnectAdapter implements HealthDataAdapter {
       
       final hasPerms = await _health.hasPermissions(_coreMetrics, permissions: permissions);
       
-      developer.log(
-        'Permission check: ${hasPerms ?? false}',
-        name: 'HealthConnect',
-      );
+      _log('Permission check: ${hasPerms ?? false}');
       return hasPerms ?? false;
     } catch (e) {
-      developer.log('Permission check failed', name: 'HealthConnect', error: e);
+      _log('Permission check failed', error: e);
       return false;
     }
   }
@@ -133,17 +116,13 @@ class HealthConnectAdapter implements HealthDataAdapter {
     final end = DateTime.now();
     final start = end.subtract(window);
     
-    developer.log(
-      'Querying Health Connect (window: ${window.inMinutes}min)',
-      name: 'HealthConnect',
-    );
+    _log('Querying data (window: ${window.inMinutes}min)');
 
     final allMetrics = <HealthMetric>[];
     int successfulTypes = 0;
     int failedTypes = 0;
-    Map<String, String> statusReport = {};
 
-    // Query each type individually for better error handling and diagnostics
+    // Query each type individually for better error handling
     for (var type in _coreMetrics) {
       try {
         final points = await _health.getHealthDataFromTypes(
@@ -154,23 +133,34 @@ class HealthConnectAdapter implements HealthDataAdapter {
 
         if (points.isNotEmpty) {
           successfulTypes++;
-          statusReport[type.name] = 'OK - ${points.length} points';
           
-          // Convert to HealthMetric format
-          for (var point in points) {
-            final metricTypeName = point.type.name;
-            final isInterval = isIntervalMetric(metricTypeName);
-            
-            double value;
-            
-            if (isInterval) {
-              // For interval metrics (sleep sessions):
-              // value = duration in minutes
+          // Special handling: Aggregate sleep sessions into total duration
+          if (type == HealthDataType.SLEEP_SESSION) {
+            double totalSleepMinutes = 0;
+            for (var point in points) {
               final duration = point.dateTo.difference(point.dateFrom).inMinutes;
-              value = duration.toDouble().clamp(0.0, double.infinity);
-            } else {
-              // For point metrics (steps, heart rate):
-              // value = numeric sample
+              totalSleepMinutes += duration.toDouble().clamp(0.0, double.infinity);
+            }
+            
+            // Emit one aggregated sleep metric for the window
+            allMetrics.add(HealthMetric(
+              type: 'SLEEP_SESSION',
+              value: totalSleepMinutes,
+              unit: 'min',
+              timestamp: end, // Use query end time
+              source: 'Health Connect',
+              metadata: {
+                'platform': 'android',
+                'is_interval': true,
+              },
+            ));
+          } else {
+            // For non-aggregated metrics (steps, heart rate): convert each point
+            for (var point in points) {
+              final metricTypeName = point.type.name;
+              double value;
+              
+              // Point metrics (steps, heart rate): value = numeric sample
               if (point.value is NumericHealthValue) {
                 value = (point.value as NumericHealthValue).numericValue.toDouble();
               } else if (point.value is num) {
@@ -179,49 +169,47 @@ class HealthConnectAdapter implements HealthDataAdapter {
                 try {
                   value = double.parse(point.value.toString());
                 } catch (e) {
-                  developer.log('Could not parse value', name: 'HealthConnect', error: e);
+                  _log('Parse error', error: e);
                   value = 0.0;
                 }
               }
-            }
 
-            allMetrics.add(HealthMetric(
-              type: metricTypeName,
-              value: value,
-              unit: _normalizeUnit(metricTypeName, point.unit.name, isInterval),
-              timestamp: point.dateTo,  // Use end time as primary timestamp
-              source: point.sourceName,
-              metadata: {
-                'platform': 'android_health_connect',
-                'source_app': point.sourceName,  // e.g., "Samsung Health", "Google Fit"
-                'date_from': point.dateFrom.toIso8601String(),
-                'date_to': point.dateTo.toIso8601String(),
-                'is_interval': isInterval,
-              },
-            ));
+              allMetrics.add(HealthMetric(
+                type: metricTypeName,
+                value: value,
+                unit: _normalizeUnit(metricTypeName, point.unit.name, false),
+                timestamp: point.dateTo,
+                source: 'Health Connect',
+                metadata: {
+                  'platform': 'android',
+                  'is_interval': false,
+                  'date_from': point.dateFrom.toIso8601String(),
+                  'date_to': point.dateTo.toIso8601String(),
+                },
+              ));
+            }
           }
         } else {
           failedTypes++;
-          statusReport[type.name] = 'No data';
         }
       } catch (e) {
         failedTypes++;
-        statusReport[type.name] = 'Error: $e';
-        developer.log('Metric query failed: ${type.name}', name: 'HealthConnect', error: e);
+        _log('Query failed', error: e);
       }
     }
 
     // Calculate data completeness for confidence annotation
     final completeness = ((successfulTypes / _coreMetrics.length) * 100).round();
-    developer.log(
-      'Sync complete: $successfulTypes/$_coreMetrics.length metrics, coverage: $completeness%',
-      name: 'HealthConnect',
-    );
+    _log('Sync: $successfulTypes/$_coreMetrics.length metrics, $completeness%');
 
-    // Deduplicate based on type + timestamp
+    // Robust deduplication: type + timestamps + source + value
     final seen = <String>{};
     final deduplicated = allMetrics.where((metric) {
-      final key = '${metric.type}_${metric.timestamp.millisecondsSinceEpoch}';
+      // Include date_from/date_to for intervals, source, and value to avoid dropping valid data
+      final dateFrom = metric.metadata['date_from'] ?? '';
+      final dateTo = metric.metadata['date_to'] ?? metric.timestamp.toIso8601String();
+      final key = '${metric.type}|$dateFrom|$dateTo|${metric.source}|${metric.value.toStringAsFixed(2)}';
+      
       if (seen.contains(key)) {
         return false;
       }
@@ -230,10 +218,7 @@ class HealthConnectAdapter implements HealthDataAdapter {
     }).toList();
 
     if (deduplicated.isEmpty) {
-      developer.log(
-        'No data retrieved from Health Connect',
-        name: 'HealthConnect',
-      );
+      _log('No data retrieved');
     }
 
     return deduplicated;
